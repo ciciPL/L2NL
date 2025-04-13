@@ -1,0 +1,25 @@
+prompt = f"""Task Instruction：Act as a precise code translator between Racket and Python. Requirements：Preserve all functional logic and Convert Racket idioms to Python equivalents:
+
+L->NL
+METEOR Score: 20.4782
+BLEU-4 Score: 0.5459
+ROUGE-L Score: 16.5042
+
+L->H->NL
+METEOR Score: 20.2337
+BLEU-4 Score: 1.1116
+ROUGE-L Score: 17.7160
+
+
+
+uniXcoder + MLM +ULM +AWP (针对python优化)
+
+L->NL
+METEOR Score: 3.8229
+BLEU-4 Score: 0.0000
+ROUGE-L Score: 9.9438
+
+L->H->NL
+METEOR Score: 11.0316
+BLEU-4 Score: 0.0000
+ROUGE-L Score: 20.0885

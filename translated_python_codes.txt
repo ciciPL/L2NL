@@ -1,0 +1,25 @@
+1: def factorial(n): return 1 if n <= 1 else n * factorial(n - 1)
+2: def fib(n): return 0 if n == 0 else 1 if n == 1 else fib(n-1) + fib(n-2)
+3: def prime(n): return False if n < 2 else (lambda f, i: f(f, i))(lambda f, i: True if i*i > n else False if n % i == 0 else f(f, i + 1), 2)
+4: def string_reverse(s): return ''.join(reversed(s))
+5: def flatten(lst): return [] if lst == [] else (flatten(lst[0]) + flatten(lst[1:]) if isinstance(lst[0], list) else flatten(lst[1:]) + [lst[0]])
+6: def binary_search(vec, x): return (lambda f, low, high: f(f, low, high))(lambda f, low, high: False if low > high else mid if mid_val == x else f(f, mid + 1, high) if mid_val < x else f(f, low, mid - 1) where mid = (low + high) // 2, mid_val = vec[mid]), 0, len(vec) - 1)
+7: def quicksort(lst): return [] if lst == [] else quicksort([x for x in lst[1:] if x < lst[0]]) + [lst[0]] + quicksort([x for x in lst[1:] if x >= lst[0]])
+8: def matrix_mult(a, b): return [[sum(x*y for x, y in zip(row, col)) for col in zip(*b)] for row in a]
+9: def eval_polynomial(coeffs, x): return sum(coeff * (x**i) for i, coeff in enumerate(coeffs[::-1]))
+10: def tree_depth(tree): return 0 if not isinstance(tree, (list, tuple)) else 1 + max(tree_depth(x) for x in tree[1:])
+11: def is_graph(g): return isinstance(g, list) and all(isinstance(x, list) and len(x) == 2 for x in g)
+12: def memq(x, lst): return False if lst is None else lst if x == lst[0] else memq(x, lst[1:])
+13: def remove_duplicates(lst): return [x for i, x in enumerate(lst) if x not in lst[:i]]
+14: def permutations(lst): return [()] if not lst else [p[:i] + (lst[0],) + p[i:] for p in permutations(lst[1:]) for i in range(len(p)+1)]
+15: def derivative(f, dx): return lambda x: (f(x + dx) - f(x)) / dx
+16: def integrate(f, a, b, n): return (b - a)/n * sum(f(a + i*(b - a)/n) for i in range(n))
+17: def mandelbrot(c): return (lambda f, z, n: f(f, z, n))(lambda f, z, n: n if abs(z) > 2 or n > 100 else f(f, z*z + c, n + 1), 0, 0)
+18: def parse_integer(s): return int(s)
+19: def vector_swap(vec, i, j): vec[i], vec[j] = vec[j], vec[i]; return vec
+20: def make_stack(): data = []; push = lambda val: data.insert(0, val); pop = lambda: data.pop(0); peek = lambda: data[0]; empty = lambda: len(data) == 0; return {'push': push, 'pop': pop, 'peek': peek, 'empty': empty}
+21: def bfs(graph, start): visited = {start: True}; queue = [start]; result = []; [result.append(queue.pop(0)) or visited.update({x: True for x in graph[result[-1]] if x not in visited}) or queue.extend([x for x in graph[result[-1]] if x not in visited]) for _ in range(len(graph))]; return result
+22: def dfs(graph, start): visited = {}; return (lambda f, node, result: f(f, node, result))(lambda f, node, result: result + [node] if all(f(f, x, result) for x in [x for x in graph[node] if x not in visited]) else None, start, [])
+23: class Queue: def __init__(self): self.queue = []; def enqueue(self, item): self.queue.append(item); def dequeue(self): return "Queue is empty" if len(self.queue) < 1 else self.queue.pop(0); def is_empty(self): return len(self.queue) == 0
+24: def a_star_heuristic(heuristic, start, goal): open = PriorityQueue(); g_score = {start: 0}; f_score = {start: heuristic(start, goal)}; came_from = {}; [open.put((f_score[current], current)) or [(came_from.update({neighbor: current}) or g_score.update({neighbor: tentative_g}) or f_score.update({neighbor: tentative_g + heuristic(neighbor, goal)}) or open.put((f_score[neighbor], neighbor))) for neighbor in get_neighbors(current) if neighbor not in g_score or tentative_g < g_score[neighbor]] for current in [open.get()[1] if not open.empty() else None] if current == goal else None] while not open.empty(); return reverse_path(came_from, goal)
+25: def huffman_encode(text): freq = {}; [freq.update({char: freq.get(char, 0) + 1}) for char in text]; heap = [(count, char) for char, count in freq.items()]; heapify(heap); [heappush(heap, (count1 + count2, make_node(char1, char2, count1 + count2))) for _ in range(len(heap)-1) for count1, char1, count2, char2 in [(heappop(heap), heappop(heap))]]; return heap[0][1]
