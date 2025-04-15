@@ -62,8 +62,8 @@ print("token生成"+f"执行耗时: {end_t - start_t:.6f} 秒")
 print(torch.cuda.is_available())
 try:
     # 打开注释文件
-    with open('doc_rkt.txt', 'r', encoding='utf-8') as doc_file, \
-            open('code_rkt.txt', 'r', encoding='utf-8') as code_file:
+    with open('rkt_result/doc_rkt.txt', 'r', encoding='utf-8') as doc_file, \
+            open('rkt_result/code_rkt.txt', 'r', encoding='utf-8') as code_file:
         for index in range(5):
             doc_line = doc_file.readline().replace(str(index)+':', '')
             code_line = code_file.readline().replace(str(index)+':', '')

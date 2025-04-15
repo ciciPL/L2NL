@@ -96,8 +96,8 @@ if __name__ == "__main__":
         exit(1)
 
     # 文件处理
-    input_file = "racket_codes.txt"
-    output_file = "translated_python_codes.txt"
+    input_file = "dataset/rkt_result/code_rkt.txt"
+    output_file = "dataset/rkt_result/rkt_python_40510_DS_1-3b.txt"
 
     if not os.path.exists(input_file):
         print(f"错误：输入文件 {input_file} 不存在")
