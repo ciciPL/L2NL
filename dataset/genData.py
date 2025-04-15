@@ -37,6 +37,9 @@
 # with open('code_rkt.txt', 'w', encoding='utf-8') as f:
 #     f.write(code_text)
 
+
+# huggingface-cli download --resume-download Qwen/Qwen2.5-Coder-14B-Instruct --local-dir model/Qwen2.5-Coder-14B-Instruct
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
@@ -45,7 +48,7 @@ import time
 # python -c "from transformers import AutoModelForCausalLM; AutoModelForCausalLM.from_pretrained(     'model/Qwen2.5-Coder-1.5B-Instruct',     torch_dtype="auto",     device_map="auto",     attn_implementation="flash_attention_2")"
 if torch.cuda.is_available():
     torch.zeros(1).cuda()
-model_name = "../model/Qwen2.5-Coder-1.5B-Instruct"
+model_name = "Qwen/Qwen2.5-Coder-14B-Instruct"
 start = time.perf_counter()
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -62,19 +65,19 @@ print("token生成"+f"执行耗时: {end_t - start_t:.6f} 秒")
 print(torch.cuda.is_available())
 try:
     # 打开注释文件
-    with open('rkt_result/doc_rkt.txt', 'r', encoding='utf-8') as doc_file, \
-            open('rkt_result/code_rkt.txt', 'r', encoding='utf-8') as code_file:
+    with open('racket/doc_rkt.txt', 'r', encoding='utf-8') as doc_file, \
+            open('racket/code_rkt.txt', 'r', encoding='utf-8') as code_file, \
+                open('rkt_result/rkt_ref.txt', 'w', encoding='utf-8') as ref_file:
         for index in range(5):
             doc_line = doc_file.readline().replace(str(index)+':', '')
             code_line = code_file.readline().replace(str(index)+':', '')
-            system_content = """You are a code summarizer. Generate ultra-concise summaries with:
-            1. summary (<=25 words)
-            2. Core logic (<=25 words)
+            system_content = """You are a code summarizer. Generate ONE-LINE summaries(<=25 words) with this format:
+            genSummary:\tsummary
 
             Rules:
             - Omit explanations
             - Never repeat doc content
-            - Max 3 lines total"""
+            """
 
             prompt = f"""CODE: {code_line}
             DOC: {doc_line}"""
@@ -104,6 +107,7 @@ try:
 
             response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
             print("第{}生成: {}".format(index, response))
+            ref_file.write(f"{index}: {response}\n")
 
 except FileNotFoundError:
     print("错误：文件未找到，请检查文件路径和文件名。")
