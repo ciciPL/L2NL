@@ -1,5 +1,6 @@
 prompt = f"""Task Instruction：Act as a precise code translator between Racket and Python. Requirements：Preserve all functional logic and Convert Racket idioms to Python equivalents:
 
+25条数据
 L->NL
 METEOR Score: 20.4782
 BLEU-4 Score: 0.5459
@@ -10,10 +11,7 @@ METEOR Score: 20.2337
 BLEU-4 Score: 1.1116
 ROUGE-L Score: 17.7160
 
-
-
 uniXcoder + MLM +ULM +AWP (针对python优化)
-
 L->NL
 METEOR Score: 3.8229
 BLEU-4 Score: 0.0000
@@ -23,3 +21,38 @@ L->H->NL
 METEOR Score: 11.0316
 BLEU-4 Score: 0.0000
 ROUGE-L Score: 20.0885
+
+rkt_40510(ref.txt):
+L->NL(1.4%,0.9%,2.5%)
+METEOR Score: 26.3725
+BLEU-4 Score: 2.5760
+ROUGE-L Score: 23.7198
+L->H->NL
+METEOR Score: 25.9923
+BLEU-4 Score: 2.3628
+ROUGE-L Score: 23.1337
+
+rkt_40510(doc.txt):
+L->NL
+METEOR Score: 17.4019
+BLEU-4 Score: 1.2373(语料库)
+ROUGE-L Score: 15.9231
+
+METEOR Score: 17.4019
+BLEU-4 Score: 2.3845(单句)
+ROUGE-L Score: 15.9231
+L->H->NL
+METEOR Score: 17.0641
+BLEU-4 Score: 1.0590
+ROUGE-L Score: 15.4693
+
+METEOR Score: 17.0641
+BLEU-4 Score: 2.2463(单句)
+ROUGE-L Score: 15.4693
+
+cd ../star/Downloads/cyqProjects/L2NL
+conda activate ../env/L2NL
+watch -n 1 nvidia-smi
+export HF_ENDPOINT=https://hf-mirror.com
+huggingface-cli download --resume-download Qwen/Qwen2.5-Coder-14B-Instruct --local-dir model/Qwen2.5-Coder-14B-Instruct
+

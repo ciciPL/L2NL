@@ -94,7 +94,7 @@ def process_file(input_file, output_file, batch_size=4):
 
 if __name__ == "__main__":
     input_file = "../../../dataset/racket/code_rkt.txt"
-    output_file = "expriment/ds-coder-1_3B/rkt_result/rkt_2_NL_40510.txt"
+    output_file = "experiment/ds-coder-1_3B/rkt_result/rkt_2_NL_40510.txt"
     batch_size = 32  # 可调整批大小
 
     print("Starting code summarization...")

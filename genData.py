@@ -67,7 +67,7 @@ try:
     # 打开注释文件
     with open('dataset/racket/doc_rkt.txt', 'r', encoding='utf-8') as doc_file, \
             open('dataset/racket/code_rkt.txt', 'r', encoding='utf-8') as code_file, \
-                open('../expriment/rkt/rkt_result/rkt_ref.txt', 'w', encoding='utf-8') as ref_file:
+                open('../experiment/rkt/rkt_result/rkt_ref.txt', 'w', encoding='utf-8') as ref_file:
         for index in range(5):
             doc_line = doc_file.readline().replace(str(index)+':', '')
             code_line = code_file.readline().replace(str(index)+':', '')
