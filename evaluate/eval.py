@@ -18,8 +18,8 @@ def read_lines(file_path):
         return [line for line in f]
 
 # 加载数据（假设每行对应一个样本，参考和结果一一对应）
-ref_path = os.path.join(current_dir,'../dataset/racket/doc_rkt.txt')  # 参考摘要文件
-result_path = os.path.join(current_dir,'../experiment/ds-coder-1_3B/rkt_result/rkt_2_NL_1199.txt')  # 模型输出文件
+ref_path = os.path.join(current_dir,'../experiment/unixcoder/ESALE/rkt_ref_40510.txt')  # 参考摘要文件
+result_path = os.path.join(current_dir,'../experiment/ds-coder-1_3B/rkt_result/rkt_2_NL_40510.txt')  # 模型输出文件
 
 refs = read_lines(ref_path)
 results = read_lines(result_path)
@@ -37,7 +37,7 @@ for line in results:
         need_list.append(num)
     else:
         try:
-            int(parts[0])
+            num = int(parts[0])
         except (ValueError, IndexError):
             continue
 ref_dict_clen={}
@@ -56,7 +56,6 @@ def tokenize_bleu(data,isRef):
             result.append(words)
     # print(result)
     return result
-
 ref_list = [value for value in ref_dict_clen.values()]
 hys_list = [value for value in result_dict.values()]
 
@@ -100,4 +99,3 @@ print(f"METEOR Score: {sum(meteor_scores)*100/len(results):.4f}")
 # 输出结果
 print(f"BLEU-4 Score: {bleu_score*100:.4f}")
 print(f"ROUGE-L Score: {rouge*100/len(results):.4f}")
-# print(f"METEOR Score: {meteor_scores*100/len(refs):.4f}")

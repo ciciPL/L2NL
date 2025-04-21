@@ -1,0 +1,514 @@
+1: define (vector_mul k a)
+2: def vector_mul(a)
+3: 
+5: -------------------------------------------------
+6: 定义
+7: Header
+9: define
+10: -------------------------------------------------
+11: 
+13: 
+14: 定义def define(self, name):
+        if name in self.defs:
+            return self.defs[name]
+        self.defs[name] = self.define_one(name)
+15: 定义def define(self, name):
+        if name in self.defs:
+            return self.defs[name]
+        self.defs[name] = self.define_one(name)
+        return self.defs[name]
+17: define
+18: (define
+19: 
+21: def set_choices(choices_as_set)
+22: def set_choices(choices_as_set):
+23: 
+25: def texify_str(s)
+26: def texify_str(s):
+27: 
+29: define
+30: 定义
+31: 
+33: define (projectPartners n)
+34: define (projectPartners)
+35: define(projectPartners n)
+37: define
+38: Description
+39: 
+41: define
+42: 定义
+43: get_line_width
+45: 定义function define() {
+46: 定义function define(v) {
+47: definefunction define(v) {
+49: define
+50: #  #
+51: 
+53: define
+54: 定义
+55: Definition
+57: pyday_to_sqlday
+58: pyday
+59: define (pyday)
+61: define
+62: 定义
+63: 
+65: define
+66: define poly_func
+67: define (poly_func X)
+69: define (epoch_timestamp_to_ms_timestamp ts)
+70: 定义function epoch_timestamp_to_ms_timestamp() {
+71: 
+73: -----------------------------------------------def get_command_from_state
+74: -----------------------------------------------def define_command_from_state
+75: --------------------------------------------def define_command_from_state
+77: 
+78: definedef define(self):
+        """
+        #  define
+        """
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+        self.log_file_status = os.path.join(self.log_dir, 'log_file_status')
+79: definedef define(self):
+        """
+        #  define
+        """
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+        self.log_file_with_status = os.path.join(self.log_dir, 'log_file_with_status')
+81: definedef define(path_list):
+82: definedef get_model_names():
+83: 
+85: define
+86: 定义
+87: 
+89: 成功
+90: 定义成功
+91: 
+93: define
+94: 定义
+95: 
+97: define
+98: 定义
+99: define_sequence
+101: definefunction () {
+102: 定义function define(x) {
+103: definefunction define(x) {
+105: define
+106: def to_bool(v)
+107: def to_bool
+109: get_items_per_page
+110: get_items_per_page
+111: 
+113: 定义
+114: define
+115: 
+117: define (sum_readings readings)
+118: define (sum_readings)
+119: 
+121: 定义function define() {
+122: 定义function define(value) {
+123: 
+125: get_categoriesdef get_categories():
+126: get_categoriesdef get_categories(
+127: 
+129: define
+130: 定义
+131: 
+133: -------------------------------------------------
+134: define (define)
+135: 
+137: define
+138: 定义
+139: 
+141: 定义
+142: define
+143: Definitions:
+145: parseAvailablefunction parseAvailable() {
+146: parseAvailabledef parseAvailable(self):
+147: 
+149: def clean_data(data)
+150: 
+151: def clean_data(self):
+        if self.clean_data is None:
+            self.clean_data = {}
+        if self.clean_data.get('data') is None:
+            self.clean_data['data'] = {}
+        return self.clean_data
+153: 运算法：
+154: 
+155: 运算法：<mask1>运算
+157: 定义
+158: define
+159: -------------------------------------------------
+161: define
+162: 定义
+163: 
+165: define
+166: -------------------------------------------------
+167: 定义
+169: special_mul
+170: define
+171: 
+173: define
+174: 定义
+175: 
+177: define
+178: define (remove_spaces_add_hyphen)
+179: define (string_item)
+181: define
+182: 定义
+183: 
+185: 定义function define() {
+186: 定义function define(file) {
+187: 
+189: def get_user_agent
+190: def get_user_agent_from_header
+191: def get_user_agent_header(
+193: define
+194: 判断
+195: 
+197: define
+198: Description
+199: 
+201: define
+202: 定义
+203: 
+205: decode_conditions
+206: 定义
+207: 解析条件
+209: 定义function define(name) {
+210: 定义function define (name) {
+211: 定义function define(name){
+213: 算法：
+214: 算法：
+215: 
+217: 定义
+218: define
+219: 
+221: 定义function (resource_noun) {
+222: 定义function define(resource_noun)
+223: 
+225: define (string_to_ord string)
+226: define (string)
+227: define (string_to_ord)
+229: define
+230: 定义
+231: 
+233: define
+234: 定义
+235: 
+237: FUNCTION: sum( arr )
+238: FUNCTION: sum( x )
+239: 
+241: 定义function define(l) {
+242: 定义def define(self):
+243: 
+245: 
+246: definedef define(self):
+        """
+        #  define
+        """
+        if self.isomid:
+            return
+        self.isomid = True
+        self.d = self.format(self.d)
+247: definedef define(self):
+        """
+        #  define
+        """
+        if self.isomid:
+            return
+        self.isomid = True
+        self.d = self.format(self.isomid)
+249: define
+250: 运算法
+251: 
+253: -------------------------------------------------
+254: 定义
+255: define
+257: define (cal_DTP_HP)
+258: define (cal_DTP_HP):
+259: 
+261: 定义function define() {
+262: 
+263: 定义function define() {
+        return {
+265: -------------------------------------------------
+266: define
+267: 
+269: 定义function define(name, version) {
+270: definedef define(name, version)
+271: definedef define(name, version)
+273: define
+274: setup
+275: STEP
+277: define
+278: 定义
+279: 
+281: define
+282: 定义
+283: 
+285: define
+286: 定义
+287: 
+289: 定义
+290: define
+291: 
+293: define
+294: define (rerun_probability)
+295: 
+297: 验证
+298: 定义
+299: 
+301: define (to_none field)
+302: define (to_none field)
+303: 
+305: define
+306: 定义
+307: 
+309: 定义
+310: define
+311: 
+313: 缓存public static function get_cache() {
+314: 定义缓存public static function define() {
+315: 
+317: 定义
+318: define
+319: definition
+321: define
+322: #  #
+323: 
+325: definedef define(invocation_name)
+326: definedef define(self):
+        """
+327: 
+329: def _set_default_contact_rating
+330: define
+331: ########################################################
+333: def remove_class_from_dict(d):
+334: def remove_class_from_dict(d)
+335: 
+337: define (seconds)
+338: define (sec_to_jd)
+339: define (sec_to_jd seconds)
+341: define
+342: 定义
+343: 
+345: 定义 _ListOpToListfunction _ListOpToList() {
+346: define _ListOpToListfunction _ListOpToList() {
+347: 
+349: define
+350: def check_duplicate_preferences
+351: 
+353: define (define bb)
+354: define (define bb bit)
+355: 
+357: 定义
+358: define
+359: -------------------------------------------------
+361: 
+362: 生成随机数function rand() {
+363: 生成随机数字function(rnd){
+365: define (lsize lst)
+366: definefunction define(lst) {
+367: 定义function define(lst) {
+369: -------------------------------------------------
+370: #
+371: 
+373: define (list mov_one_all)
+374: definedef define(self):
+375: 
+377: 定义function make_spaces(in_string) {
+378: 定义function define(in_string) {
+379: 定义function make_spaces(string) {
+381: define
+382: define (n_rows_cols)
+383: 
+385: define
+386: template_type
+387: template_types
+389: define (pipe_Di Do WT)
+390: define (pipe_Di DoW)
+391: 
+393: define
+394: define (define)
+395: 
+397: 定义
+398: define
+399: 
+401: 解压
+402: define
+403: 
+405: 
+406: definedef define(self):
+        """
+        #  define
+407: definedef define(self):
+        """
+        #  define
+        """
+        self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('rshift', self.register('r
+409: def get_unique(l)
+410: def get_unique(l):
+411: 
+413: define
+414: 定义
+415: 
+417: 定义
+418: define
+419: 
+421: 定义
+422: define
+423: 验证
+425: define
+426: 定义
+427: 
+429: 定义def define(self):
+430: 定义def define(self):
+        """
+431: 定义def define_obj_ref_list
+433: define
+434: 定义
+435: 
+437: define (mix x y a)
+438: define (mix x y a)
+439: 
+441: #  #  #  #  #
+442: def test(self):
+443: #  #  #  #
+445: define
+446: define (year)
+447: ###################################################
+449: define
+450: -------------------------------------------------
+451: 定义
+453: define
+454: define (define)
+455: 
+457: define
+458: 定义
+459: 
+461: def is_less_than_thresh
+462: def is_less_than_thresh():
+463: 
+465: 定义
+466: define
+467: 
+469: define
+470: 定义
+471: 
+473: definedef __init__(self):
+474: 
+475: definedef __init__(self):
+        """
+        #  define
+        """
+        self.define = define
+477: Description:
+478: define
+479: Description
+481: define
+482: def slopes
+483: 
+485: Description:
+486: Description:
+            \
+487: 
+489: define
+490: 定义
+491: 
+493: define
+494: 定义
+495: 
+497: define
+498: define card
+499: 定义 card
+501: define
+502: 定义function define() {
+503: #  #  #
+505: 定义def define(self):
+        """
+506: 定义def define(self):
+507: 定义def define(self, cond):
+509: 定义
+510: define
+511: read_files
+513: define
+514: -------------------------------------------------
+515: 定义
+517: check_sender_linedef check_sender
+518: check_sender_linedef check_sender(
+519: check_sender_linefunction checkSenderLine(){
+521: 定义function define(status_message) {
+522: 定义function define(status) {
+523: 状态定义function Status(status) {
+525: define
+526: 定义
+527: 
+529: year_to_date_str
+530: year_to_date_str(
+531: 
+533: 定义
+534: define
+535: 
+537: define
+538: #  #
+539: 
+541: 定义标题
+542: titleizefunction titleize(text) {
+543: titleizefunction titleize (text) {
+545: define
+546: 定义
+547: 
+549: define
+550: Description
+551: 
+553: define
+554: 定义
+555: 
+557: 定义
+558: define
+559: -------------------------------------------------
+561: -------------------------------------------------
+562: define
+563: 定义
+565: define
+566: 定义
+567: 
+569: vect3_add
+570: define
+571: vect3
+573: 定义
+574: define
+575: 
+577: 定义
+578: define
+579: 
+581: define
+582: 定义
+583: 
+585: define
+586: define (dRELU x)
+587: define (x)
+589: 定义function define() {
+590: definedef define(self):
+        """
+591: 
+593: 初始化function init() {
+594: 初始化function init() {
+595: 
+597: define
+598: def mel
+599: 
+601: define_hash_to_zero_one
+602: 定义function define(value) {
+603: 
+605: 
+606: 定义def define(self, name):
+        self.name = name
+607: 定义def define(self, name):
+        self.name = name
+        self.regexp = re.compile(name)
