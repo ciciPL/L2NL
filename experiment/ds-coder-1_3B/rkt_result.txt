@@ -1,0 +1,9 @@
+trans/gen ds-coder1.3b
+L->NL(1.4%,0.9%,2.5%)
+    BLEU-4:          3.1235
+    ROUGE-L (F1):    23.7237
+    METEOR:          31.7722
+L->H->NL
+    BLEU-4:          2.9884
+    ROUGE-L (F1):    23.1385
+    METEOR:          30.3594
