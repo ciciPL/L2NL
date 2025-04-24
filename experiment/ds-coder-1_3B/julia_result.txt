@@ -1,0 +1,10 @@
+trans/gen ds-coder1.3b
+
+L->NL  julia_2_NL.txt(4090/45000条)
+    BLEU-4:          1.7854
+    ROUGE-L (F1):    17.7015
+    METEOR:          24.3967
+L->H->NL   julia_2_python_2_NL_45000.txt(4090)
+    BLEU-4:          1.9101
+    ROUGE-L (F1):    17.1540
+    METEOR:          22.8927
