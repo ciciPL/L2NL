@@ -65,7 +65,7 @@ def read_files(ref_path, hyp_path, num):
         for i, line in enumerate(f_hyp):
             # line = line.strip()
             if not line: continue
-            parts = line.split('\t', 1)
+            parts = line.split(':', 1)
             if len(parts) == 2:
                 hypotheses.append(parts[1].strip())
             else:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
     parser.add_argument("-r", "--reference", type=str, default="../julia_ref.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../julia_result/result_julia_NL_45000.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../julia_result/julia_2_python_2_NL_2th.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

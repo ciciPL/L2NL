@@ -3,3 +3,13 @@ L->NL (unixCoder-ESALE):
     BLEU-4:          3.1587
     ROUGE-L (F1):    22.3751
     METEOR:          16.0513
+
+    result_julia_NL_45000_2th.txt
+    BLEU-4:          3.1588
+    ROUGE-L (F1):    22.3845
+    METEOR:          16.0592
+
+L->H->NL (unixCoder-ESALE):
+    BLEU-4:          3.1319
+    ROUGE-L (F1):    21.3354
+    METEOR:          15.3035

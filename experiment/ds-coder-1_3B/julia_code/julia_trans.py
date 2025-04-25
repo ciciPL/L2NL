@@ -10,19 +10,20 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("julia_translation.log"),
+        logging.FileHandler("translation_clean.log"),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
-class JuliaTranslator:
+
+class CleanTranslator:
     def __init__(self, model_name="../../../model/deepseek-coder-1.3b-instruct", batch_size=32):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
-        self.batch_size = batch_size
+        self.batch_size = batch_size  # 新增批处理大小参数
 
     def initialize(self):
         """初始化模型"""
@@ -35,7 +36,7 @@ class JuliaTranslator:
 
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
-                device_map="auto",
+                device_map={"": 0},
                 torch_dtype=torch.float16,
                 trust_remote_code=True
             ).eval()
@@ -47,42 +48,30 @@ class JuliaTranslator:
             return False
 
     def extract_clean_code(self, generated_text):
-        """提取纯代码，保留 Julia 的特点"""
-        # 尝试提取代码块
-        patterns = [
-            r'def\s+\w+\(.*?\):\s*(.*?)(?=\n\s*\n|\Z)',
-            r'function\s+\w+\(.*?\)(.*?)end',
-            r'(?<=```python\n)([\s\S]*?)(?=```|\Z)'
-        ]
+        """严格提取纯代码（原逻辑不变）"""
+        pattern1 = r'(def\s[\s\S]*?)(?=\n\s*\d+:|\Z)'
+        pattern2 = r'(?<=genPython:\n)([\s\S]*?)(?=\n\s*(?:Note:|Racket:|$))'
 
-        for pattern in patterns:
-            match = re.search(pattern, generated_text, re.DOTALL | re.MULTILINE)
+        for pattern in [pattern1, pattern2]:
+            match = re.search(pattern, generated_text, re.DOTALL)
             if match:
                 code = match.group(1).strip()
-                # 处理多余的注释和空行
                 code = re.sub(r'#.*$', '', code, flags=re.MULTILINE)
+                code = re.sub(r'Note:.*$', '', code, flags=re.MULTILINE)
                 lines = [line.rstrip() for line in code.split('\n') if line.strip()]
                 return '\n'.join(lines)
         return None
 
-    def translate_batch(self, julia_codes):
-        """批量翻译 Julia 到 Python"""
-        system_content = """  
-        Role: You are an expert programmer proficient in Julia and Python, specialized in translating between these languages.  
-        Task: Translate the Julia code into Python, preserving the original logic and style as much as possible.  
-        Key Requirements:  
-        1. Maintain the original algorithm's structure  
-        2. Use Python's syntax and idioms  
-        3. Preserve type hints and functional characteristics where possible  
-        4. Output clean, readable Python code  
-        """
+    def translate_batch(self, julia_code):
+        """新增批量翻译方法"""
+        system_content = """Convert julia to Python. Output ONLY the Python code with proper indentation."""
 
-        # 生成批量 prompt
+        # 生成批量prompt
         messages = [
             [
                 {"role": "system", "content": system_content},
-                {"role": "user", "content": f"JULIA_CODE: {code}"}
-            ] for code in julia_codes
+                {"role": "user", "content": f"RACKET_CODE: {code}"}
+            ] for code in julia_code
         ]
 
         # 批量处理模板
@@ -95,14 +84,14 @@ class JuliaTranslator:
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=300
+            max_length=512
         ).to(self.device)
 
         # 批量生成
         outputs = self.model.generate(
             input_ids=inputs.input_ids,
             attention_mask=inputs.attention_mask,
-            max_new_tokens=200,
+            max_new_tokens=300,
             temperature=0.3,
             do_sample=False,
             pad_token_id=self.tokenizer.eos_token_id
@@ -112,9 +101,10 @@ class JuliaTranslator:
         decoded = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
         return [self.extract_clean_code(d) for d in decoded]
 
+
 def process_file(input_path, output_path, batch_size):
-    """处理文件（分批处理）"""
-    translator = JuliaTranslator(batch_size=batch_size)
+    """处理文件（修改为分批处理）"""
+    translator = CleanTranslator(batch_size=batch_size)  # 可调整批大小
     if not translator.initialize():
         return False
 
@@ -160,6 +150,7 @@ def process_file(input_path, output_path, batch_size):
         logger.error(f"文件处理失败: {str(e)}")
         return False
 
+
 if __name__ == "__main__":
     input_file = "../../../dataset/julia/code.txt"
     output_file = "../julia_result/julia_2_python.txt"
@@ -169,7 +160,7 @@ if __name__ == "__main__":
         exit(1)
 
     logger.info("开始转换流程...")
-    if process_file(input_file, output_file, 64):
+    if process_file(input_file, output_file,32):
         logger.info(f"转换完成! 结果保存至: {output_file}")
     else:
         logger.error("转换过程中出现严重错误")

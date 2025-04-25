@@ -1,5 +1,5 @@
-input_path = '../julia_result/result_julia_NL.txt'
-output_path = '../julia_result/result_julia_NL_45000.txt'
+input_path = '../julia_result/multiline_clean.txt'
+output_path = '../julia_result/result_julia_python_NL_45000.txt'
 
 #-------------数据跨行-----------
 # def fix_multiline_data(data_lines):
@@ -79,23 +79,23 @@ with open(input_path, 'r',encoding='UTF-8') as f_in:
             if line.find(str(flag))>-1:
                 if line.find(str(flag+1))>-1 and flag>10 and line.find(str(flag+2))>-1:
                     f_content = line.split(str(flag+1))[0]
-                    f_out.write(f_content)
+                    # f_out.write(f_content)
                     result.append(f_content)
-                    temp = str(flag+1)+line.split(str(flag+1))[1].split(str(flag+2))[0]
-                    f_out.write (temp)
+                    temp = str(flag+1)+":"+line.split(str(flag+1))[1].split(str(flag+2))[0]
+                    # f_out.write (temp)
                     result.append(temp)
-                    result.append(line.split(str(flag+2))[1])
-                    last_content = line.split(str(flag+2))[1]
+                    result.append(str(flag+2)+":"+line.split(str(flag+2))[1])
+                    last_content = str(flag+2)+":"+line.split(str(flag+2))[1]
                     shiji+=3
                     flag +=3
                     line = f_in.readline()
                 if line.find(str(flag+1))>-1 and flag>10:
                     f_content = line.split(str(flag+1))[0]
-                    f_out.write(f_content)
+                    # f_out.write(f_content)
                     result.append(f_content)
 
-                    temp = str(flag+1)+line.split(str(flag+1))[1]
-                    f_out.write (temp)
+                    temp = str(flag+1)+":"+line.split(str(flag+1))[1]
+                    # f_out.write (temp)
                     result.append(temp)
                     last_content = temp
                     shiji+=2
@@ -103,7 +103,7 @@ with open(input_path, 'r',encoding='UTF-8') as f_in:
                     line = f_in.readline()
 
                 else:
-                    f_out.write(line)
+                    # f_out.write(line)
                     result.append(line)
                     last_content = line
                     flag = flag + 1
