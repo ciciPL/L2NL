@@ -34,5 +34,7 @@ cd ../star/Downloads/cyqProjects/L2NL
 conda activate ../env/L2NL
 watch -n 1 nvidia-smi
 export HF_ENDPOINT=https://hf-mirror.com
-huggingface-cli download --resume-download Qwen/Qwen2.5-Coder-14B-Instruct --local-dir model/Qwen2.5-Coder-14B-Instruct
+huggingface-cli download --resume-download Qwen/Qwen2.5-Coder-1.5B-Instruct --local-dir model/Qwen2.5-Coder-1.5B-Instruct
+
+
 

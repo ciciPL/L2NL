@@ -10,7 +10,6 @@ class UniXcoder(nn.Module):
     def __init__(self, model_name):
         """
             Build UniXcoder.
-
             Parameters:
 
             * `model_name`- huggingface model card name. e.g. microsoft/unixcoder-base

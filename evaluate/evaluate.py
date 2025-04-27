@@ -6,6 +6,7 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
 from bert_score import score
+import bleu
 
 # bert_score import and calculation might fail, handle gracefully
 
@@ -31,6 +32,17 @@ import os
 import traceback
 
 
+def skip_empty(empty_path):
+    empty_id = []
+    with open(empty_path, "r") as f:
+        line = f.readline()
+        while line:
+            index = line.split(':')[0]
+            empty_id.append(index)
+            line = f.readline()
+    return empty_id
+
+
 # --- NLTK Download Check --- (Keep as is)
 # ... (previous NLTK check code) ...
 
@@ -49,11 +61,15 @@ def read_files(ref_path, hyp_path, num):
     malformed_refs = 0
     malformed_hyps = 0
 
+    empty_id = skip_empty("../experiment/unixcoder/ESALE/julia_result/julia_ptyhon_nl2th_emptyID.txt")
+
     print(f"Reading references from: {ref_path}")
     with open(ref_path, 'r', encoding='utf-8') as f_ref:
         for i, line in enumerate(f_ref):
             line = line.strip()
             if not line: continue
+            index = line.split(':')[0]
+            # if index in empty_id: continue
             parts = line.split(':', 1)
             if len(parts) == 2:
                 references.append(parts[1].strip())
@@ -65,12 +81,15 @@ def read_files(ref_path, hyp_path, num):
         for i, line in enumerate(f_hyp):
             # line = line.strip()
             if not line: continue
+            index = line.split(':')[0]
+            # if index in empty_id: continue
             parts = line.split(':', 1)
             if len(parts) == 2:
                 hypotheses.append(parts[1].strip())
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
+
 
     if malformed_refs > 0:
         print(f"Warning: Found {malformed_refs} potentially malformed lines in reference file (missing ':').")
@@ -92,7 +111,8 @@ def read_files(ref_path, hyp_path, num):
         print("Warning: No valid content extracted from input files.")
         return [], []
 
-    print(f"Successfully read {len(references)} reference-hypothesis pairs.")
+    print(f"Successfully read {len(references)} reference pairs.")
+    print(f"Successfully read {len(hypotheses)} hypothesis pairs.")
     return references, hypotheses
 
 
@@ -107,6 +127,18 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     smooth_func = SmoothingFunction().method1
 
     print(f"\nEvaluating {len(references)} summaries...")
+
+    try:
+        dict_size = len(hypotheses)
+        predictionMap = dict(zip(range(dict_size), hypotheses))
+        refMap = dict(zip(range(dict_size), references))
+        bleu_score = bleu.bleuFromMaps(refMap, predictionMap)
+        dev_bleu = round(bleu_score[0], 2)
+        print(dev_bleu)
+        print(bleu_score)
+    except Exception as e:
+        print(f"Warning: BLEU calculation failed for pair : {e}")
+        bleu4_scores.append(0.0)
 
     # --- N-gram Metrics Calculation ---
     for i, (ref, hyp) in enumerate(zip(references, hypotheses)):
@@ -232,9 +264,10 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../julia_result/julia_ref.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/unixcoder/ESALE/julia_ref.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../julia_result/julia_2_python_2_NL_45000.txt",
+    parser.add_argument("-p", "--prediction", type=str,
+                        default="../experiment/unixcoder/BASE/base_result/result_julia_nl_unx-base.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
@@ -247,7 +280,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        references, hypotheses = read_files(args.reference, args.prediction,-1)
+        references, hypotheses = read_files(args.reference, args.prediction, -1)
 
         if references and hypotheses:
             results = evaluate_summaries(references, hypotheses, args.model_path)

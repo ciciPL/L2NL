@@ -1,11 +1,8 @@
-import subprocess
-
-import evaluate
 import nltk
 from nltk import word_tokenize
 from nltk.translate.bleu_score import corpus_bleu
-from nltk.translate.meteor_score import meteor_score, single_meteor_score
-from rouge_score import rouge, rouge_scorer
+from nltk.translate.meteor_score import single_meteor_score
+from rouge_score import rouge_scorer
 
 nltk.download('punkt_tab')
 nltk.download('punkt')
