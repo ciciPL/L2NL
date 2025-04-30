@@ -1,12 +1,12 @@
 L->NL (unixCoder-ESALE):
-    rkt_NL_4090_40510.txt               result_rkt_nl_unx-base.txt
-    BLEU-4:          1.1377             BLEU-4:          0.1720
-    ROUGE-L (F1):    10.2320            ROUGE-L (F1):    8.1025
-    METEOR:          6.6174             METEOR:          1.7235
-    rkt_NL_4060ti_25303.txt
-    BLEU-4:          1.1443
-    ROUGE-L (F1):    10.3554
-    METEOR:          6.7203
+    rkt_NL_4090_40510.txt               result_rkt_nl_unx-base(batch=16).txt                    result_python_nl_unx-base(19028条)
+    BLEU-4:          1.1377             BLEU-4:          0.1720                                 BLEU-4:          2.3366
+    ROUGE-L (F1):    10.2320            ROUGE-L (F1):    8.1025                                 ROUGE-L (F1):    16.7056
+    METEOR:          6.6174             METEOR:          1.7235                                 METEOR:          11.8327
+    rkt_NL_4060ti_25303.txt             result_rkt_nl_unx-base_batch64.txt
+    BLEU-4:          1.1443             BLEU-4:          0.2880
+    ROUGE-L (F1):    10.3554            ROUGE-L (F1):    11.0157
+    METEOR:          6.7203             METEOR:          2.3768
 
 L->Python->NL (unixCoder-ESALE,trans:ds-coder):
     rkt_python_NL_4090_40510.txt
@@ -17,3 +17,5 @@ L->Python->NL (unixCoder-ESALE,trans:ds-coder):
     BLEU-4:          3.2425
     ROUGE-L (F1):    21.9391
     METEOR:          15.7605
+
+

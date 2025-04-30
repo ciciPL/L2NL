@@ -70,7 +70,7 @@ def read_files(ref_path, hyp_path, num):
             if not line: continue
             index = line.split(':')[0]
             # if index in empty_id: continue
-            parts = line.split(':', 1)
+            parts = line.split('\t', 1)
             if len(parts) == 2:
                 references.append(parts[1].strip())
             else:
@@ -264,10 +264,10 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/unixcoder/ESALE/julia_ref.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../finetune/dataset/Clean_PCSD/test/ref.txt",
                         help="Path to the reference summaries file (format: index:content).")
     parser.add_argument("-p", "--prediction", type=str,
-                        default="../experiment/unixcoder/BASE/base_result/result_julia_nl_unx-base.txt",
+                        default="../finetune/dataset/result_python_nl_unix-base",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
