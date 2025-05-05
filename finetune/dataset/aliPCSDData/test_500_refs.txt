@@ -1,0 +1,500 @@
+1:returns the first item in a list .
+2:return a list of minions
+3:wait until a instance is running .
+4:attach votes count to each object of the queryset .
+5:rgb to short
+6:a wrapper around pprint . pprint - - for debugging , really .
+7:turn auto - escape on / off based on the file type .
+8:turn a formatted time back into a datetime .
+9:creates a new api deployment .
+10:get rectangular grid .
+11:remove files of each path in the list
+12:reads a motif from a handle using a specified file - format .
+13:highlight only the tag name .
+14:modifies the main help menu to handle all registered help files .
+15:the main function .
+16:request entrance exam problems to be re - scored as a background task .
+17:run a sql query and return query result as list of tuples , or a list of dictionaries if as _ dict was passed , or an empty list if no data is available .
+18:this function prints and plots the confusion matrix .
+19:returns true / false boolean depending on if botocore supports usage plan
+20:put one value to the labjack device eput is equivilent to an addrequest followed by a goone .
+21:copied from win _ system . py
+22:get the points from the segment table .
+23:install the kqueue ( ) reactor .
+24:modules home page
+25:add protobuf keys to a request object .
+26:returns the linode id for a vm from the provided name .
+27:a wrapper around astropy . utils . misc . did _ you _ mean that deals with the display of deprecated units .
+28:create the rule to match for a given action .
+29:return a file : / / url to the given local path .
+30:gather the set of modules which comprise the entrance exam
+31:read the viewfinder passphrase from local file .
+32:given an identity pool name ,
+33:convert request params based on function annotations , with error handling .
+34:loads the experiment description python script from the given experiment directory .
+35:checks whether the nrows parameter for parsing is either an integer or float that can safely be cast to an integer without losing accuracy .
+36:performs static checks via pyflakes .
+37:get objects of the type .
+38:when creating or saving a storefs , validate that it has the necessary information .
+39:try to install the optimal twisted reactor for this platform .
+40:given a reg - exp pattern , normalizes it to an iterable of forms that suffice for reverse matching .
+41:helper function to the grains from the proxied device .
+42:serve static files below a given point in the directory structure .
+43:export the certificate to a file from the given certificate store .
+44:show a figure with lines joining the accepted matches input : im1 , im2 , locs1 , locs2 , matchscores ( as output from match ( ) ) , show _ below .
+45:stops a google app engine application process instance on current machine .
+46:wrapper method for _ filter _ schema to filter multiple schemas .
+47:clear names that are not part of the strict es api
+48:compile pillar data for the specified minion id
+49:parses the start and end lines from a line string like start - end .
+50:bind cli arguments to a shell . py do _ foo function .
+51:set up a special command in the crontab .
+52:sets the diffchunkgenerator class used for generating chunks .
+53:determines whether a proxy should be used to open a connection to the specified url , based on the value of the no _ proxy environment variable .
+54:test setting context properties
+55:finds prereg challenge registrations whose registered _ meta includes q5 and corrects
+56:get a random user agent string .
+57:return greyscale local autolevel of an image .
+58:render a response consisting of an html chunk and a js onload chunk in the format required by the modal - workflow framework .
+59:compute id of a real matrix to a specified relative precision .
+60:multivariate division with remainder over a ring .
+61:reverses the vertical mirroring of all items in list fliplist .
+62:generates a list of colors based on a list of names .
+63:render index page .
+64:uses the metadata module to parse the metadata from the provided url
+65:generative network to parameterize generative model .
+66:return a list consisting of paths parent directory , its grandparent , and so on .
+67:find all dynamicsymbols in expression .
+68:convert a sequence to a bytes type
+69:instantiate a cipher object that performs ofb encryption / decryption .
+70:get the precedence index for state .
+71:make the http request and return the data
+72:decrypts a cypher text using the decryption key dkey , working modulo n
+73:shutdown a running system delay : int
+74:enable / disable sidebar items
+75:dump object to string
+76:returns none if no reader is found for the identity .
+77:details page : show a box with three add - on reviews .
+78:unconditionally skip a test .
+79:only load if elasticsearch libraries exist .
+80:export kits in csv format
+81:use basic logger .
+82:convenience method for executing operating system commands .
+83:wrap where / having clause with parenthesis if necessary
+84:return a tile key string .
+85:finds a dominating set for the graph g .
+86:return the active file location
+87:disable termination protection on a node
+88:return the structure representation of the given * typ * .
+89:walk up until we find share / jupyter / hub
+90:helper method for creating a new library .
+91:entry level 2 , a more complicated parsing scheme that covers examples such as i have 80 boxes of freshly baked pies
+92:selenium test result reports
+93:split 2 layers previously bound
+94:convert lat / lon pair to alphanumeric utm zone .
+95:returns the phases of the given list of 3 - letter amino acid fragments .
+96:clear variables stored in _ _ context _ _ .
+97:check if a point lies within bounds .
+98:return the current time as yymmdd . hh : mm : ss . uuuuuu .
+99:trains the tm with given sequence for a given number of time steps and level of input corruption
+100:extension of a path .
+101:list snapshots either for all vms and templates or for a specific vm / template in this vmware environment
+102:first part of chinese remainder theorem , for multiple application .
+103:enqueue method to be executed using a background worker
+104:returns the function qualifier as a version or alias or none .
+105:map variants to fields .
+106:stop watching a question .
+107:get new repository .
+108:returns a list of floating ip pools .
+109:openbsd specific helper function .
+110:reads a properties from the system property store .
+111:get mac address from domain xml .
+112:a pre - configured wrapper around the app validator .
+113:remove a value from a variable in the make . conf
+114:display all control character indicies , names , and values .
+115:checks a security osstatus error code and throws an exception if there is an error to report
+116:only load the module if sensehat is available
+117:create a virtual server
+118:quote a command line argument so that it appears as one argument when processed via cmd . exe and parsed by commandlinetoargvw ( as is typical for
+119:put to update one inventory .
+120:determine if the migration should be switched to postcopy mode
+121:pull an image from a docker registry .
+122:computes the space2depth transformation for subpixel calculations .
+123:create a set with contents from a whitelist file for membership testing .
+124:add a remote git repository into a directory .
+125:length is total audio length in seconds nseconds is amount of time to sample in seconds padding is off - limits seconds at beginning and ending
+126:get task info for task with given task id
+127:return a timestamp as a nicely formated datetime string .
+128:write an index entry to a file .
+129:a convenience wrapper for memoizing instance methods .
+130:return the graph adjacency matrix as a numpy recarray .
+131:return the subset of the list names that match pat .
+132:yield a pairs of artists and titles to search for .
+133:returns the modules list of output filters , as a list .
+134:initialize the zone interval and the zzone table
+135:return the list of functools - wrappable attributes on a callable .
+136:pack object o and write it to stream
+137:returns a sign up form via the django - registration app if the url is valid .
+138:decorator to disable processing $ { curdir } variable .
+139:runs the importer from the command line .
+140:returns a trainer extension to continuously record a value .
+141:get the count of objects for a namespace , raise if ns not found
+142:attempts to determine the process id for a running process , using . . .
+143:get names of changed files from git .
+144:finds the best match for target _ name out of names using the nginx name - matching rules .
+145:checks if the tables or views exists .
+146:fake gcs bucket metadata
+147:convenience function for pchip interpolation .
+148:this calculates a softmax over the vocabulary as a function of the dot product of context and word .
+149:computes a multivariate kendalls rank correlation tau , for seasonal data .
+150:create a relationship between two datasets .
+151:returns true if user has permission ptype for given doctype .
+152:default implementation of put .
+153:bootstrapped version of mann - whitney - u test
+154:similar to exp _ create but blocking .
+155:downloads a modified file from a diff .
+156:return a list of service that are enabled on boot
+157:check whether the specified column exists in the current schema .
+158:returns " rwx " - style string like that ls would give you .
+159:search for fonts in the specified font paths .
+160:serialize obj to a json formatted str .
+161:tests the creation of a file extension
+162:return the effective number of cpus in the system as an integer .
+163:iterate over all files and build a dict of udid - > last - seen - timestamp .
+164:reduce the given cstringi .
+165:finds all the referenced templates from the ast .
+166:searches python code for a list of template names .
+167:applies sim _ otu _ table over a range of parameters table : the input table to simulate samples from tree : tree related otus in input table simulated _ sample _ sizes : a list of ints defining how many output samples should be create per input sample dissimilarities : a list of floats containing the dissimilarities to use in simulating tables mapping _ f : file handle for metadata mapping file , if a mapping file should be created with the samples from each simulated table
+168:read bti pdf process .
+169:helper to check regularization .
+170:check if a block volume is attached .
+171:release an eip from your eip pool
+172:deletes dev files
+173:if the learners mode does not match their assigned cohort , move the learner into the correct cohort .
+174:plug a layer - 2 gateway attachment object in a logical port
+175:use this decorator to enable granular security permissions to your methods .
+176:factory function to create a manager that subclasses another manager and adds behaviors specific to generic relations .
+177:return true if line contains any arithmetic operators .
+178:change the default group of the user
+179:detemine if an image is low contrast .
+180:returns a list of the urls to hit to grab all the xmodule js
+181:context processor that provides a csrf token , or the string notprovided if it has not been provided by either a view decorator or the middleware
+182:given a set of completed courses , determine which programs are completed .
+183:initialize application user .
+184:given a list of headers , return a signatured dict
+185:closes each review request in the given dictionary as submitted .
+186:return the command list to use
+187:remove leading indent from a block of text .
+188:renders the response as kml .
+189:the xenstore - ls command returns a listing that isnt terribly useful .
+190:generate adu breakdown of field .
+191:return a dict of the last function called for all minions
+192:return the availability zone to use
+193:gives back a map of all the machines ssh configurations
+194:return a list of member workers and their status
+195:get an instance of user matching the provided params .
+196:return a revision that is the translation of a default - language one .
+197:output from successful command execution or none
+198:json api endpoint for manipulating a textbook via its internal id .
+199:return the contents of a named file as a list of lines .
+200:inverse hyperbolic cotangent
+201:division of two terms in over a ring / field .
+202:return true if the author is this content is the passed user , else false
+203:required method to auto register this checker
+204:determine a correct web template set , return full template path
+205:return a list of strings in colon - hex format representing all the link local
+206:populate a libvirtconfigguestinterface instance with host backend details for an 802 . 1qbh device .
+207:delete a file or directory either locally or on s3 .
+208:f _ locals is not guaranteed to have . get ( ) , but it will always support _ _ getitem _ _ .
+209:return a list of all files on the file server in a specified environment
+210:ensure that a network is present .
+211:safely copies server _ root to temp _ dir and returns copied files
+212:return the currently preferred plugin order .
+213:respond to requests for the idps xrds document , which is used in
+214:check the length of specified string
+215:wrap a function returning an iterable such that the resulting iterable only ever yields unique items .
+216:get manifest resources from file
+217:given a vpc id describe its properties .
+218:force non - datetime columns to be read as such .
+219:forward - backward iir filter that uses gustafssons method .
+220:sets user specified mathjax settings
+221:if the original image contains exif data , use that data to preserve image orientation in the new image .
+222:check to see if stddev / variance tests should be run .
+223:inversion of arrays of symmetric matrices ; returns the pseudo - inverse for rank - deficient matrices .
+224:list site wide projects
+225:asset edit page
+226:run benchmark test .
+227:awards enrollment badge to the given user on new enrollments .
+228:remove an lvm volume group
+229:main function for combining fasta files , writing valid qiime labels mapping _ f : open file object of the metadata mapping file fasta _ dir : directory of fasta files to combine into a single file filename _ column : column of metadata mapping file containing fasta filenames output _ dir : directory to write output combined file to count _ start : number to start enumeration of fasta labels with
+230:returns a list of ipv6 addresses assigned to the host .
+231:zoom in and out of images with the same arguments , randomly or non - randomly .
+232:return chrome _ extensions information from osquery
+233:set callbacks and private data to render decoded video to a custom area in memory .
+234:return device _ owner names for allowed _ addr _ pair ports serviced by dvr
+235:builds the vnc config spec .
+236:helper method to create theano shared variables for layer parameters and to initialize them .
+237:set the global serializer used by all class in cssutils .
+238:creates a json with the grade distribution for all the problems in the course .
+239:reload changed buffers .
+240:create a self - signed ca certificate and server certificate signed by the
+241:add another node into the peer list .
+242:seek in the named broadcast .
+243:check for given keys in the shared environment dict and abort if not found .
+244:run a sentiment analysis request on text within a passed filename .
+245:return a list of all available grains
+246:inset the carving of a gcode file .
+247:ensure there are split points for converting to epub .
+248:stop watching a question , for anonymous users .
+249:builds a regressor set comprisong motion parameters , composite norm and outliers
+250:validate enrollment attribute
+251:format a list of message sizes appropriately for the lines of a list response .
+252:find users that do not have permissions on new _ node .
+253:returns the list of services name that are aliased and their alias path ( s )
+254:calculate probability from normal distribution
+255:find if an user exists in a specific database on the ms sql server .
+256:read all multipart parts into entity . parts .
+257:commits changes if the system is not in managed transaction mode .
+258:returns a list of lists containing the entire spreadsheet .
+259:performs a 1 - way anova .
+260:get the plugins whose names are in the attribute dictionary .
+261:add a list of plugins to the module docstring , formatted as a restructuredtext table .
+262:write the pip delete marker file into this directory .
+263:skips this test unless you are on python 2 . 7 . x or later .
+264:perform some action that affects the outside world .
+265:ensure policy exists .
+266:refine an isolating interval of a root to the given precision .
+267:return the first configured instance .
+268:figures out group colors for a specific series based on prefs .
+269:mac ony message route
+270:encode the image part of a thumbnail , then return the 3 part tuple
+271:this method print a file
+272:run a search - and - replace on filename with given regex patterns .
+273:return the hits authority matrix .
+274:restarts adbd as root .
+275:dijkstra algorithm for finding the shortest path between two nodes .
+276:convert a dictionary to a list of dictionaries to facilitate ordering
+277:gets list of states of provider - user combinations .
+278:error handler showing list of available projects .
+279:validates and normalizes aff4 _ type to class object .
+280:given a class , configure the class declaratively , using the given registry , which can be any dictionary , and
+281:given a text record as a bytestring and the extra data flags from the mobi header , return the trailing data as a dictionary , mapping bit number to data as bytestring .
+282:for detailed descriptions of the parameters see : URL
+283:shows the time from npls sntp server .
+284:validate and return a valid color for option of type color
+285:reduce elems using fn to combine them from right to left .
+286:a view that can only be visited by staff .
+287:makes an iterator safe by ignoring the exceptions occured during the iteration .
+288:check if the given regex is valid .
+289:return true if and only if the avas are equal .
+290:sort the rules in a stylesheet .
+291:process and save list of images as tfrecord of example protos .
+292:options nit : int , optional
+293:conditional decorator that loads edxnotes only when they exist .
+294:update head files with the latest branch heads .
+295:create a nvp logical router on the specified cluster .
+296:returns a list with all instrument rack descendants from a track or chain .
+297:for a specific format type , returns the format for the current language , defaults to the format in the settings .
+298:updates last _ edited _ an _ exploration to the current datetime for the user with given user _ id .
+299:format all the found values to their natural type .
+300:sanity checks installed packages jail
+301:this function decides whether or not to trigger the remote dag
+302:takes a dotted path to a member name in a module , and returns the member after importing it .
+303:depth first search wrapper
+304:do the main task of writing the gallery , detail , and index rst pages .
+305:check whether or not an upgrade is available for a given package
+306:produce a consistent tooltip based on available chart configuration .
+307:true if this file is generated by illumina software post - casava 1 . 8
+308:test if an openid is already in database
+309:return a list of colors defining a color palette .
+310:works like argument clinic , to validate function params .
+311:makes the multiplication operator optional in most cases .
+312:returns the color - inversed clip .
+313:channel release section 9 . 1 . 7
+314:drop an installed postgresql extension
+315:wrapper around expand that only uses the multinomial hint .
+316:return pypcap device name for given interface or libdnet / scapy device name .
+317:local bottom - hat of an image .
+318:add signal handler for signal name if it exists on given platform
+319:default datalist item renderer for incidents on profile pages
+320:generate a csr .
+321:get the subdirectories within a package
+322:returns the clone spec
+323:bottom the carving .
+324:create a patch object .
+325:construct a polynomial from an expression .
+326:provides label corresponding to units of the highest significance in the provided set .
+327:fixture providing a window registry for win _ id 0 and 1 .
+328:parses a full http range header .
+329:execute the sample on the emulator via adb
+330:compute singular values of a matrix .
+331:list all of the installed certificates keychain
+332:checks if a user of a mongodb database has specified roles
+333:for exception handling outside of a web context
+334:decodes a packet binary string into a packet dictionary .
+335:returns a string identifying the python implementation revision .
+336:attempts to decode a bytestring path to a unicode object for the purpose of displaying it to the user .
+337:shape function for the variablelstm op .
+338:retrieve a list of all the defined model classes .
+339:get and display the metadata for the current user .
+340:create a coil definition using templates , transform if necessary .
+341:returns the encrypted user password from the secrets database .
+342:this function will contatenate two " comma - separated value " text files , but remove the first row from all but the first file .
+343:ensures that history not changed .
+344:solves a dictionary learning matrix factorization problem .
+345:parameter _ type _ list _ opt : empty
+346:convert ipv6 packed bytes to string .
+347:creates a list of prepopulated _ fields that should render javascript for the prepopulated fields for both the admin form and inlines .
+348:mean squared error function .
+349:parse a gcode file and display the commands .
+350:implementation of the add _ user command .
+351:stage osm data into a temporary set of tables using osm2pgsql .
+352:create the paths required for binary configs .
+353:factory that returns an appropriate browser model depending on the browser filter type and hotswap target .
+354:strips illegal characters for a given os from a path .
+355:a helper for the bookmark pager .
+356:returns true if the system can bind an ipv6 address .
+357:do the inverse of the conversion done by split _ header _ words .
+358:check if the user _ data is encoded properly .
+359:regex rewrite outgoing url
+360:updates course search index .
+361:returns status of a scan
+362:unify _ walk returns an unification where a and b are unified , given the unification that already exists in the unification u .
+363:creates an instance of the current identity _ class and assigns it to the module - level name identity by default .
+364:translate a shell - like wildcard pattern to a compiled regular expression .
+365:update a metadef tag
+366:eagerly evaluate tasklets until it is blocking on some rpc .
+367:find and return din iii relay switch .
+368:list wiki documents .
+369:parallel process in batch mode .
+370:return a predicate representing whether * value * is equal to zero .
+371:format the split libraries log
+372:block a specific icmp type on a zone . .
+373:stop all firewall rules
+374:output database definition
+375:returns the temp directory that should be used by qiime scripts
+376:jitter a gcode linear move file .
+377:get the current bootstrap . py script content
+378:iterate over records , over - riding the alphabet .
+379:create and attach volumes to created node
+380:replaces the underlined " dash " region of a setext header with a run of dashes or equal - signs that match the length of the header text .
+381:displays a graph with the given title .
+382:given the user system _ tags , return the user entry point
+383:indicate a function extends an operation .
+384:parses a soap enveloped header and body saml thing and returns the thing as a dictionary class instance .
+385:helper decorator to mock open ( ) in pavelib . i18n .
+386:install a package .
+387:returns a partial get _ connection function for the provided service .
+388:small helper function that looks up a given string priority in the
+389:get metadata for the specified book .
+390:get all versions of item whose state is a valid state
+391:object type comparisons should always use isinstance ( ) instead of comparing types directly .
+392:spawn a new public stream
+393:generate a pretty - printed summary of the node .
+394:find the column comment
+395:return the relevant url from settings .
+396:makes shared replacements for all * other * variables than the ones passed .
+397:returns the version of the installed syslog - ng .
+398:clean function to know how much time took the execution of one statement
+399:returns the number of bits that are set in a 32bit int
+400:iterates over all links in the passed xml doc and creates links .
+401:load tweets from file into dict , see save _ tweets ( ) .
+402:add a user in database
+403:list unique elements , preserving order .
+404:raises argumenterror when objects in list _ are not instances of cls
+405:safely evaluates a string containing a python expression .
+406:creates a randomly generated bucket in s3 with the files text1 . txt and another _ directory / text2 . txt inside .
+407:return the users ssh keys on the minion . .
+408:test gloo wrappers
+409:run pytest tests .
+410:return the system font directories for os x .
+411:stop a machine by name
+412:return a new numpy record array with only fields listed in names
+413:force - reload the named service
+414:no longer used , but here for backwards compatibility .
+415:when we are asked to update lets reap the cache
+416:split a string up according to unix shell - like rules for quotes and backslashes .
+417:transforms a cinder exception but keeps its traceback intact .
+418:stop a service and chain the resulting deferred to another deferred .
+419:returns true if istable property is set for given doctype .
+420:walk the list and merge override rules .
+421:multiply together several polynomials in k [ x ] .
+422:create an index of days at time t , interpreted in timezone tz .
+423:transform from bit list to ascii string .
+424:iterate over all tags in block in reverse order , i . e . last tag to first tag .
+425:returns a deepcopy of the returned value of the wrapped function .
+426:concatenate arrays along the given axis .
+427:only load this module if the requests python module is available
+428:only load if the mysql module is in _ _ salt _ _
+429:creates a new hunt .
+430:find the common block dimensions from the list of block dimensions
+431:stores an auth token in the app engine datastore .
+432:subtracts list b from list a and returns the resulting list .
+433:appointment type : restful crud controller
+434:update task info for task with given task id and updated values
+435:builds a new object with type keys .
+436:recursively deciphers the given object .
+437:return a string describing the probable encoding of a file .
+438:start debugging from frame .
+439:differentiable image downscaling by a factor of k
+440:remove joinable files and their . 1 backups
+441:get pyrabbit manager .
+442:parse the analysis options field to a dictionary .
+443:sanitize positional and keyword arguments before calling a function .
+444:get any single pagerduty resource by key .
+445:helper function to get an user email from an identifier and validate it .
+446:format an arbitrary value as a compact string .
+447:delegates emails by querying for the list of recipients who should get the mail , chopping up into batches of no more than settings . bulk _ email _ emails _ per _ task in size , and queueing up worker jobs .
+448:parse code and include non string / codeblock kwargs as dependencies .
+449:listen to users input
+450:execute a single action on the given provider / instance
+451:checks if the provided hash is actually 160bits or 20 bytes long and returns the address , else none
+452:displays the date hierarchy for date drill - down functionality .
+453:this tests the performance of the processors scheduler
+454:given a cpu _ time ( ) ntuple calculates the total cpu time .
+455:does not include ssh key mocking
+456:display log details uuid : string uuid of fault
+457:convert the group to the gid on this system group group to convert to its gid
+458:returns a dict of old license titles , keyed by old license id .
+459:get a vsphere container view reference to all objects of type obj _ type
+460:return current day of the week , month 1 . . 31
+461:takes a new snapshot of the disk image .
+462:sets the identity of a given option , assigns additional permissions based on the role that the user is a part of .
+463:set the winrepo module if the os is windows
+464:generates a webpay / solitude external id given an addons primary key .
+465:recursive helper for : func : _ rec _ strip .
+466:returns a genericinlineformset for the given kwargs .
+467:if we have an object dtype , try to coerce dates and / or numbers
+468:p is the probablity of dropping a unit
+469:searches for the directory where a given file is located , and returns a possibly - empty list of additional directories , or none if the file couldnt be found at all .
+470:find all stderr from bootstrap actions in the given dir .
+471:skip a test unless a database supports all of gis _ lookups .
+472:create estr resource file given a dictionary of errors .
+473:increment the line number of each node in the tree starting at * node * by * n * .
+474:adds a users home directory if it doesnt already exist .
+475:start a default difftool session
+476:asserts two dicts are the same
+477:returns maximum norm of a polynomial in k [ x ] .
+478:yields sentences of - tuples from the given corpus , which is a . txt file with a sentence on each line , with slash - encoded tokens .
+479:when a step definition calls another step definition with behave _ as , that step should not be marked as success .
+480:determine whether the given string represents an ipv4 address .
+481:helper function for _ fit _ coordinate _ descent
+482:finds the class registered to the alias .
+483:power of chisquare goodness of fit test effect size is sqrt of chisquare statistic divided by nobs
+484:get information about a frame or traceback object .
+485:get any alter table statements to add constraints after the fact .
+486:dns query over tcp
+487:copies a table .
+488:return sum of square deviations of sequence data .
+489:compare version of python interpreter to the given one .
+490:return the boot time in number of seconds since the epoch began .
+491:stop the specified service
+492:send a notification about aggregate update .
+493:copy source _ path to output _ path , making sure any parent directories exist .
+494:return a dictionary with information about the sites configuration .
+495:load the grammar .
+496:helper fixture to test caret browsing positions .
+497:person rest controller - limited to just search _ ac for use in autocompletes - allows differential access permissions
+498:returns an array of samples drawn from the standard normal distribution .
+499:parses sql statements from file - like object .
+500:compute the unitary , ordinary - frequency inverse sine transform of f , defined as . .

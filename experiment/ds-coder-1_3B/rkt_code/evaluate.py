@@ -232,9 +232,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../rkt_ref_40510.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../../../finetune/dataset/aliPCSDData/test_500_refs.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../rkt_result/rkt_2_NL_40510.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../../../finetune/qwen7B-PCSD/test_500_hyps.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

@@ -7,3 +7,13 @@ L->H->NL
     BLEU-4:          2.9884
     ROUGE-L (F1):    23.1385
     METEOR:          30.3594
+
+
+BLEU-4:          2.4237
+ROUGE-L (F1):    21.4661
+METEOR:          26.1642
+
+
+BLEU-4:          4.1563
+ROUGE-L (F1):    28.7022
+METEOR:          19.4949
