@@ -59,8 +59,9 @@
 # base_dir = 'Clean_PCSD'  # 根据实际路径调整
 # output_dir = 'aliPCSDData'
 # process_pcsd_dataset(base_dir, output_dir)
-import re
 
+#构建阿里的测试集数据格式
+import re
 from openpyxl.workbook import Workbook
 
 

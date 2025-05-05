@@ -40,3 +40,11 @@ huggingface-cli download --resume-download deepseek-ai/deepseek-coder-1.3b-instr
 
 
 torchrun --nproc_per_node 1 src/train.py --stage sft --do_train --use_fast_tokenizer --model_name_or_path '../../model/Qwen2.5-Coder-1.5B-Instruct' --dataset train_pcsd --template qwen --finetuning_type lora --lora_target q_proj,v_proj --output_dir '../qwen2.5-1.3b' --overwrite_cache --overwrite_output_dir --warmup_steps 100 --weight_decay 0.1 --per_device_train_batch_size 2 --gradient_accumulation_steps 4 --ddp_timeout 9000 --learning_rate 5e-6 --lr_scheduler_type cosine --logging_steps 1 --cutoff_len 4096 --save_steps 1000 --plot_loss --num_train_epochs 5 --bf16
+
+BLEU-4:          9.1440
+ROUGE-L (F1):    36.8914
+METEOR:          32.2428
+
+BLEU-4:          2.9117
+ROUGE-L (F1):    23.3626
+METEOR:          26.6321

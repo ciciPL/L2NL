@@ -234,7 +234,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
     parser.add_argument("-r", "--reference", type=str, default="../../../finetune/dataset/aliPCSDData/test_500_refs.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../../../finetune/qwen7B-PCSD/test_500_hyps.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../../../finetune/qwen7B/test_500_hyps_sft.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

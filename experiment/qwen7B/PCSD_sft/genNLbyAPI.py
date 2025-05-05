@@ -2,6 +2,7 @@ import dashscope
 import pandas as pd
 import time
 
+
 def process_file(input_file):
     # 读取Excel文件，假设文件名为 'data.xlsx'
     file_path = input_file
@@ -20,12 +21,12 @@ def generate_summary(prompt_list, api_key):
 
     for idx, prompt in enumerate(prompt_list):
         print(f"Processing prompt {idx + 1}/{len(prompt_list)}: {prompt[:30]}...")
-
+        prompt_new = f"""Generate a ONE-LINE summary (≤30 words) for this code:\nCode: {prompt}\nSummary:"""
         try:
             response = dashscope.Generation.call(
                 api_key=api_key,
-                model="qwen2.5-7b-instruct-ft-202505042236-e5cd",
-                prompt=prompt,
+                model="qwen2.5-coder-7b-instruct",
+                prompt=prompt_new,
                 result_format='message'
             )
 
@@ -55,15 +56,15 @@ def save_refs(refs_list):
 
 
 def save_hyps(hyps_list):
-    with open('test_500_hyps.txt', 'w', encoding='utf-8') as f:
+    with open('test_500_hyps_base.txt', 'w', encoding='utf-8') as f:
         for idx, content in enumerate(hyps_list, start=1):
             f.write(f"{idx}:{content}\n")
 
 
 if __name__ == '__main__':
     api_key = 'sk-5f1dde7966184692b7083e2bd7f9fa3f'
-    input_file = '../dataset/aliPCSDData/test_500.xlsx'
+    input_file = '../../../finetune/dataset/aliPCSDData/test_500.xlsx'
     prompts, refs = process_file(input_file)
-    save_refs(refs)
+    # save_refs(refs)
     hyps = generate_summary(prompts, api_key)
     save_hyps(hyps)
