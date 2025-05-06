@@ -16,6 +16,18 @@ def process_file(input_file):
     return prompt_list, completion_list
 
 
+def process_txt_file(input_file):
+    # 读取txt文件,取4051个
+    prompt_list = []
+    with open(input_file) as f:
+        for line in f:
+            index = line.split(':')[0]
+            if index == '4052': break
+            prompt_list.append(line.replace(index+':\t', ''))
+
+    return prompt_list
+
+
 def generate_summary(prompt_list, api_key):
     results = []
 
@@ -25,8 +37,8 @@ def generate_summary(prompt_list, api_key):
         try:
             response = dashscope.Generation.call(
                 api_key=api_key,
-                model="qwen2.5-coder-7b-instruct",
-                prompt=prompt_new,
+                model="qwen2.5-7b-instruct-ft-202505042236-e5cd",
+                prompt=prompt,
                 result_format='message'
             )
 
@@ -34,10 +46,11 @@ def generate_summary(prompt_list, api_key):
                 print(f"⚠️ No valid output returned for prompt: {prompt}")
                 print("Full error response:", response)
                 results.append(None)
-                time.sleep(5)  # 如果失败，多等一会儿再试
+                time.sleep(1)  # 如果失败，多等一会儿再试
                 continue
 
             result = response.output.choices[0].message.content
+            print(result+'\n')
             results.append(result)
 
         except Exception as e:
@@ -45,7 +58,7 @@ def generate_summary(prompt_list, api_key):
             print("Exception:", str(e))
             results.append(None)
 
-        time.sleep(1)  # 控制请求频率
+        time.sleep(0.1)  # 控制请求频率
     return results
 
 
@@ -56,15 +69,16 @@ def save_refs(refs_list):
 
 
 def save_hyps(hyps_list):
-    with open('test_500_hyps_base.txt', 'w', encoding='utf-8') as f:
+    with open('rkt_python_nl_7B_sft_4051.txt', 'w', encoding='utf-8') as f:
         for idx, content in enumerate(hyps_list, start=1):
             f.write(f"{idx}:{content}\n")
 
 
 if __name__ == '__main__':
     api_key = 'sk-5f1dde7966184692b7083e2bd7f9fa3f'
-    input_file = '../../../finetune/dataset/aliPCSDData/test_500.xlsx'
-    prompts, refs = process_file(input_file)
+    input_file = '../../../experiment/ds-coder-1_3B/rkt_result/rkt_2_python_40510.txt'
+    prompts= process_txt_file(input_file)
+
     # save_refs(refs)
     hyps = generate_summary(prompts, api_key)
     save_hyps(hyps)

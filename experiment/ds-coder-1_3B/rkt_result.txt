@@ -8,12 +8,26 @@ L->H->NL
     ROUGE-L (F1):    23.1385
     METEOR:          30.3594
 
+    微调模型(数据清洗过，epoch=3，loss没下降到最佳就结束了的模型)
+    BLEU-4:          3.3073
+    ROUGE-L (F1):    24.7977
+    METEOR:          31.1358
+
 
 BLEU-4:          2.4237
 ROUGE-L (F1):    21.4661
 METEOR:          26.1642
-
-
+这俩是微调g了，疑似数据质量问题
 BLEU-4:          4.1563
 ROUGE-L (F1):    28.7022
 METEOR:          19.4949
+
+
+Successfully Evaluated Pairs: 4051 7B
+BLEU-4:          10.0313
+ROUGE-L (F1):    39.6006
+METEOR:          43.3262
+
+BLEU-4:          9.2119
+ROUGE-L (F1):    38.5633
+METEOR:          40.6279
