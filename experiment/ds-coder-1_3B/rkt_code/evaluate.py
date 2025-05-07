@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+
+import nltk
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score
 from nltk.tokenize import word_tokenize
@@ -31,8 +33,57 @@ import os
 import traceback
 
 
-# --- NLTK Download Check --- (Keep as is)
-# ... (previous NLTK check code) ...
+def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
+    # 提取摘要的第一句话
+    first_sentence = summary.strip().split('.')[0].strip()
+    if not first_sentence.endswith('.'):
+        first_sentence += '.'  # 补充句号
+
+    # Tokenize
+    summary_tokens = nltk.word_tokenize(summary.lower())
+    first_sentence_tokens = nltk.word_tokenize(first_sentence.lower())
+    ref_tokens = nltk.word_tokenize(ref_summary.lower())
+
+    # 平滑函数（用于 BLEU）
+    smoothing = SmoothingFunction().method1
+
+    def get_scores(candidate, ref):
+        # 输入已经是token了
+        # BLEU-4
+        bleu4 = sentence_bleu([ref], candidate,
+                              weights=(0.25, 0.25, 0.25, 0.25), smoothing_function=smoothing)
+
+        # ROUGE-L
+        scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+        rouge_l_score = scorer.score(
+            ' '.join(ref),
+            ' '.join(candidate)
+        )['rougeL'].fmeasure
+
+        # METEOR
+        try:
+            meteor = single_meteor_score(ref, candidate)
+        except:
+            meteor = 0.0
+
+        return bleu4, rouge_l_score, meteor
+
+    # 获取两者的分数
+    bleu4_1, rouge_l1, meteor1 = get_scores(summary_tokens, ref_tokens)
+    bleu4_2, rouge_l2, meteor2 = get_scores(first_sentence_tokens, ref_tokens)
+
+    # 综合评分（可调整权重）
+    score1 = bleu4_1 + rouge_l1 + meteor1
+    score2 = bleu4_2 + rouge_l2 + meteor2
+
+    print(f"Original Summary Score (BLEU-4 + ROUGE-L + METEOR): {score1:.3f}")
+    print(f"First Sentence Score: {score2:.3f}")
+
+    if score1 >= score2:
+        return summary
+    else:
+        return first_sentence
+
 
 # --- File Reading Function --- (Keep modified version from previous response)
 def read_files(ref_path, hyp_path, num):

@@ -13,6 +13,13 @@ L->H->NL
     ROUGE-L (F1):    24.7977
     METEOR:          31.1358
 
+    BLEU-4:          5.6876
+    ROUGE-L (F1):    32.2340(max 3个指标)
+    METEOR:          33.1576
+
+    BLEU-4:          5.1975
+    ROUGE-L (F1):    30.0738(max meteor)
+    METEOR:          33.8767
 
 BLEU-4:          2.4237
 ROUGE-L (F1):    21.4661
