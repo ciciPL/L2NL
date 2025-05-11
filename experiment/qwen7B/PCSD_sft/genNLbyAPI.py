@@ -37,8 +37,8 @@ def generate_summary(prompt_list, api_key):
         try:
             response = dashscope.Generation.call(
                 api_key=api_key,
-                model="qwen2.5-7b-instruct-ft-202505042236-e5cd",
-                prompt=prompt,
+                model="qwen2.5-coder-7b-instruct",
+                prompt=prompt_new,
                 result_format='message'
             )
 
@@ -69,7 +69,7 @@ def save_refs(refs_list):
 
 
 def save_hyps(hyps_list):
-    with open('rkt_python_nl_7B_sft_4051.txt', 'w', encoding='utf-8') as f:
+    with open('rkt_python_nl_ali7B_4051.txt', 'w', encoding='utf-8') as f:
         for idx, content in enumerate(hyps_list, start=1):
             f.write(f"{idx}:{content}\n")
 

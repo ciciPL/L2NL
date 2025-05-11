@@ -41,10 +41,103 @@ huggingface-cli download --resume-download deepseek-ai/deepseek-coder-1.3b-instr
 
 torchrun --nproc_per_node 1 src/train.py --stage sft --do_train --use_fast_tokenizer --model_name_or_path '../../model/Qwen2.5-Coder-1.5B-Instruct' --dataset train_pcsd --template qwen --finetuning_type lora --lora_target q_proj,v_proj --output_dir '../qwen2.5-1.3b' --overwrite_cache --overwrite_output_dir --warmup_steps 100 --weight_decay 0.1 --per_device_train_batch_size 2 --gradient_accumulation_steps 4 --ddp_timeout 9000 --learning_rate 5e-6 --lr_scheduler_type cosine --logging_steps 1 --cutoff_len 4096 --save_steps 1000 --plot_loss --num_train_epochs 5 --bf16
 
-BLEU-4:          9.1440
-ROUGE-L (F1):    36.8914
-METEOR:          32.2428
+a：
+ outputs = model.generate(
+        **inputs,
+        max_new_tokens=40,                BLEU-4:          2.6228
+        min_new_tokens=10,                ROUGE-L (F1):    22.3347
+        temperature=0.1,                  METEOR:          32.6016
+        top_p=0.5,
+        do_sample=True,
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.2,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
+b:
+ outputs = model.generate(
+        **inputs,
+        max_new_tokens=30,                BLEU-4:          3.3967
+        min_new_tokens=10,                ROUGE-L (F1):    25.2660
+        temperature=0.1,                  METEOR:          32.8781
+        top_p=0.5,
+        do_sample=True,
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
+c:
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=25,
+        min_new_tokens=10,              L->NL微调的模型                    L->NL(base)
+        temperature=0.1,                BLEU-4:          4.0267         BLEU-4:          3.6322
+        top_p=0.5,                      ROUGE-L (F1):    27.2335        ROUGE-L (F1):    25.3380
+        do_sample=True,                 METEOR:          32.6886        METEOR:          30.9337
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
+d:
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=25,
+        min_new_tokens=10,
+        temperature=0.1,                BLEU-4:          4.0313
+        top_p=0.8,                      ROUGE-L (F1):    27.0691
+        do_sample=True,                 METEOR:          32.5232
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
+e:
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=25,
+        min_new_tokens=10,              BLEU-4:          3.8673
+        temperature=0.5,                ROUGE-L (F1):    26.5267
+        top_p=0.8,                      METEOR:          32.0564
+        do_sample=True,
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
+f:
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=25,
+        min_new_tokens=10,
+        temperature=1,                    BLEU-4:          2.9624
+        top_p=0.8,                        ROUGE-L (F1):    23.3671
+        do_sample=True,                   METEOR:          28.2589
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
 
-BLEU-4:          2.9117
-ROUGE-L (F1):    23.3626
-METEOR:          26.6321
+max 20
+BLEU-4:          4.3641
+ROUGE-L (F1):    27.8635
+METEOR:          29.2283
+max 25 top 0.8 rp1.2
+BLEU-4:          3.6225
+ROUGE-L (F1):    25.8549
+METEOR:          30.0948
+qwen14B
+max25
+BLEU-4:          3.5100
+ROUGE-L (F1):    25.2465
+METEOR:          30.1273
+max20
+BLEU-4:          4.2532
+ROUGE-L (F1):    27.2734
+METEOR:          29.1081
+max15
+BLEU-4:          5.1174
+ROUGE-L (F1):    29.2354
+METEOR:          26.9552

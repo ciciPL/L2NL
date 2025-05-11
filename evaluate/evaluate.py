@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+
+import nltk
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score
 from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
 from bert_score import score
-import bleu
 
 # bert_score import and calculation might fail, handle gracefully
 
@@ -32,20 +33,65 @@ import os
 import traceback
 
 
-def skip_empty(empty_path):
-    empty_id = []
-    with open(empty_path, "r") as f:
-        line = f.readline()
-        while line:
-            index = line.split(':')[0]
-            empty_id.append(index)
-            line = f.readline()
-    return empty_id
 
+def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
+    # 提取摘要的第一句话
+    first_sentence = summary.strip().split('.')[0].strip()
+    if not first_sentence.endswith('.'):
+        first_sentence += '.'  # 补充句号
 
-# --- NLTK Download Check --- (Keep as is)
-# ... (previous NLTK check code) ...
+    # Tokenize
+    summary_tokens = nltk.word_tokenize(summary.lower())
+    first_sentence_tokens = nltk.word_tokenize(first_sentence.lower())
+    ref_tokens = nltk.word_tokenize(ref_summary.lower())
 
+    # 平滑函数（用于 BLEU）
+    smoothing = SmoothingFunction().method1
+
+    def get_scores(candidate, ref):
+        # 输入已经是token了
+        # BLEU-4
+        bleu4 = sentence_bleu([ref], candidate,
+                              weights=(0.25, 0.25, 0.25, 0.25), smoothing_function=smoothing)
+
+        # ROUGE-L
+        scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+        rouge_l_score = scorer.score(
+            ' '.join(ref),
+            ' '.join(candidate)
+        )['rougeL'].fmeasure
+
+        # METEOR
+        try:
+            meteor = single_meteor_score(ref, candidate)
+        except:
+            meteor = 0.0
+
+        return bleu4, rouge_l_score, meteor
+
+    # 获取两者的分数
+    bleu4_1, rouge_l1, meteor1 = get_scores(summary_tokens, ref_tokens)
+    bleu4_2, rouge_l2, meteor2 = get_scores(first_sentence_tokens, ref_tokens)
+
+    # 综合评分（可调整权重）
+    score1 = bleu4_1 + rouge_l1 + meteor1
+    score2 = bleu4_2 + rouge_l2 + meteor2
+
+    print(f"Original Summary Score (BLEU-4 + ROUGE-L + METEOR): {score1:.3f}")
+    print(f"First Sentence Score: {score2:.3f}")
+
+    if score1 >= score2:
+        return summary
+    else:
+        return first_sentence
+
+def faith_id():
+    # id=[]
+    # with open('../lua_result/lua_2_python_4081.txt','r',encoding='utf-8') as f:
+    #     for line in f:
+    #         if line.find("转换失败")>-1:
+    #             id.append(line.strip().split(':')[0])
+    return id
 # --- File Reading Function --- (Keep modified version from previous response)
 def read_files(ref_path, hyp_path, num):
     # ... (previous read_files code with ':' and '\t' splitting) ...
@@ -60,17 +106,16 @@ def read_files(ref_path, hyp_path, num):
     hypotheses = []
     malformed_refs = 0
     malformed_hyps = 0
-
-    empty_id = skip_empty("../experiment/unixcoder/ESALE/julia_result/julia_ptyhon_nl2th_emptyID.txt")
-
+    ids = faith_id()
+    print(ids)
     print(f"Reading references from: {ref_path}")
     with open(ref_path, 'r', encoding='utf-8') as f_ref:
         for i, line in enumerate(f_ref):
             line = line.strip()
             if not line: continue
-            index = line.split(':')[0]
-            # if index in empty_id: continue
             parts = line.split(':', 1)
+            if parts[0] =='3014':break
+            # if parts[0] in ids:continue
             if len(parts) == 2:
                 references.append(parts[1].strip())
             else:
@@ -81,11 +126,11 @@ def read_files(ref_path, hyp_path, num):
         for i, line in enumerate(f_hyp):
             # line = line.strip()
             if not line: continue
-            index = line.split(':')[0]
-            # if index in empty_id: continue
-            parts = line.split(':', 1)
+            parts = line.split('\t', 1)
+            if parts[0] == '4082': break
+            # if parts[0] in ids: continue
             if len(parts) == 2:
-                hypotheses.append(parts[1].strip())
+                hypotheses.append(parts[1].split('[END]')[0].strip())
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
@@ -110,8 +155,7 @@ def read_files(ref_path, hyp_path, num):
         print("Warning: No valid content extracted from input files.")
         return [], []
 
-    print(f"Successfully read {len(references)} reference pairs.")
-    print(f"Successfully read {len(hypotheses)} hypothesis pairs.")
+    print(f"Successfully read {len(references)} reference-hypothesis pairs.")
     return references, hypotheses
 
 
@@ -126,18 +170,6 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     smooth_func = SmoothingFunction().method1
 
     print(f"\nEvaluating {len(references)} summaries...")
-
-    try:
-        dict_size = len(hypotheses)
-        predictionMap = dict(zip(range(dict_size), hypotheses))
-        refMap = dict(zip(range(dict_size), references))
-        bleu_score = bleu.bleuFromMaps(refMap, predictionMap)
-        dev_bleu = round(bleu_score[0], 2)
-        print(dev_bleu)
-        print(bleu_score)
-    except Exception as e:
-        print(f"Warning: BLEU calculation failed for pair : {e}")
-        bleu4_scores.append(0.0)
 
     # --- N-gram Metrics Calculation ---
     for i, (ref, hyp) in enumerate(zip(references, hypotheses)):
@@ -263,10 +295,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str,
-                        default="../finetune/dataset/aliPCSDData/test_500_refs.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/lua_result/lua_ref_48194.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../experiment/qwen7B/PCSD_sft/test_500_hyps_base.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../experiment/unixcoder/ESALE/lua_result/lua_2_NL_Esale.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
@@ -279,7 +310,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        references, hypotheses = read_files(args.reference, args.prediction, -1)
+        references, hypotheses = read_files(args.reference, args.prediction,-1)
 
         if references and hypotheses:
             results = evaluate_summaries(references, hypotheses, args.model_path)

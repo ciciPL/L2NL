@@ -30,11 +30,18 @@ ROUGE-L (F1):    28.7022
 METEOR:          19.4949
 
 
-Successfully Evaluated Pairs: 4051 7B
+Successfully Evaluated Pairs: 4051 本地7B
+L NL
 BLEU-4:          10.0313
 ROUGE-L (F1):    39.6006
 METEOR:          43.3262
-
+L H NL
 BLEU-4:          9.2119
 ROUGE-L (F1):    38.5633
 METEOR:          40.6279
+
+阿里7bsft
+L H NL
+BLEU-4:          8.7550
+ROUGE-L (F1):    37.1051
+METEOR:          31.8367

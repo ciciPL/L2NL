@@ -33,6 +33,7 @@ import os
 import traceback
 
 
+
 def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
     # 提取摘要的第一句话
     first_sentence = summary.strip().split('.')[0].strip()
@@ -84,7 +85,13 @@ def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
     else:
         return first_sentence
 
-
+def faith_id():
+    id=[]
+    with open('../lua_result/lua_2_python_4081.txt','r',encoding='utf-8') as f:
+        for line in f:
+            if line.find("转换失败")>-1:
+                id.append(line.strip().split(':')[0])
+    return id
 # --- File Reading Function --- (Keep modified version from previous response)
 def read_files(ref_path, hyp_path, num):
     # ... (previous read_files code with ':' and '\t' splitting) ...
@@ -99,13 +106,16 @@ def read_files(ref_path, hyp_path, num):
     hypotheses = []
     malformed_refs = 0
     malformed_hyps = 0
-
+    ids = faith_id()
+    print(ids)
     print(f"Reading references from: {ref_path}")
     with open(ref_path, 'r', encoding='utf-8') as f_ref:
         for i, line in enumerate(f_ref):
             line = line.strip()
             if not line: continue
             parts = line.split(':', 1)
+            if parts[0] =='2701':break
+            # if parts[0] in ids:continue
             if len(parts) == 2:
                 references.append(parts[1].strip())
             else:
@@ -117,8 +127,10 @@ def read_files(ref_path, hyp_path, num):
             # line = line.strip()
             if not line: continue
             parts = line.split(':', 1)
+            if parts[0] == '4082': break
+            # if parts[0] in ids: continue
             if len(parts) == 2:
-                hypotheses.append(parts[1].strip())
+                hypotheses.append(parts[1].split('[END]')[0].strip())
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
@@ -283,9 +295,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../../../finetune/dataset/aliPCSDData/test_500_refs.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../lua_result/lua_ref_48194.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../../../finetune/qwen7B/test_500_hyps_sft.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../lua_result/lua_2_NL_2700.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

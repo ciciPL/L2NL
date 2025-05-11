@@ -1,5 +1,6 @@
-input_path = '../../../qwen_1.5B/rkt_result/rkt_2_python_2_NL_sft_qwen.txt'
-output_path = '../../../qwen_1.5B/rkt_result/rkt_2_python_2_NL_sft_qwen_40510.txt'
+input_path = '../../../ds-coder-1_3B/rkt_result/rkt_2_python_2_NL_qwen3_14B_4051_c.txt'
+output_path = '../../../ds-coder-1_3B/rkt_result/rkt_2_python_2_NL_qwen3_14B_4051_c.txt'
+
 
 # -------------数据跨行-----------
 def fix_multiline_data(data_lines):
@@ -32,16 +33,17 @@ def process_file(input_path, output_path):
         input_lines = f.readlines()
 
     fixed_lines = fix_multiline_data(input_lines)
-    flag=1
+    flag = 1
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(fixed_lines))
-        flag+=1
+        if flag < 4053:
+            f.write('\n'.join(fixed_lines))
+        flag += 1
+
 
 if __name__ == '__main__':
     process_file(input_path, output_path)
 
-
-#---------------移除空行----------------------
+# ---------------移除空行----------------------
 # def remove_empty_duplicate_lines(input_file_path, output_file_path):
 #     try:
 #         with open(input_file_path, 'r', encoding='utf-8') as infile:
@@ -65,7 +67,7 @@ if __name__ == '__main__':
 # if __name__ == "__main__":
 #     remove_empty_duplicate_lines(output_path, output_path)
 
-#一行出现多个答案处理
+# 一行出现多个答案处理
 # flag = 1
 # shiji =1
 # last = False

@@ -1,26 +1,14 @@
+from peft import PeftModel
 from sympy.physics.units import temperature
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
+model_path = '../../../model/deepseek-ai/deepseek-coder-1.3b-instruct'
 # 初始化模型和tokenizer
-tokenizer = AutoTokenizer.from_pretrained("../model/deepseek-coder-1.3b-instruct", trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained("../model/deepseek-coder-1.3b-instruct", device_map={"": 0},
+tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(model_path, device_map={"": 0},
                                              trust_remote_code=True)
-
-
-def extract_summary(full_response):
-    """精准提取 Summary: 和 Core Logic: 之间的内容（完全不变）"""
-    summary_start = full_response.find("Summary:")
-    if summary_start == -1:
-        return None
-
-    core_logic_start = full_response.find("Core Logic:")
-    if core_logic_start == -1:
-        return None
-
-    summary = full_response[summary_start + len("Summary:"):core_logic_start].strip()
-    summary = ' '.join(summary.split())
-    return summary
+model = PeftModel.from_pretrained(model, '../../../finetune/ds-coder/output_dir_ali6k')
 
 
 def generate_summary_batch(code_list):
@@ -36,12 +24,15 @@ Summary:"""
 
     outputs = model.generate(
         **inputs,
-        max_new_tokens=30,
+        max_new_tokens=15,
+        min_new_tokens=10,
         temperature=0.1,
-        num_beams=1,
-        do_sample=False,
+        top_p=0.5,
+        do_sample=True,
+        no_repeat_ngram_size=2,
         repetition_penalty=1.5,
-        eos_token_id=tokenizer.eos_token_id
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
     )
 
     return [
@@ -51,16 +42,27 @@ Summary:"""
 
 
 def process_file(input_file, output_file, batch_size=4):
-    """处理文件（改为分批处理，其他逻辑不变）"""
+    """处理文件（改为分批处理，并加入进度条）"""
+    from tqdm import tqdm
+
     with open(input_file, 'r', encoding='utf-8') as infile, \
             open(output_file, 'w', encoding='utf-8') as outfile:
 
+        # 获取总行数用于进度条
+        total_lines = sum(1 for _ in infile)
+        infile.seek(0)  # 重置文件指针到开头
+
+        # 使用 tqdm 添加进度条
+        lines = tqdm(infile, total=total_lines, desc="Processing code", unit="line")
+
         # 缓存批次数据
         batch = []
-        for line in infile:
+        for line in lines:
             if ':' in line:
                 index, code = line.split(':', 1)
-                batch.append((index.strip(), code.strip()))
+                code  =  code.strip().replace('\\n','')
+                print(code)
+                batch.append((index.strip(),code.strip() ))
 
                 # 达到批次大小时处理
                 if len(batch) >= batch_size:
@@ -69,12 +71,15 @@ def process_file(input_file, output_file, batch_size=4):
                         summaries = generate_summary_batch(codes)
                         for idx, summary in zip(indices, summaries):
                             outfile.write(f"{idx}: {summary}\n")
-                            print(f"✅ Success: {idx}")
+                            # 可选：取消注释下面这行以实时刷新输出
+                            # outfile.flush()
+                            # print(f"✅ Success: {idx}")
                     except Exception as e:
                         for idx in indices:
                             error_msg = f"❌ Error processing {idx}: {str(e)}"
                             outfile.write(f"{idx}: {error_msg}\n")
-                            print(error_msg)
+                            # outfile.flush()
+                            # print(error_msg)
                     batch = []
 
         # 处理剩余不足一个批次的数据
@@ -84,18 +89,21 @@ def process_file(input_file, output_file, batch_size=4):
                 summaries = generate_summary_batch(codes)
                 for idx, summary in zip(indices, summaries):
                     outfile.write(f"{idx}: {summary}\n")
-                    print(f"✅ Success: {idx}")
+                    # outfile.flush()
+                    # print(f"✅ Success: {idx}")
             except Exception as e:
                 for idx in indices:
                     error_msg = f"❌ Error processing {idx}: {str(e)}"
                     outfile.write(f"{idx}: {error_msg}\n")
-                    print(error_msg)
+                    # outfile.flush()
+                    # print(error_msg)
 
 
 if __name__ == "__main__":
-    input_file = "../../../dataset/racket/code_rkt.txt"
-    output_file = "experiment/ds-coder-1_3B/rkt_result/rkt_2_NL_40510.txt"
-    batch_size = 32  # 可调整批大小
+    # input_file = "../../../dataset/racket/code_rkt.txt"
+    input_file ="../rkt_result/rkt_2_python_4051_qwen3_14B.txt"
+    output_file = "../rkt_result/rkt_2_python_2_NL_qwen3_14B_4051_c.txt"
+    batch_size = 4  # 可调整批大小
 
     print("Starting code summarization...")
     process_file(input_file, output_file, batch_size)
