@@ -1,7 +1,7 @@
 import re
 
-input_file = "../lua_result/lua_ref.txt"
-output_file = "../lua_result/lua_ref_48194.txt"
+input_file = "../../../dataset/r/r_ref.txt"
+output_file = "../r_result/r_ref_3840.txt"
 # 存储结果
 results = []
 

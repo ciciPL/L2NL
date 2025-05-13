@@ -152,8 +152,8 @@ def process_file(input_path, output_path, batch_size):
 
 
 if __name__ == "__main__":
-    input_file = "../../../dataset/lua/code.txt"
-    output_file = "../lua_result/lua_2_python.txt"
+    input_file = "../../../dataset/r/code.txt"
+    output_file = "../r_result/r_2_python.txt"
 
     if not os.path.exists(input_file):
         logger.error(f"输入文件不存在: {input_file}")

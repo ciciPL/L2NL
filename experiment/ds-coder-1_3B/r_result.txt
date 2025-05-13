@@ -1,0 +1,10 @@
+L->NL
+3840条 base                      sft
+BLEU-4:          2.8271         BLEU-4:          3.2661
+ROUGE-L (F1):    21.1730        ROUGE-L (F1):    23.8227
+METEOR:          25.9774        METEOR:          30.7910
+
+L->H->NL
+                                BLEU-4:          3.6298
+                                ROUGE-L (F1):    25.9009
+                                METEOR:          31.2856

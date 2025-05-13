@@ -50,4 +50,4 @@ def process_code_file(input_file, output_file):
             f_out.write(f"{current_index}:\t{compressed_code}\n")
 
 # 示例调用
-process_code_file('rkt_2_python.txt', 'rkt_2_python_40510.txt')
+process_code_file('../r_result/r_2_python.txt', '../r_result/r_2_python_clean.txt')

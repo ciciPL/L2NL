@@ -114,7 +114,7 @@ def read_files(ref_path, hyp_path, num):
             line = line.strip()
             if not line: continue
             parts = line.split(':', 1)
-            if parts[0] =='3014':break
+            if parts[0] =='3841':break
             # if parts[0] in ids:continue
             if len(parts) == 2:
                 references.append(parts[1].strip())
@@ -126,8 +126,8 @@ def read_files(ref_path, hyp_path, num):
         for i, line in enumerate(f_hyp):
             # line = line.strip()
             if not line: continue
-            parts = line.split('\t', 1)
-            if parts[0] == '4082': break
+            parts = line.split(':', 1)
+            if parts[0] == '3841': break
             # if parts[0] in ids: continue
             if len(parts) == 2:
                 hypotheses.append(parts[1].split('[END]')[0].strip())
@@ -295,9 +295,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/lua_result/lua_ref_48194.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/r_result/r_ref_3840.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../experiment/unixcoder/ESALE/lua_result/lua_2_NL_Esale.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../experiment/ds-coder-1_3B/r_result/r_2_python_2_NL_4081.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
