@@ -213,56 +213,31 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     # ... (other checks for model_path, refs/hyps) ...
     elif local_model_path and references and hypotheses:
         print(f"\n--- Starting BERTScore Calculation ---")
-        print(f"Using local model path: {local_model_path}")
 
-        # 1. Pre-check path and config.json (Keep this check)
-        config_path = os.path.join(local_model_path, 'config.json')
-        if not os.path.isdir(local_model_path) or not os.path.exists(config_path):
-            print(f"Error: Model directory or config.json check failed for: {local_model_path}")
-        # 2. *** Manually Load Model and Tokenizer FOR BERTScore ***
-        elif TRANSFORMERS_AVAILABLE:
-            loaded_model = None
-            loaded_tokenizer = None
-            scorer_bert = None  # <--- Initialize scorer object
-            try:
-                print(f"DEBUG: Manually loading tokenizer and model for BERTScorer...")
-                # --- Add device placement ---
-                import torch
-                device = 'cuda' if torch.cuda.is_available() else 'cpu'
-                print(f"DEBUG: Using device: {device}")
-                # --- ---
-                loaded_tokenizer = AutoTokenizer.from_pretrained(local_model_path)
-                loaded_model = AutoModel.from_pretrained(local_model_path).to(device)  # <-- Move model to device
-                print(
-                    f"DEBUG: Manual load successful (Tokenizer: {type(loaded_tokenizer)}, Model: {loaded_model.config.model_type}).")
+        try:
+            # --- Add device placement ---
+            import torch
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            print(f"DEBUG: Using device: {device}")
 
-                # ---!!! IMPORTANT CORRECTION STARTS HERE !!!---
+            # 4. *** Call the score method of the BERTScorer instance ***
+            print(f"Calculating BERTScore using scorer instance...")
+            # The scorer's score method takes only candidates and references
+            P, R, F1 = score(hypotheses, references, lang="en", batch_size=64,
+                             model_type='microsoft/deberta-xlarge-mnli')  # Add batch_size
+            # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
 
-                # 4. *** Call the score method of the BERTScorer instance ***
-                print(f"Calculating BERTScore using scorer instance...")
-                # The scorer's score method takes only candidates and references
-                P, R, F1 = score(hypotheses, references, lang="en", batch_size=16,
-                                 baseline_path=local_model_path)  # Add batch_size
-                # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
+            bert_f1_scores = F1.tolist()
+            bertscore_failed = False  # Mark as success!
+            print("BERTScore calculation completed successfully.")
 
-                bert_f1_scores = F1.tolist()
-                bertscore_failed = False  # Mark as success!
-                print("BERTScore calculation completed successfully.")
-
-            except Exception as e:
-                print(f"\n---!!! BERTScore Calculation Failed !!!---")
-                if loaded_model is None or loaded_tokenizer is None:
-                    print("Failure occurred during manual loading phase.")
-                print(f"Error Type: {type(e).__name__}")
-                print(f"Error Message: {e}")
-                print("Traceback:")
-                traceback.print_exc()
-                print("----------------------------------------")
-                # bertscore_failed remains True
-            finally:
-                # Optional: Clean up memory if model objects are large
-                del loaded_model
-                del loaded_tokenizer
+        except Exception as e:
+            print(f"\n---!!! BERTScore Calculation Failed !!!---")
+            print(f"Error Type: {type(e).__name__}")
+            print(f"Error Message: {e}")
+            print("Traceback:")
+            traceback.print_exc()
+            print("----------------------------------------")
 
         else:  # Transformers not available
             print("BERTScore calculation skipped: transformers library needed for manual loading.")
@@ -295,9 +270,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/r_result/r_ref_3840.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/ocaml_result/ocaml_ref_4081.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../experiment/ds-coder-1_3B/r_result/r_2_python_2_NL_4081.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../experiment/qwen/ocaml_result/ocaml_2_NL_qwen.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

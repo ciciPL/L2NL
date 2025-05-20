@@ -1,32 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="star@172.25.214.16:22 password" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="root@connect.nma1.seetacloud.com:47002 password">
+      <paths name="star@192.168.1.144:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_697" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@connect.nmb2.seetacloud.com:41679 password">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@connect.nmb2.seetacloud.com:41679 password (2)">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="star@172.25.214.16:22 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/home/star/Downloads/cyqProjects/env/L2NL" local="$PROJECT_DIR$" />
+            <mapping deploy="/L2NL" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

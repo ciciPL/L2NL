@@ -1,0 +1,11 @@
+lua_NL_3k_sft.txt
+BLEU-4:          3.7648
+ROUGE-L (F1):    25.1204
+METEOR:          26.8199
+BERTScore (F1):  68.1081
+
+lua_python_NL_3k_sft.txt
+BLEU-4:          4.8655
+ROUGE-L (F1):    29.9048
+METEOR:          30.3438
+BERTScore (F1):  70.9836
