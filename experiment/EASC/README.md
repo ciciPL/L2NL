@@ -4,6 +4,10 @@ Title: An Extractive-and-Abstractive Framework for Source Code Summarization
 ## Requirements
 The dependencies can be installed using the following command:
 
+```bash
+pip install -r requirements.txt
+```
+
 ## Original Dataset
 The CodeSearchNet original dataset can be downloaded from the github repo: [https://github.com/github/CodeSearchNet](https://github.com/github/CodeSearchNet), and the cleaned dataset (CodeXGLUE) can be downloaded from the [https://drive.google.com/open?id=1rd2Tc6oUWBo7JouwexW3ksQ0PaOhUr6h](https://drive.google.com/open?id=1rd2Tc6oUWBo7JouwexW3ksQ0PaOhUr6h)
 
