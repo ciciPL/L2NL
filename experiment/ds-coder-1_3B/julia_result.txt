@@ -4,6 +4,7 @@ L->NL  julia_2_NL.txt(4090/45000条)
     BLEU-4:          1.7854
     ROUGE-L (F1):    17.7015
     METEOR:          24.3967
+    BERTScore (F1):  61.3322
 L->H->NL   julia_2_python_2_NL_45000.txt(4090)
     BLEU-4:          1.9101
     ROUGE-L (F1):    17.1540
@@ -13,7 +14,9 @@ L->NL sft
     BLEU-4:          2.5513
     ROUGE-L (F1):    22.0478
     METEOR:          28.8397
+    BERTScore (F1):  61.8926
 L->H->NL sft
     BLEU-4:          2.7547
     ROUGE-L (F1):    23.1446
     METEOR:          29.9198
+    BERTScore (F1):  61.9483

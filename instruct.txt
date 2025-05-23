@@ -34,7 +34,7 @@ cd ../star/Downloads/cyqProjects/L2NL
 conda activate ../env/L2NL
 watch -n 1 nvidia-smi
 export HF_ENDPOINT=https://hf-mirror.com
-huggingface-cli download --resume-download deepseek-ai/deepseek-coder-1.3b-instruct --local-dir model/deepseek-ai/deepseek-coder-1.3b-instruct
+huggingface-cli download --resume-download microsoft/deberta-xlarge-mnli --local-dir model/microsoft/deberta-xlarge-mnli
 
     --deepspeed $DS_CONFIG_PATH \
 
@@ -75,7 +75,7 @@ c:
         temperature=0.1,                BLEU-4:          4.0267         BLEU-4:          3.6322
         top_p=0.5,                      ROUGE-L (F1):    27.2335        ROUGE-L (F1):    25.3380
         do_sample=True,                 METEOR:          32.6886        METEOR:          30.9337
-        no_repeat_ngram_size=2,
+        no_repeat_ngram_size=2,         BERTScore (F1):  64.5714        BERTScore (F1):  64.2559
         repetition_penalty=1.5,
         eos_token_id=tokenizer.eos_token_id,
         pad_token_id=tokenizer.pad_token_id
@@ -121,9 +121,11 @@ f:
     )
 
 max 20
+rkt_python_NL_4051_2th_c_sft_b.txt
 BLEU-4:          4.3641
 ROUGE-L (F1):    27.8635
 METEOR:          29.2283
+BERTScore (F1):  65.1621
 max 25 top 0.8 rp1.2
 BLEU-4:          3.6225
 ROUGE-L (F1):    25.8549
@@ -141,3 +143,31 @@ max15
 BLEU-4:          5.1174
 ROUGE-L (F1):    29.2354
 METEOR:          26.9552
+
+
+-------------------3k deepseek-----------------------
+rkt_2_NL_4051_3k_c_sft
+BLEU-4:          5.1818
+ROUGE-L (F1):    30.1757
+METEOR:          31.7294
+BERTScore (F1):  70.1238
+rkt_2_python_2_NL_4051_3k_c_sft_b.txt 25 10 1.2
+BLEU-4:          4.8351
+ROUGE-L (F1):    29.6147
+METEOR:          30.4038
+BERTScore (F1):  70.2523
+rkt_2_python_2_NL_4051_3k_c_sft.txt 25 10 1.5
+BLEU-4:          4.8978
+ROUGE-L (F1):    29.4913
+METEOR:          30.1386
+BERTScore (F1):  70.2481
+rkt_2_python_2_NL_4051_3k_c_sft_c.txt  20 10 1.5
+BLEU-4:          4.9956
+ROUGE-L (F1):    29.9658
+METEOR:          29.0491
+BERTScore (F1):  70.0842
+rkt_2_python_2_NL_4051_3k_c_sft_d.txt 30 10 1.2
+BLEU-4:          4.8560
+ROUGE-L (F1):    29.4883
+METEOR:          30.7908
+BERTScore (F1):  70.2953

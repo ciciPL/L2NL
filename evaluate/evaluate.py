@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-
+import re
+import xml.sax.saxutils
+import MyscoreBert
 import nltk
+from bert_score import score
+from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score
-from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
-from bert_score import score
+
+import bleu
 
 # bert_score import and calculation might fail, handle gracefully
 
@@ -93,7 +97,7 @@ def faith_id():
     #             id.append(line.strip().split(':')[0])
     return id
 # --- File Reading Function --- (Keep modified version from previous response)
-def read_files(ref_path, hyp_path, num):
+def read_files(ref_path, hyp_path, num,size):
     # ... (previous read_files code with ':' and '\t' splitting) ...
     # Ensure this function works correctly based on the previous iteration
     """读取参考文件和假设（结果）文件，并解析格式"""
@@ -114,7 +118,7 @@ def read_files(ref_path, hyp_path, num):
             line = line.strip()
             if not line: continue
             parts = line.split(':', 1)
-            if parts[0] =='3841':break
+            if parts[0] ==str(size):break
             # if parts[0] in ids:continue
             if len(parts) == 2:
                 references.append(parts[1].strip())
@@ -127,10 +131,14 @@ def read_files(ref_path, hyp_path, num):
             # line = line.strip()
             if not line: continue
             parts = line.split(':', 1)
-            if parts[0] == '3841': break
-            # if parts[0] in ids: continue
+            if parts[0] == str(size): break
+            # if parts[0] in ids:
+            #     with open('../experiment/unixcoder/BASE/base_result/result_julia_nl_unx-base.txt', 'r', encoding='utf-8') as f_empty:
+            #         for line in f_empty:
+            #             if line.split('\t')[0] in ids:
+            #                 hypotheses.append(line.split('\t')[1].strip())
             if len(parts) == 2:
-                hypotheses.append(parts[1].split('[END]')[0].strip())
+                hypotheses.append(parts[1].split('[END]')[0].replace('The function','').strip())
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
@@ -158,13 +166,33 @@ def read_files(ref_path, hyp_path, num):
     print(f"Successfully read {len(references)} reference-hypothesis pairs.")
     return references, hypotheses
 
-
+def normalize(s):
+    if type(s) is not str:
+        s = " ".join(s)
+    for (pattern, replace) in bleu.normalize1:
+        s = re.sub(pattern, replace, s)
+    s = xml.sax.saxutils.unescape(s, {"&quot;": ""})
+    for (pattern, replace) in bleu.normalize2:
+        s = re.sub(pattern, replace, s)
+    return s.split()
 # --- Evaluation Function ---
 def evaluate_summaries(references, hypotheses, local_model_path):
     """计算各种评估指标"""
     bleu4_scores = []
     rougeL_f1_scores = []
     meteor_scores = []
+    hypList = []
+    refList=[]
+    for hyp in hypotheses:
+        hypList.append([hyp])
+    for ref in references:
+        refList.append([ref])
+    dict_size = len(hypList)
+    predictionMap = dict(zip(range(dict_size), hypList))
+    refMap = dict(zip(range(dict_size), refList))
+    bleu_score = bleu.bleuFromMaps(refMap, predictionMap)
+    dev_bleu = round(bleu_score[0], 2)
+    print(bleu_score)
 
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
     smooth_func = SmoothingFunction().method1
@@ -181,6 +209,8 @@ def evaluate_summaries(references, hypotheses, local_model_path):
             hyp_tokens_bleu = word_tokenize(hyp.lower())
             bleu4 = sentence_bleu(ref_tokens_bleu, hyp_tokens_bleu, weights=(0.25, 0.25, 0.25, 0.25),
                                   smoothing_function=smooth_func)
+            # import sacrebleu
+            # bleu4 = sacrebleu.corpus_bleu([hyp.lower()], [[ref.lower()]])
             bleu4_scores.append(bleu4)
         except Exception as e:
             print(f"Warning: BLEU calculation failed for pair {i}: {e}")
@@ -213,31 +243,39 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     # ... (other checks for model_path, refs/hyps) ...
     elif local_model_path and references and hypotheses:
         print(f"\n--- Starting BERTScore Calculation ---")
+        print(f"Using local model path: {local_model_path}")
 
-        try:
-            # --- Add device placement ---
-            import torch
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            print(f"DEBUG: Using device: {device}")
+        # 1. Pre-check path and config.json (Keep this check)
+        config_path = os.path.join(local_model_path, 'config.json')
+        if not os.path.isdir(local_model_path) or not os.path.exists(config_path):
+            print(f"Error: Model directory or config.json check failed for: {local_model_path}")
+        # 2. *** Manually Load Model and Tokenizer FOR BERTScore ***
+        elif TRANSFORMERS_AVAILABLE:
+            try:
+                print(f"DEBUG: Manually loading tokenizer and model for BERTScorer...")
+                # --- Add device placement ---
+                import torch
+                device = 'cuda' if torch.cuda.is_available() else 'cpu'
+                print(f"DEBUG: Using device: {device}")
 
-            # 4. *** Call the score method of the BERTScorer instance ***
-            print(f"Calculating BERTScore using scorer instance...")
-            # The scorer's score method takes only candidates and references
-            P, R, F1 = score(hypotheses, references, lang="en", batch_size=64,
-                             model_type='microsoft/deberta-xlarge-mnli')  # Add batch_size
-            # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
+                # 4. *** Call the score method of the BERTScorer instance ***
+                print(f"Calculating BERTScore using scorer instance...")
+                # The scorer's score method takes only candidates and references
+                P, R, F1 = MyscoreBert.score(hypotheses, references, lang="en", batch_size=12,
+                                 model_type=local_model_path)  # Add batch_size
+                # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
 
-            bert_f1_scores = F1.tolist()
-            bertscore_failed = False  # Mark as success!
-            print("BERTScore calculation completed successfully.")
+                bert_f1_scores = F1.tolist()
+                bertscore_failed = False  # Mark as success!
+                print("BERTScore calculation completed successfully.")
 
-        except Exception as e:
-            print(f"\n---!!! BERTScore Calculation Failed !!!---")
-            print(f"Error Type: {type(e).__name__}")
-            print(f"Error Message: {e}")
-            print("Traceback:")
-            traceback.print_exc()
-            print("----------------------------------------")
+            except Exception as e:
+                print(f"\n---!!! BERTScore Calculation Failed !!!---")
+                print(f"Error Type: {type(e).__name__}")
+                print(f"Error Message: {e}")
+                print("Traceback:")
+                traceback.print_exc()
+                print("----------------------------------------")
 
         else:  # Transformers not available
             print("BERTScore calculation skipped: transformers library needed for manual loading.")
@@ -272,9 +310,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
     parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/ocaml_result/ocaml_ref_4081.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../experiment/qwen/ocaml_result/ocaml_2_NL_qwen.txt",
+    parser.add_argument("-p", "--prediction", type=str, default="../experiment/ds-coder-1_3B/ocaml_result/ocaml_2_NL_4081.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
-    parser.add_argument("--model_path", type=str, default=" bert-base-uncased",  # 改为 None，明确要求用户提供
+    parser.add_argument("--model_path", type=str, default="../model/microsoft/deberta-xlarge-mnli",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
 
     args = parser.parse_args()
@@ -285,7 +323,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        references, hypotheses = read_files(args.reference, args.prediction,-1)
+        references, hypotheses = read_files(args.reference, args.prediction,-1,size=4082)
 
         if references and hypotheses:
             results = evaluate_summaries(references, hypotheses, args.model_path)

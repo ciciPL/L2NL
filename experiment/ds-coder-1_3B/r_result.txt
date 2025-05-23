@@ -3,8 +3,15 @@ L->NL
 BLEU-4:          2.8271         BLEU-4:          3.2661
 ROUGE-L (F1):    21.1730        ROUGE-L (F1):    23.8227
 METEOR:          25.9774        METEOR:          30.7910
-
+BERTScore (F1):  63.1368        BERTScore (F1):  64.1980
 L->H->NL
                                 BLEU-4:          3.6298
                                 ROUGE-L (F1):    25.9009
                                 METEOR:          31.2856
+                                BERTScore (F1):  63.5953
+
+r_2_NL_3k_c_sft.txt             r_2_python_2_NL_3k_c_sft.txt
+BLEU-4:          4.3232         BLEU-4:          5.4452
+ROUGE-L (F1):    26.4343        ROUGE-L (F1):    31.4024   30 10 1.2
+METEOR:          30.1500        METEOR:          33.9344
+BERTScore (F1):  69.1672        BERTScore (F1):  70.5895

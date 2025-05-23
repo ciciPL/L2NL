@@ -8,7 +8,7 @@ model_path = '../../../model/deepseek-ai/deepseek-coder-1.3b-instruct'
 tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(model_path, device_map={"": 0},
                                              trust_remote_code=True)
-model = PeftModel.from_pretrained(model, '../../../finetune/ds-coder/output_dir_ali6k')
+# model = PeftModel.from_pretrained(model, '../../../finetune/ds-coder/output_dir_ali6k')
 
 
 def generate_summary_batch(code_list):
@@ -100,9 +100,9 @@ def process_file(input_file, output_file, batch_size=4):
 
 
 if __name__ == "__main__":
-    # input_file = "../../../dataset/ocaml/code.txt"
-    input_file ="../r_result/r_2_python_clean.txt"
-    output_file = "../r_result/r_2_python_2_NL.txt"
+    input_file = "../../../dataset/lua/code.txt"
+    # input_file ="../r_result/r_2_python_clean.txt"
+    output_file = "../lua_result/lua_2_NL.txt"
     batch_size = 4  # 可调整批大小
 
     print("Starting code summarization...")

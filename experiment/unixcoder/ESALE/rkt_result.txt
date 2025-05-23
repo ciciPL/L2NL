@@ -13,9 +13,23 @@ L->Python->NL (unixCoder-ESALE,trans:ds-coder):
     BLEU-4:          3.2420
     ROUGE-L (F1):    21.9319
     METEOR:          15.7595
+    BERTScore (F1):  55.6755
     rkt_python_NL_4060ti_40510.txt
     BLEU-4:          3.2425
     ROUGE-L (F1):    21.9391
     METEOR:          15.7605
+
+
+esale 4500
+BLEU-4:          1.0312
+ROUGE-L (F1):    9.8105
+METEOR:          6.2072
+BERTScore (F1):  47.8311
+
+trans
+BLEU-4:          3.4382
+ROUGE-L (F1):    22.6086
+METEOR:          16.3584
+BERTScore (F1):  53.7202
 
 

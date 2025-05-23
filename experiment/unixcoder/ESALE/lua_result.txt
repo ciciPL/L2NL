@@ -1,11 +1,13 @@
 L->NL
-result_lua_nl_sft.txt(4081)
-BLEU-4:          2.3877
-ROUGE-L (F1):    18.0170
-METEOR:          12.8695
+result_lua_nl_sft.txt(4819)
+BLEU-4:          2.3898
+ROUGE-L (F1):    17.9234
+METEOR:          12.7854
+BERTScore (F1):  53.4253
 
 L->H->NL
 result_lua_python_nl_sft.txt(4081)
 BLEU-4:          3.1311
 ROUGE-L (F1):    21.9438
 METEOR:          15.6267
+BERTScore (F1):  53.6996

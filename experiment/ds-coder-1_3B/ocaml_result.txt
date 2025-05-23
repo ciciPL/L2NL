@@ -3,8 +3,14 @@ ocaml_2_NL_4081.txt base                sft
 BLEU-4:          3.0455                 BLEU-4:          3.1298
 ROUGE-L (F1):    22.8975                ROUGE-L (F1):    24.4769
 METEOR:          26.7902                METEOR:          28.5195
-
+BERTScore (F1):  64.1994                BERTScore (F1):  63.9552
 L->H->NL
                                         BLEU-4:          3.3023
                                         ROUGE-L (F1):    25.2258
                                         METEOR:          29.7825
+                                        BERTScore (F1):  63.7063
+
+BLEU-4:          3.0475
+ROUGE-L (F1):    22.9025
+METEOR:          26.7940
+BERTScore (F1):  64.1991

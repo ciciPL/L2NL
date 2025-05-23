@@ -16,8 +16,14 @@ L->NL
 BLEU-4:          2.6577                 BLEU-4:          2.1472
 ROUGE-L (F1):    22.2005                ROUGE-L (F1):    19.3302
 METEOR:          26.6330                METEOR:          23.3817
-
+BERTScore (F1):  62.8319                BERTScore (F1):  62.5459
 L->H->NL(lua_2_python_2_NL_sft_4081.txt)
 BLEU-4:          3.1560
 ROUGE-L (F1):    24.9829
 METEOR:          29.1325
+BERTScore (F1):  63.4641
+base top10
+BLEU-4:          2.1076
+ROUGE-L (F1):    19.2610
+METEOR:          23.4802
+BERTScore (F1):  62.5370

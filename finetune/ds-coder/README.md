@@ -42,3 +42,48 @@ deepspeed finetune_deepseekcoder.py \
     --deepspeed configs/ds_config_zero3.json \
     --bf16 True
 ```
+tensorboard --logdir runs --port 6007
+```bash
+# 1. 设置环境变量 (根据您的实际情况修改)
+export MODEL_PATH="../../model/deepseek-ai/deepseek-coder-1.3b-instruct"
+export DATASET_PATH="train_fixed"
+export OUTPUT_PATH="../3k/output_dir_3k_3th"
+export DS_CONFIG_PATH="../ds_config_single_gpu.json"
+
+# 2. 计算总步数并调整保存策略 (可选，但推荐)
+# num_samples=3000
+# batch_size_per_device=4
+# grad_accum_steps=4
+# epochs=3
+# total_steps=$(( (num_samples / (batch_size_per_device * grad_accum_steps)) * epochs ))
+# echo "Total training steps: $total_steps"
+# save_steps_value=200 # 例如每200步保存一次
+
+# 3. 运行训练命令
+# 使用 torchrun 启动单GPU训练 (NPROC_PER_NODE=1)
+    --deepspeed $DS_CONFIG_PATH \
+torchrun --nproc_per_node=1 src/train.py \
+    --stage sft \
+    --do_train \
+    --use_fast_tokenizer \
+    --flash_attn fa2\
+    --model_name_or_path $MODEL_PATH \
+    --dataset $DATASET_PATH \
+    --template deepseek \
+    --finetuning_type lora \
+    --lora_target q_proj,v_proj \
+    --output_dir $OUTPUT_PATH \
+    --overwrite_cache \
+    --overwrite_output_dir \
+    --warmup_ratio 0.1 \
+    --weight_decay 0.1 \
+    --per_device_train_batch_size 4 \
+    --gradient_accumulation_steps 8 \
+    --learning_rate 2e-4 \
+    --lr_scheduler_type cosine \
+    --logging_steps 1 \
+    --cutoff_len 1024 \
+    --save_steps 40 \
+    --plot_loss \
+    --num_train_epochs 3 \
+    --bf16

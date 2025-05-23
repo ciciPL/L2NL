@@ -6,9 +6,9 @@ import torch
 model_path = '../../../model/deepseek-ai/deepseek-coder-1.3b-instruct'
 # 初始化模型和tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(model_path, device_map={"": 0},
+model = AutoModelForCausalLM.from_pretrained(model_path, device_map={"": 0}, attn_implementation="flash_attention_2",torch_dtype=torch.bfloat16,
                                              trust_remote_code=True)
-model = PeftModel.from_pretrained(model, '../../../finetune/ds-coder/output_dir_ali6k')
+model = PeftModel.from_pretrained(model, '../../../finetune/ds-coder/3k')
 
 
 def generate_summary_batch(code_list):
@@ -24,7 +24,7 @@ Summary:"""
 
     outputs = model.generate(
         **inputs,
-        max_new_tokens=15,
+        max_new_tokens=25,
         min_new_tokens=10,
         temperature=0.1,
         top_p=0.5,
@@ -60,9 +60,9 @@ def process_file(input_file, output_file, batch_size=4):
         for line in lines:
             if ':' in line:
                 index, code = line.split(':', 1)
-                code  =  code.strip().replace('\\n','')
+                code = code.strip().replace('\\n', '')
                 print(code)
-                batch.append((index.strip(),code.strip() ))
+                batch.append((index.strip(), code.strip()))
 
                 # 达到批次大小时处理
                 if len(batch) >= batch_size:
@@ -100,10 +100,10 @@ def process_file(input_file, output_file, batch_size=4):
 
 
 if __name__ == "__main__":
-    # input_file = "../../../dataset/racket/code_rkt.txt"
-    input_file ="../rkt_result/rkt_2_python_4051_qwen3_14B.txt"
-    output_file = "../rkt_result/rkt_2_python_2_NL_qwen3_14B_4051_c.txt"
-    batch_size = 4  # 可调整批大小
+    input_file = "../../../dataset/r/code.txt"
+    # input_file ="../r_result/r_2_python_clean.txt"
+    output_file = "../../../experiment/ds-coder-1_3B/r_result/r_2_python_2_NL_3k_c_sft.txt"
+    batch_size = 8  # 可调整批大小
 
     print("Starting code summarization...")
     process_file(input_file, output_file, batch_size)

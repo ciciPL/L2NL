@@ -1,5 +1,5 @@
-input_path = '../r_result/r_2_python_2_NL.txt'
-output_path = '../r_result/r_2_python_2_NL_4081.txt'
+input_path = '../lua_result/lua_2_NL.txt'
+output_path = '../lua_result/lua_2_NL_4819.txt'
 
 
 def fix_multiline_data(data_lines):
@@ -10,7 +10,7 @@ def fix_multiline_data(data_lines):
         line = line.strip()
         if not line:
             continue
-        if line.split(':', 1)[0].strip()=='4082':break
+        if line.split(':', 1)[0].strip()=='4820':break
         # 检查是否是新的索引行（格式为"数字:内容"）
         if ':' in line and line.split(':', 1)[0].strip().isdigit():
             if buffer:  # 如果buffer有内容，先保存
