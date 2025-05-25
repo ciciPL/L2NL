@@ -22,7 +22,8 @@ from transformers import AdamW, get_linear_schedule_with_warmup, \
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-transformer_path = r'I:\project\codebert-base'
+# transformer_path = r'I:\project\codebert-base'
+transformer_path = '../../../../model/microsoft/codeBERT-base'
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -127,7 +128,7 @@ def main(language):
     ## Required parameters
     parser.add_argument("--model_type", default='roberta', type=str,
                         help="Model type: e.g. roberta")
-    parser.add_argument("--model_name_or_path", default=r'microsoft/codebert-base', type=str,
+    parser.add_argument("--model_name_or_path", default=r'../../../../model/microsoft/codeBERT-base', type=str,
                         help="Path to pre-trained model: e.g. roberta-base")
     parser.add_argument("--output_dir", default=f'model/{language}', type=str,
                         help="The output directory where the model predictions and checkpoints will be written.")
