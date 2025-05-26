@@ -1,3 +1,8 @@
+import ast
+import tokenize
+from io import StringIO
+
+
 def split_java_to_seqs(code_token_list):
     lf_bracket_up = 0
     idxs = []
@@ -147,6 +152,56 @@ def split_java_to_seqs(code_token_list):
 #         print('aa')
 #
 #     return code_seqs
+def get_tokens(code_string):
+    """Helper to tokenize a code string."""
+    tokens = []
+    try:
+        # Use tokenize for more robust tokenization than split()
+        for tok in tokenize.generate_tokens(StringIO(code_string).readline):
+            if tok.type not in [tokenize.ENCODING, tokenize.ENDMARKER, tokenize.NL, tokenize.NEWLINE]:
+                 # Skip comments, encoding, newlines etc. if needed
+                 # or handle them based on how CSN data is tokenized
+                if tok.type != tokenize.COMMENT:
+                    tokens.append(tok.string)
+    except tokenize.TokenError:
+         # Fallback if tokenize fails (e.g., incomplete code)
+        tokens = code_string.split()
+    return tokens
+
+
+def split_python_with_ast(raw_code):
+    """
+    Splits Python code using AST.
+    Returns a list of code statement strings AND a boolean indicating success.
+    """
+    sequences = []
+    success = True  # 假设成功
+    try:
+        tree = ast.parse(raw_code)
+
+        if tree.body and isinstance(tree.body[0], ast.FunctionDef):
+            func_body = tree.body[0].body
+        else:
+            func_body = tree.body
+
+        for node in func_body:
+            try:
+                segment = ast.get_source_segment(raw_code, node)
+                if segment:
+                    sequences.append(segment)
+            except AttributeError:
+                start_line = node.lineno - 1
+                end_line = getattr(node, 'end_lineno', start_line)
+                lines = raw_code.splitlines()[start_line:end_line]
+                sequences.append("\n".join(lines))
+
+    except SyntaxError:
+        print(f"Warning: AST parsing failed for code snippet. Falling back to newline split.")
+        sequences = [line.strip() for line in raw_code.strip().split('\n') if line.strip()]
+        success = False  # 标记为失败
+
+    return sequences if sequences else [raw_code.strip()], success  # 返回列表和成功标志
+
 
 def split_python_to_seqs(code_token_list):
     # '"

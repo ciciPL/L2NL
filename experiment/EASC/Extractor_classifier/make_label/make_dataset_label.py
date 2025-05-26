@@ -126,85 +126,84 @@ def get_code_ex(code_seqs, nl_seq):
 def make_pcsd_dataset(input_path, output_path, language):
     total_num = 0
     no_ex_seqs_num = 0
+    ast_failed_num = 0  # <--- 添加 AST 失败计数器
 
-    # 计算总行数以完善 tqdm
     total_lines = 0
     with open(input_path, encoding="utf-8") as f:
         for _ in f:
             total_lines += 1
 
     with open(input_path, encoding="utf-8") as in_f, jsonlines.open(output_path, mode='w') as out_f:
-        # 使用 tqdm 并传入总行数
         for line in tqdm(in_f, total=total_lines, desc=f"Processing PCSD {os.path.basename(input_path)}"):
-            line = line.strip()
-            js = json.loads(line)
+            js = json.loads(line.strip())
 
-            # 使用 PCSD 数据集的字段
             idx = js['id']
-            # 假设 'code' 字段是已经分词但未分割标识符的字符串
-            code_tokens = js['code'].split()
-            # 假设 'comment' 字段是已经分词但未分割标识符的字符串
+            raw_code = js['raw_code']
             nl_tokens = js['comment'].split()
+            code_tokens_full = js['code'].split()
 
-            # --- 后续处理与 make_py_dataset 类似 ---
+            # 1. 使用 AST 分割代码，并获取成功标志
+            code_statement_strings, ast_success = split_python_with_ast(raw_code)  # <--- 接收标志
+            if not ast_success:
+                ast_failed_num += 1  # <--- 如果失败，增加计数
 
-            # 1. 分割代码 (使用现有的 split_java_to_seqs，注意其对 Python 的局限性)
-            code_seqs = split_python_to_seqs(code_tokens)
-            code_seqs = ' <spt> '.join(code_seqs)
+            # 2. 对每个分割出的语句进行处理
+            code_seqs = []
+            for stmt_str in code_statement_strings:
+                stmt_tokens = stmt_str.split()
+                stmt_split_ids = split_identifier_into_parts(' '.join(stmt_tokens))
+                stmt_lower = ' '.join(stmt_split_ids).lower()
+                if stmt_lower.strip():
+                    code_seqs.append(stmt_lower)
 
-            # 2. 分割标识符并小写
-            code_seqs = split_identifier_into_parts(code_seqs)
-            code_seqs = ' '.join(code_seqs)
-            code_seqs_lower = code_seqs.lower()
-            code_seqs = code_seqs_lower.split(' <spt> ')
-            code_seqs = [seq for seq in code_seqs if seq.strip()]  # 过滤空序列
+            if not code_seqs:
+                code_seqs = [' '.join([s.lower() for s in split_identifier_into_parts(' '.join(code_tokens_full))])]
 
-            # 3. 处理完整代码（用于回退）
-            code = ' '.join(code_tokens).replace('\n', '')
-            code = split_identifier_into_parts(code)
-            code_lower = [s.lower() for s in code]
-
-            # 4. 处理 NL
+            # ... (后续处理 NL, code_lower, 获取标签等) ...
             nl = ' '.join(nl_tokens).replace('\n', '')
             nl = split_identifier_into_parts(nl)
             nl_seq = [' '.join(nl).lower()]
 
-            # 5. 准备输出 JSON 对象
-            out_js = {}
-            out_js['idx'] = idx
+            code_full_str = ' '.join(code_tokens_full).replace('\n', '')
+            code_full_split = split_identifier_into_parts(code_full_str)
+            code_lower = [s.lower() for s in code_full_split]
+
+            out_js = {'idx': idx}
             out_js['cleaned_nl'] = nl_seq
             out_js['cleaned_codes'] = code_lower
-            out_js['cleaned_blocks'] = []  # 保持字段存在，但为空
-            out_js['cleaned_blocks_ex'] = []  # 保持字段存在，但为空
+            out_js['cleaned_blocks'] = []
+            out_js['cleaned_blocks_ex'] = []
 
-            # 6. 获取重要序列和标签
             ex_seqs, ex_ids, fs, ps, rs, max_Rouge_l_r = get_code_ex(code_seqs, nl_seq)
+
             if len(ex_seqs) == 0:
-                ex_seqs = [' '.join(code_lower)]  # 回退策略
+                ex_seqs = [' '.join(code_lower)]
                 no_ex_seqs_num += 1
                 out_js['ex_labels'] = [0] * len(code_seqs) if code_seqs else [0]
             else:
                 out_js['ex_labels'] = [1 if i in ex_ids else 0 for i in range(len(code_seqs))]
+
             out_js['fs'] = fs
             out_js['ps'] = ps
             out_js['rs'] = rs
             out_js['max_Rouge_l_r'] = max_Rouge_l_r
             out_js['cleaned_seqs'] = code_seqs
             out_js['cleaned_seqs_ex'] = ex_seqs
-            # 确保标签存在
             if 'ex_labels' not in out_js:
                 out_js['ex_labels'] = [1 if i in ex_ids else 0 for i in range(len(code_seqs))]
 
-            # 7. 写入文件
             out_f.write(out_js)
             total_num += 1
 
     print('total num:', total_num)
     print('no ex seqs num:', no_ex_seqs_num)
+    print('AST parse failed num:', ast_failed_num)  # <--- 打印统计结果
     if total_num > 0:
         print('no ex seqs %:', np.round(no_ex_seqs_num / total_num, 4))
+        print('AST parse failed %:', np.round(ast_failed_num / total_num, 4))  # <--- 打印百分比
     else:
         print('no ex seqs %: 0.0')
+        print('AST parse failed %: 0.0')
 
 
 def make_py_dataset(input_path, output_path, language):
@@ -303,7 +302,7 @@ if __name__ == '__main__':
     # output_root = f'../../../../dataset/CSN/{language}-cls/'
 
     input_root = f'../../../../finetune/dataset/Clean_PCSD/'
-    output_root = f'../../../../finetune/dataset/Clean_PCSD-cls/'
+    output_root = f'../../../../dataset/Clean_PCSD-ast/'
     # 确保输出目录存在
     if not os.path.exists(output_root):
         os.makedirs(output_root)
@@ -314,6 +313,7 @@ if __name__ == '__main__':
         input_path = input_root + i + "/" + i + '.jsonl'
         output_path = output_root + i + "/" + i + '.jsonl'
         # 检查输入文件是否存在
+
         if os.path.exists(input_path):
             make_pcsd_dataset(input_path, output_path, language)
         else:
