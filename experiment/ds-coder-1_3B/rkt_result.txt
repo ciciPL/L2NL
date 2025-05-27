@@ -13,13 +13,26 @@ L->H->NL
     ROUGE-L (F1):    24.7977
     METEOR:          31.1358
 
-    BLEU-4:          5.6876
-    ROUGE-L (F1):    32.2340(max 3个指标)
-    METEOR:          33.1576
+c:
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=25,
+        min_new_tokens=10,              L->NL微调的模型                    L->NL(base)
+        temperature=0.1,                BLEU-4:          4.0267         BLEU-4:          3.6322
+        top_p=0.5,                      ROUGE-L (F1):    27.2335        ROUGE-L (F1):    25.3380
+        do_sample=True,                 METEOR:          32.6886        METEOR:          30.9337
+        no_repeat_ngram_size=2,         BERTScore (F1):  64.5714        BERTScore (F1):  64.2559
+        repetition_penalty=1.5,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id
+    )
 
-    BLEU-4:          5.1975
-    ROUGE-L (F1):    30.0738(max meteor)
-    METEOR:          33.8767
+max 20
+rkt_python_NL_4051_2th_c_sft_b.txt
+BLEU-4:          4.3641
+ROUGE-L (F1):    27.8635
+METEOR:          29.2283
+BERTScore (F1):  65.1621
 
 BLEU-4:          2.4237
 ROUGE-L (F1):    21.4661
@@ -28,20 +41,3 @@ METEOR:          26.1642
 BLEU-4:          4.1563
 ROUGE-L (F1):    28.7022
 METEOR:          19.4949
-
-
-Successfully Evaluated Pairs: 4051 本地7B
-L NL
-BLEU-4:          10.0313
-ROUGE-L (F1):    39.6006
-METEOR:          43.3262
-L H NL
-BLEU-4:          9.2119
-ROUGE-L (F1):    38.5633
-METEOR:          40.6279
-
-阿里7bsft
-L H NL
-BLEU-4:          8.7550
-ROUGE-L (F1):    37.1051
-METEOR:          31.8367
