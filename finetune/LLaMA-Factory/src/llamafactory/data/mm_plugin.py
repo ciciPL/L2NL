@@ -176,7 +176,7 @@ class MMPluginMixin:
             raise ValueError("Video processor was not found, please check and update your processor config.")
 
         if self.audio_token is not None and feature_extractor is None:
-            raise ValueError("Audio feature extractor was not found, please check and update your processor config.")
+            raise ValueError("Audio feature extracted_dataset was not found, please check and update your processor config.")
 
     def _preprocess_image(
         self, image: "ImageObject", image_max_pixels: int, image_min_pixels: int, **kwargs

@@ -37,7 +37,6 @@ import os
 import traceback
 
 
-
 def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
     # 提取摘要的第一句话
     first_sentence = summary.strip().split('.')[0].strip()
@@ -89,6 +88,7 @@ def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
     else:
         return first_sentence
 
+
 def faith_id():
     # id=[]
     # with open('../lua_result/lua_2_python_4081.txt','r',encoding='utf-8') as f:
@@ -96,8 +96,10 @@ def faith_id():
     #         if line.find("转换失败")>-1:
     #             id.append(line.strip().split(':')[0])
     return id
+
+
 # --- File Reading Function --- (Keep modified version from previous response)
-def read_files(ref_path, hyp_path, num,size):
+def read_files(ref_path, hyp_path, num, size):
     # ... (previous read_files code with ':' and '\t' splitting) ...
     # Ensure this function works correctly based on the previous iteration
     """读取参考文件和假设（结果）文件，并解析格式"""
@@ -116,9 +118,9 @@ def read_files(ref_path, hyp_path, num,size):
     with open(ref_path, 'r', encoding='utf-8') as f_ref:
         for i, line in enumerate(f_ref):
             line = line.strip()
-            if not line: continue
-            parts = line.split(':', 1)
-            if parts[0] ==str(size):break
+            # if not line: continue
+            parts = line.split('\t', 1)
+            if parts[0] == str(size): break
             # if parts[0] in ids:continue
             if len(parts) == 2:
                 references.append(parts[1].strip())
@@ -129,7 +131,7 @@ def read_files(ref_path, hyp_path, num,size):
     with open(hyp_path, 'r', encoding='utf-8') as f_hyp:
         for i, line in enumerate(f_hyp):
             # line = line.strip()
-            if not line: continue
+            # if not line: continue
             parts = line.split(':', 1)
             if parts[0] == str(size): break
             # if parts[0] in ids:
@@ -138,7 +140,9 @@ def read_files(ref_path, hyp_path, num,size):
             #             if line.split('\t')[0] in ids:
             #                 hypotheses.append(line.split('\t')[1].strip())
             if len(parts) == 2:
-                hypotheses.append(parts[1].split('[END]')[0].replace('The function','').strip())
+                clean_code = re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9\s]', '', parts[1].strip())
+                hypotheses.append(parts[1].strip().split('CODE:')[0])
+                # hypotheses.append(parts[1].strip().replace('{', '').replace('}', '').replace('[', '').replace(']', '').replace('/', ''))
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
@@ -166,6 +170,7 @@ def read_files(ref_path, hyp_path, num,size):
     print(f"Successfully read {len(references)} reference-hypothesis pairs.")
     return references, hypotheses
 
+
 def normalize(s):
     if type(s) is not str:
         s = " ".join(s)
@@ -175,6 +180,8 @@ def normalize(s):
     for (pattern, replace) in bleu.normalize2:
         s = re.sub(pattern, replace, s)
     return s.split()
+
+
 # --- Evaluation Function ---
 def evaluate_summaries(references, hypotheses, local_model_path):
     """计算各种评估指标"""
@@ -182,7 +189,7 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     rougeL_f1_scores = []
     meteor_scores = []
     hypList = []
-    refList=[]
+    refList = []
     for hyp in hypotheses:
         hypList.append([hyp])
     for ref in references:
@@ -262,7 +269,7 @@ def evaluate_summaries(references, hypotheses, local_model_path):
                 print(f"Calculating BERTScore using scorer instance...")
                 # The scorer's score method takes only candidates and references
                 P, R, F1 = MyscoreBert.score(hypotheses, references, lang="en", batch_size=12,
-                                 model_type=local_model_path)  # Add batch_size
+                                             model_type=local_model_path)  # Add batch_size
                 # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
 
                 bert_f1_scores = F1.tolist()
@@ -308,9 +315,10 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/ocaml_result/ocaml_ref_4081.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../finetune/dataset/Clean_PCSD/train/ref.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str, default="../experiment/ds-coder-1_3B/ocaml_result/ocaml_2_NL_4081.txt",
+    parser.add_argument("-p", "--prediction", type=str,
+                        default="../finetune/dataset/Clean_PCSD/train/PCSD_ref_gen_vllm_clean.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default="../model/microsoft/deberta-xlarge-mnli",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
@@ -323,7 +331,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        references, hypotheses = read_files(args.reference, args.prediction,-1,size=4082)
+        references, hypotheses = read_files(args.reference, args.prediction, -1, size=57850)
 
         if references and hypotheses:
             results = evaluate_summaries(references, hypotheses, args.model_path)

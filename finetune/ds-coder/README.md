@@ -11,7 +11,7 @@ pip install -r requirements.txt
 Please follow [Sample Dataset Format](https://huggingface.co/datasets/nickrosh/Evol-Instruct-Code-80k-v1) to prepare your training data.
 Each line is a json-serialized string with two required fields `instruction` and `output`.
 
-After data preparation, you can use the sample shell script to finetune `deepseek-ai/deepseek-coder-6.7b-instruct`. 
+After data preparation, you can use the sample shell script to finetune `deepseek-ai/deepseek-coder-6.7b-instruct`.
 Remember to specify `DATA_PATH`, `OUTPUT_PATH`.
 And please choose appropriate hyper-parameters(e.g., `learning_rate`, `per_device_train_batch_size`) according to your scenario.
 
@@ -42,12 +42,14 @@ deepspeed finetune_deepseekcoder.py \
     --deepspeed configs/ds_config_zero3.json \
     --bf16 True
 ```
+
 tensorboard --logdir runs --port 6007
+
 ```bash
 # 1. 设置环境变量 (根据您的实际情况修改)
 export MODEL_PATH="../../model/deepseek-ai/deepseek-coder-1.3b-instruct"
-export DATASET_PATH="train_fixed"
-export OUTPUT_PATH="../3k/output_dir_3k_3th"
+export DATASET_PATH="train_fixed_3.6v6.4"
+export OUTPUT_PATH="../output_fixed_3.6v6.4"
 export DS_CONFIG_PATH="../ds_config_single_gpu.json"
 
 # 2. 计算总步数并调整保存策略 (可选，但推荐)
@@ -87,3 +89,5 @@ torchrun --nproc_per_node=1 src/train.py \
     --plot_loss \
     --num_train_epochs 3 \
     --bf16
+```
+

@@ -1,4 +1,0 @@
-BLEU-4:          2.0635
-ROUGE-L (F1):    18.4052
-METEOR:          22.4649
-BERTScore (F1):  61.5268

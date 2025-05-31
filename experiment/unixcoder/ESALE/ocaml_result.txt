@@ -1,0 +1,13 @@
+L->NL
+esale
+BLEU-4:          2.4998
+ROUGE-L (F1):    18.6285
+METEOR:          13.3326
+BERTScore (F1):  54.2164
+
+L->H->NL
+esale
+BLEU-4:          3.3383
+ROUGE-L (F1):    22.2622
+METEOR:          16.2763
+BERTScore (F1):  54.3356
