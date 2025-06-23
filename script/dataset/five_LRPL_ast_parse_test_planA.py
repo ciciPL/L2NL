@@ -1,7 +1,7 @@
+import json
+import os
 import subprocess
 import tempfile
-import os
-import json
 
 # --- Lua ---
 try:

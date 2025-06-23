@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import torch
-from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, RobertaTokenizer, \
-    RobertaForCausalLM  # Keep these imports
-import os # Added for creating output directory
+import os  # Added for creating output directory
 
+import torch
 from experiment.unixcoder.ESALE.rkt_code.unixcoder import UniXcoder
 
 # --- Configuration ---

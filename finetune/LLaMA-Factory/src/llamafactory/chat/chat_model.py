@@ -21,13 +21,12 @@ from collections.abc import AsyncGenerator, Generator
 from threading import Thread
 from typing import TYPE_CHECKING, Any, Optional
 
-from ..extras.constants import EngineName
-from ..extras.misc import torch_gc
-from ..hparams import get_infer_args
 from .hf_engine import HuggingfaceEngine
 from .sglang_engine import SGLangEngine
 from .vllm_engine import VllmEngine
-
+from ..extras.constants import EngineName
+from ..extras.misc import torch_gc
+from ..hparams import get_infer_args
 
 if TYPE_CHECKING:
     from ..data.mm_plugin import AudioInput, ImageInput, VideoInput

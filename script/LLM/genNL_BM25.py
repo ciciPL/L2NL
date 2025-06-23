@@ -1,9 +1,9 @@
 import json
 import re
 
+import torch
 from peft import PeftModel
 from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
 
 model_path = '../../model/deepseek-coder-1.3b-instruct'
 # 初始化模型和tokenizer

@@ -1,8 +1,9 @@
 import json
 
-import numpy as np
-from sentence_transformers import SentenceTransformer # 用于将文本转换为向量
 import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer  # 用于将文本转换为向量
+
 # --- 1. 选择/加载编码器模型 ---
 # RaxCS 使用的是经过对比学习微调的 CodeBERT (x-encoder) [cite: 145]。
 # 对于示例，我们使用一个 SentenceTransformer 模型。

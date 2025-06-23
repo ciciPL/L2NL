@@ -1,9 +1,10 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
-import re
-import os
-from tqdm import tqdm
 import logging
+import os
+import re
+
+import torch
+from tqdm import tqdm
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # 配置日志
 logging.basicConfig(

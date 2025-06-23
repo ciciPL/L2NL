@@ -17,15 +17,14 @@
 
 from typing import TYPE_CHECKING, Optional
 
+from .trainer import CustomDPOTrainer
+from ..trainer_utils import create_modelcard_and_push, create_ref_model
 from ...data import PairwiseDataCollatorWithPadding, get_dataset, get_template_and_fix_tokenizer
 from ...extras.constants import IGNORE_INDEX
 from ...extras.misc import calculate_tps
 from ...extras.ploting import plot_loss
 from ...hparams import ModelArguments
 from ...model import load_model, load_tokenizer
-from ..trainer_utils import create_modelcard_and_push, create_ref_model
-from .trainer import CustomDPOTrainer
-
 
 if TYPE_CHECKING:
     from transformers import Seq2SeqTrainingArguments, TrainerCallback

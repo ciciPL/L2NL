@@ -22,7 +22,6 @@ from llamafactory.data import get_template_and_fix_tokenizer
 from llamafactory.data.template import parse_template
 from llamafactory.hparams import DataArguments
 
-
 if TYPE_CHECKING:
     from transformers import PreTrainedTokenizer
 

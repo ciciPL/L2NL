@@ -2,12 +2,12 @@
 import re
 import string
 
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from langdetect import detect
-import matplotlib.pyplot as plt
-import jieba
 from transformers import AutoTokenizer
+
 # input_file = 'lengthRef.txt'
 model_name = '../../../model/deepseek-coder-1.3b-instruct'
 # 初始化模型和tokenizer

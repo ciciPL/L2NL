@@ -37,12 +37,11 @@ from trl.core import PPODecorators, logprobs_from_logits
 from trl.models.utils import unwrap_model_for_generation
 from typing_extensions import override
 
-from ...extras import logging
-from ...extras.misc import AverageMeter, count_parameters, get_current_device, get_logits_processor
+from .ppo_utils import dump_layernorm, get_rewards_from_server, replace_model, restore_layernorm
 from ..callbacks import FixValueHeadModelCallback, SaveProcessorCallback
 from ..trainer_utils import create_custom_optimizer, create_custom_scheduler
-from .ppo_utils import dump_layernorm, get_rewards_from_server, replace_model, restore_layernorm
-
+from ...extras import logging
+from ...extras.misc import AverageMeter, count_parameters, get_current_device, get_logits_processor
 
 if TYPE_CHECKING:
     from datasets import Dataset

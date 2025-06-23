@@ -1,25 +1,25 @@
-import os
-import logging
 import argparse
+import logging
 import math
-import numpy as np
-from tqdm import tqdm
 import multiprocessing
+import os
+import sys
 import time
 
+import numpy as np
 import torch
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
-from torch.utils.data.distributed import DistributedSampler
-from transformers import AdamW, get_linear_schedule_with_warmup
-from models import build_or_load_gen_model
+from configs_train import add_args, set_seed, set_dist
 from evaluator import smooth_bleu
 # from evaluator.CodeBLEU import calc_code_bleu
 from evaluator.bleu import _bleu
-from utils import get_filenames, get_elapse_time, load_and_cache_gen_data
-from configs_train import add_args, set_seed, set_dist
+from torch.utils.data import DataLoader, SequentialSampler, RandomSampler
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
+from transformers import AdamW, get_linear_schedule_with_warmup
 
-import sys
+from models import build_or_load_gen_model
+from utils import get_filenames, get_elapse_time, load_and_cache_gen_data
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 

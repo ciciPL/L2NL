@@ -13,8 +13,6 @@ from tqdm.auto import tqdm
 from transformers import (AutoModel, AutoTokenizer, GPT2Tokenizer, RobertaTokenizer)
 from transformers import __version__ as trans_version
 
-
-
 __all__ = []
 
 SCIBERT_URL_DICT = {

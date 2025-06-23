@@ -17,9 +17,8 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from ..extras import logging
 from .data_utils import Role
-
+from ..extras import logging
 
 if TYPE_CHECKING:
     from datasets import Dataset, IterableDataset

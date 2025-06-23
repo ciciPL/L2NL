@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-import sys, math, re, xml.sax.saxutils
-import subprocess
-import os
+import math
+import re
+import sys
+import xml.sax.saxutils
 
 # from tqdm import tqdm
 

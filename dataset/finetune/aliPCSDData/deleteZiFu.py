@@ -1,5 +1,3 @@
-import os
-
 # --- （这是我们之前定义的函数，稍作调整或直接使用其输出来判断） ---
 def analyze_special_char_ratio(
     text: str,

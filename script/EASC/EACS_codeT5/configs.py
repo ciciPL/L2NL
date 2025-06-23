@@ -1,8 +1,9 @@
-import random
-import torch
 import logging
 import multiprocessing
+import random
+
 import numpy as np
+import torch
 
 logger = logging.getLogger(__name__)
 

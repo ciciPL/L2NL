@@ -1,8 +1,6 @@
 import os
-import sys
 import subprocess
 import tempfile
-import itertools
 
 # path to the stanford corenlp jar
 STANFORD_CORENLP_3_4_1_JAR = 'stanford-corenlp-3.4.1.jar'

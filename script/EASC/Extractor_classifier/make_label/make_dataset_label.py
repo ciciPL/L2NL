@@ -1,11 +1,12 @@
 import json
+import os  # <--- 添加导入 os 库
+from vendor import parse_R
 import jsonlines
 import numpy as np
 from tqdm import tqdm
+
 import rouge_not_a_wrapper as my_rouge
 from identifier_splitting import split_identifier_into_parts
-import os  # <--- 添加导入 os 库
-
 from utils import *
 
 ex_codes_num = []
@@ -395,6 +396,58 @@ def make_pcsd_dataset_modified(input_path, output_path):
         print("AST 解析成功率 %: 0.0%")
         print("AST 解析失败率 %: 0.0%")
 
+def make_LRPL_sentences_ast(input_path, output_path,stop_index):
+    total_num = 0
+    no_ex_seqs_num = 0
+    ast_failed_num = 0  # <--- 添加 AST 失败计数器
+
+    total_lines = 0
+    with open(input_path, encoding="utf-8") as f:
+        for _ in f:
+            total_lines += 1
+
+    with open(input_path, encoding="utf-8") as in_f, jsonlines.open(output_path, mode='w') as out_f:
+        for line in tqdm(in_f, total=total_lines, desc=f"Processing LRPL {os.path.basename(input_path)}"):
+
+
+            idx = line.split(':')[0].strip()
+            raw_code = line.split(':')[1].strip()
+            if int(idx) == stop_index: break
+            # 1. 使用 AST 分割代码，并获取成功标志
+            code_statement_strings, ast_success = parse_R.split_r_into_statements(raw_code,'../../../../vendor/parse_fixed.R')  # <--- 接收标志
+
+            # 2. 对每个分割出的语句进行处理
+            code_seqs = []
+            if ast_success:
+                for stmt_str in code_statement_strings:
+                    stmt_tokens = stmt_str.split()
+                    stmt_split_ids = split_identifier_into_parts(' '.join(stmt_tokens))
+                    stmt_lower = ' '.join(stmt_split_ids).lower()
+                    if stmt_lower.strip():
+                        code_seqs.append(stmt_lower)
+            else:
+                ast_failed_num += 1  # <--- 如果失败，增加计数
+                # code_seqs=['Parse_faith']
+
+            if len(code_statement_strings)==1:
+                no_ex_seqs_num += 1
+                # code_seqs=['len = 1']
+
+            out_js = {'idx': idx}
+            out_js['raw_codes'] = raw_code
+            out_js['cleaned_seqs'] = code_seqs
+            out_f.write(out_js)
+            total_num += 1
+
+    print('total num:', total_num)
+    print('no ex seqs num:', no_ex_seqs_num)
+    print('AST parse failed num:', ast_failed_num)  # <--- 打印统计结果
+    if total_num > 0:
+        print('no ex seqs %:', np.round(no_ex_seqs_num / total_num, 4))
+        print('AST parse failed %:', np.round(ast_failed_num / total_num, 4))  # <--- 打印百分比
+    else:
+        print('no ex seqs %: 0.0')
+        print('AST parse failed %: 0.0')
 
 if __name__ == '__main__':
     language = 'python'  # <--- 确保这里是你想要的语言
@@ -403,31 +456,32 @@ if __name__ == '__main__':
     # input_root = f'../../../../dataset/CSN/{language}/'
     # output_root = f'../../../../dataset/CSN/{language}-cls/'
 
-    input_root = f'../../../../finetune/dataset/Clean_PCSD/'
-    output_root = f'../../../../dataset/Clean_PCSD-ast/'
+    input_root = f'../../../../dataset/finetune/aliPCSDData/output6k.json'
+    output_root = f'../../../../dataset/ready_sentences_dataset/6k_sentences.json'
+
+    make_pcsd_dataset(input_root, output_root,language)
     # 确保输出目录存在
-    if not os.path.exists(output_root):
-        os.makedirs(output_root)
+    # if not os.path.exists(output_root):
+    #     os.makedirs(output_root)
 
     dataset_file = ['train', 'valid', 'test']
-    t = 0
-    f1 = 0
-    with open("../../../../experiment/ds-coder-1_3B/r_result/r_2_python_clean.txt", 'r', encoding='utf-8') as f:
-        for line in f:
-            code = line.split(':')[1].strip()
+    # t = 0
+    # f1 = 0
+    # with open("../../../../experiment/ds-coder-1_3B/r_result/r_2_python_clean.txt", 'r', encoding='utf-8') as f:
+    #     for line in f:
+    #         code = line.split(':')[1].strip()
+    #
+    #         try:
+    #             ast.parse(code)
+    #             t += 1
+    #             print("True")
+    #         except Exception as e:
+    #             f1 += 1
+    #             print("False")
+    #     print("t",t)
+    #     print("f",f1)
 
-            try:
-                ast.parse(code)
-                t += 1
-                print("True")
-            except Exception as e:
-                f1 += 1
-                print("False")
-        print("t",t)
-        print("f",f1)
-
-    # make_pcsd_dataset_modified('../../../../experiment/ds-coder-1_3B/r_result/r_2_python_clean.txt',
-    #                   '../../../../experiment/ds-coder-1_3B/r_result/r_2_python_sentences.jsonl')
+    # make_LRPL_sentences_ast(input_root,output_root,3760)
 
     # for i in dataset_file:
     #     input_path = input_root + i + "/" + i + '.jsonl'

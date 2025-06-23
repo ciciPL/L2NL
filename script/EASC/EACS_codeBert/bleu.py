@@ -1,6 +1,7 @@
-import sys, math, re, xml.sax.saxutils
-import subprocess
-import os
+import math
+import re
+import sys
+import xml.sax.saxutils
 
 nonorm = 0
 

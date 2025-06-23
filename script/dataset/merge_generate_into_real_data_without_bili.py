@@ -3,9 +3,9 @@ import os
 #该文件用于把真实摘要和合成摘要合并
 
 # Define filenames
-file_real_cleaned = "extract_ref.txt"
-file_synthetic_cleaned = "extract_PCSD_ref_gen_vllm_prompt2th_clean.txt"
-file_synthetic_uncleaned = "PCSD_ref_gen_vllm_prompt2th_clean.txt" # User stated this is uncleaned
+file_real_cleaned = "../../dataset/finetune/Clean_PCSD/train/extract_ref.txt"
+file_synthetic_cleaned = "../../dataset/finetune/Clean_PCSD/train/extract_PCSD_ref_gen_vllm_prompt2th_clean.txt"
+file_synthetic_uncleaned = "../../dataset/finetune/Clean_PCSD/train/PCSD_ref_gen_vllm_prompt2th_clean.txt" # User stated this is uncleaned
 output_file = "fixed_20872_36977_3.6v6.4.txt"
 
 # --- Helper function to read a file into a dictionary ---

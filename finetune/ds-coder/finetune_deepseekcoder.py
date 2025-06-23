@@ -6,8 +6,8 @@ from typing import Optional, Dict, Sequence
 import torch
 import torch.distributed
 import transformers
-from transformers import Trainer
 from datasets import load_dataset
+from transformers import Trainer
 
 IGNORE_INDEX = -100
 EOT_TOKEN = "<|EOT|>"

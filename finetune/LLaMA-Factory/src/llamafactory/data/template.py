@@ -18,11 +18,10 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from typing_extensions import override
 
-from ..extras import logging
 from .data_utils import Role
 from .formatter import EmptyFormatter, FunctionFormatter, StringFormatter, ToolFormatter
 from .mm_plugin import get_mm_plugin
-
+from ..extras import logging
 
 if TYPE_CHECKING:
     from transformers import PreTrainedTokenizer

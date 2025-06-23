@@ -21,11 +21,6 @@ import uuid
 from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Optional
 
-from ..data import Role as DataRole
-from ..extras import logging
-from ..extras.constants import AUDIO_PLACEHOLDER, IMAGE_PLACEHOLDER, VIDEO_PLACEHOLDER
-from ..extras.misc import is_env_enabled
-from ..extras.packages import is_fastapi_available, is_pillow_available, is_requests_available
 from .common import dictify, jsonify
 from .protocol import (
     ChatCompletionMessage,
@@ -40,7 +35,11 @@ from .protocol import (
     Role,
     ScoreEvaluationResponse,
 )
-
+from ..data import Role as DataRole
+from ..extras import logging
+from ..extras.constants import AUDIO_PLACEHOLDER, IMAGE_PLACEHOLDER, VIDEO_PLACEHOLDER
+from ..extras.misc import is_env_enabled
+from ..extras.packages import is_fastapi_available, is_pillow_available, is_requests_available
 
 if is_fastapi_available():
     from fastapi import HTTPException, status

@@ -19,14 +19,13 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from transformers.utils import is_torch_npu_available
 
+from .common import get_save_dir, load_config
+from .locales import ALERTS
 from ..chat import ChatModel
 from ..data import Role
 from ..extras.constants import PEFT_METHODS
 from ..extras.misc import torch_gc
 from ..extras.packages import is_gradio_available
-from .common import get_save_dir, load_config
-from .locales import ALERTS
-
 
 if TYPE_CHECKING:
     from ..chat import BaseEngine

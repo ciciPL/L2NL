@@ -1,22 +1,22 @@
+import argparse
+import json
+import logging
+import os
+import random
+import sys
+from itertools import cycle
+
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler, TensorDataset
+from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, TensorDataset
 from torch.utils.data.distributed import DistributedSampler
-import numpy as np
-
-import os
-import argparse
-import logging
-import random
 from tqdm import tqdm
-from itertools import cycle
-import json
-import bleu
-from model import Seq2Seq
-import sys
-
 from transformers import AdamW, get_linear_schedule_with_warmup, \
     RobertaConfig, RobertaModel, RobertaTokenizer
+
+import bleu
+from model import Seq2Seq
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 

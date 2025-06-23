@@ -1,22 +1,20 @@
-import torch
-from torch.optim import AdamW
-from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler, TensorDataset
-from torch.utils.data.distributed import DistributedSampler
-import numpy as np
-from torch.utils.tensorboard import SummaryWriter # 导入 TensorBoard
-import math # 导入 math 用于计算总步数
-
-import os
 import argparse
-import logging
-import random
-from tqdm import tqdm, trange # 导入 trange 用于 epoch 循环
 # from itertools import cycle # epoch 模式下不再需要 cycle
 import json
-import jsonlines
+import logging
+import os
 import platform
-
+import random
 import sys
+
+import jsonlines
+import numpy as np
+import torch
+from torch.optim import AdamW
+from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, TensorDataset
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter  # 导入 TensorBoard
+from tqdm import tqdm, trange  # 导入 trange 用于 epoch 循环
 
 # 确保 model.py 存在或提供一个占位符
 try:

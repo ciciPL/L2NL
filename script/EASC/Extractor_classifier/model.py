@@ -167,9 +167,11 @@ class SelectorNet(nn.Module):
         logits, probs, self.stat_hidden_state = self.stat_net(outputs, self.stat_hidden_state.data)
 
         active_mask = s_mask.ne(0).view(-1) == 1
-        loss = self.loss_fct(logits.view(-1, logits.size(-1))[active_mask],
-                             labels.view(-1)[active_mask])
+        if labels:
+            loss = self.loss_fct(logits.view(-1, logits.size(-1))[active_mask],
+                                 labels.view(-1)[active_mask])
 
-        net_outputs = loss, loss * active_mask.sum(), active_mask.sum(), active_mask, probs
-
+            net_outputs = loss, loss * active_mask.sum(), active_mask.sum(), active_mask, probs
+        else:
+            net_outputs = active_mask.sum(), active_mask, probs
         return net_outputs

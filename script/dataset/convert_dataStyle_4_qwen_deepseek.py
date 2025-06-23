@@ -63,6 +63,10 @@
 #构建阿里的测试集数据格式
 import re
 from openpyxl.workbook import Workbook
+# 构建阿里的测试集数据格式
+import re
+
+from openpyxl.workbook import Workbook
 
 
 def clean_string(s):

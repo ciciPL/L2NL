@@ -1,11 +1,12 @@
-from torch.utils.data import TensorDataset
-import numpy as np
 import logging
 import os
 import random
-import torch
 import time
+
+import torch
+from torch.utils.data import TensorDataset
 from tqdm import tqdm
+
 from _utils import *
 
 logger = logging.getLogger(__name__)

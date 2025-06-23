@@ -40,9 +40,11 @@
 
 # huggingface-cli download --resume-download Qwen/Qwen2.5-Coder-14B-Instruct --local-dir model/Qwen2.5-Coder-14B-Instruct
 
+import time
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import time
+
 # 预热GPU（避免首次推理延迟）
 # 首次运行前先预加载（只需一次）
 # python -c "from transformers import AutoModelForCausalLM; AutoModelForCausalLM.from_pretrained(     'model/Qwen2.5-Coder-1.5B-Instruct',     torch_dtype="auto",     device_map="auto",     attn_implementation="flash_attention_2")"

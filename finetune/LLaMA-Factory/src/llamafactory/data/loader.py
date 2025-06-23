@@ -16,11 +16,8 @@ import os
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 import numpy as np
-from datasets import Dataset, load_dataset, load_from_disk
+from datasets import load_dataset, load_from_disk
 
-from ..extras import logging
-from ..extras.constants import FILEEXT2TYPE
-from ..extras.misc import check_version, has_tokenized_data
 from .converter import align_dataset
 from .data_utils import get_dataset_module, merge_dataset, read_cloud_json, split_dataset
 from .parser import get_dataset_list
@@ -32,7 +29,9 @@ from .processor import (
     SupervisedDatasetProcessor,
     UnsupervisedDatasetProcessor,
 )
-
+from ..extras import logging
+from ..extras.constants import FILEEXT2TYPE
+from ..extras.misc import check_version, has_tokenized_data
 
 if TYPE_CHECKING:
     from datasets import Dataset, IterableDataset

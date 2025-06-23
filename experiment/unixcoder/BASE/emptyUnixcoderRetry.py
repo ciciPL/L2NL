@@ -59,12 +59,14 @@
 #
 # out.close()
 
-import torch
-from unixcoder import UniXcoder
 import random
+
 import numpy as np
+import torch
 from rouge_score import rouge_scorer
 from tqdm import tqdm
+
+from unixcoder import UniXcoder
 
 # 设置随机种子
 seed = 42

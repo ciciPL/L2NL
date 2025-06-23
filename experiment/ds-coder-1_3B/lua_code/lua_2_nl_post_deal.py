@@ -1,5 +1,5 @@
-input_path = '../lua_result/lua_2_NL.txt'
-output_path = '../lua_result/lua_2_NL_4819.txt'
+input_path = '../../../experiment/ds_1B/r_result/r_NL.txt'
+output_path = '../../ds_1B/r_result/r_NL.txt'
 
 
 def fix_multiline_data(data_lines):

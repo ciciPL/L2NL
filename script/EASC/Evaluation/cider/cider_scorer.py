@@ -1,8 +1,9 @@
 import copy
-from collections import defaultdict
-import numpy as np
-import pdb
 import math
+from collections import defaultdict
+
+import numpy as np
+
 
 def precook(s, n=4, out=False):
     """

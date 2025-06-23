@@ -22,12 +22,11 @@ import torch
 from transformers import GenerationConfig, TextIteratorStreamer
 from typing_extensions import override
 
+from .base_engine import BaseEngine, Response
 from ..data import get_template_and_fix_tokenizer
 from ..extras import logging
 from ..extras.constants import AUDIO_PLACEHOLDER, IMAGE_PLACEHOLDER, VIDEO_PLACEHOLDER, EngineName
 from ..model import load_model, load_tokenizer
-from .base_engine import BaseEngine, Response
-
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer, ProcessorMixin

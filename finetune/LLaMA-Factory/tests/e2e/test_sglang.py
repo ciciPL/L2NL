@@ -19,7 +19,6 @@ import pytest
 from llamafactory.chat import ChatModel
 from llamafactory.extras.packages import is_sglang_available
 
-
 MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
 
 

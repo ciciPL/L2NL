@@ -15,10 +15,9 @@
 import json
 from typing import TYPE_CHECKING
 
+from ..locales import ALERTS
 from ...data import Role
 from ...extras.packages import is_gradio_available
-from ..locales import ALERTS
-
 
 if is_gradio_available():
     import gradio as gr

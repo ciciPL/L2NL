@@ -1,5 +1,4 @@
 import pandas as pd
-import re  # 导入 re 模块，以备后续可能需要的更复杂的空格处理
 
 
 # 辅助函数，用于处理从Parquet读取的单个 content 字符串块

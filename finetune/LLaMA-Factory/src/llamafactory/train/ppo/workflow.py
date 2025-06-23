@@ -17,13 +17,12 @@
 
 from typing import TYPE_CHECKING, Optional
 
+from .trainer import CustomPPOTrainer
+from ..callbacks import fix_valuehead_checkpoint
+from ..trainer_utils import create_ref_model, create_reward_model
 from ...data import MultiModalDataCollatorForSeq2Seq, get_dataset, get_template_and_fix_tokenizer
 from ...extras.ploting import plot_loss
 from ...model import load_model, load_tokenizer
-from ..callbacks import fix_valuehead_checkpoint
-from ..trainer_utils import create_ref_model, create_reward_model
-from .trainer import CustomPPOTrainer
-
 
 if TYPE_CHECKING:
     from transformers import Seq2SeqTrainingArguments, TrainerCallback

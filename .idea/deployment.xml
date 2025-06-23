@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="root@connect.nma1.seetacloud.com:47002 password">
+      <paths name="buli4090">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@connect.nmb2.seetacloud.com:41679 password">
+      <paths name="buliA102">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$" web="" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@connect.nmb2.seetacloud.com:41679 password (2)">
+      <paths name="root@connect.westb.seetacloud.com:22426 password">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/root/autodl-tmp/L2NL" local="$PROJECT_DIR$" web="/root/autodl-tmp/L2NL" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@nm.tools.buluai.cn:10544 password">
+      <paths name="root@nm.tools.buluai.cn:10565 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/data/L2NL" local="$PROJECT_DIR$" />
+            <mapping deploy="/" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

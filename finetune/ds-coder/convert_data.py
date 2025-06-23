@@ -1,4 +1,3 @@
-import os
 import json
 
 # from dataset.bertData import code_lines

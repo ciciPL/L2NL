@@ -15,10 +15,9 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Optional
 
-from ...extras import logging
-from ..data_utils import Role
 from .processor_utils import DatasetProcessor, infer_seqlen
-
+from ..data_utils import Role
+from ...extras import logging
 
 if TYPE_CHECKING:
     from ..mm_plugin import AudioInput, ImageInput, VideoInput

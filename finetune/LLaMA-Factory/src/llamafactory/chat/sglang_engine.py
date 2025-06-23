@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 import requests
 from typing_extensions import override
 
+from .base_engine import BaseEngine, Response
 from ..data import get_template_and_fix_tokenizer
 from ..extras import logging
 from ..extras.constants import AUDIO_PLACEHOLDER, IMAGE_PLACEHOLDER, VIDEO_PLACEHOLDER, EngineName
@@ -29,8 +30,6 @@ from ..extras.packages import is_sglang_available
 from ..hparams import DataArguments, FinetuningArguments, GeneratingArguments, ModelArguments
 from ..model import load_config, load_tokenizer
 from ..model.model_utils.quantization import QuantizationMethod
-from .base_engine import BaseEngine, Response
-
 
 if is_sglang_available():
     from sglang.utils import launch_server_cmd, terminate_process, wait_for_server  # type: ignore

@@ -1,9 +1,7 @@
 
 import os
-import sys
 import subprocess
 import threading
-import pdb
 
 # Assumes meteor-1.5.jar is in the same directory as meteor.py.  Change as needed.
 METEOR_JAR = 'meteor-1.5.jar'

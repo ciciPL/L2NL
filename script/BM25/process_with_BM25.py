@@ -1,7 +1,8 @@
-import json
-from tqdm import tqdm
 import argparse
+import json
 import sys
+
+from tqdm import tqdm
 
 # 确保 BM25_Retriever.py 在 Python 路径中
 # 如果 BM25_Retriever.py 在上一级目录的 BM25 文件夹中

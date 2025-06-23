@@ -1,11 +1,10 @@
-from bleu.bleu import Bleu
-from rouge.rouge import Rouge
-from cider.cider import Cider
-from meteor.meteor import Meteor
-import numpy as np
 import sys
 
+from bleu.bleu import Bleu
 from bleu.bleu import computeMaps, bleuFromMaps
+from cider.cider import Cider
+from meteor.meteor import Meteor
+from rouge.rouge import Rouge
 
 
 def main(hyp, ref, len):

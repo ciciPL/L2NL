@@ -1,0 +1,21 @@
+r_NL.txt
+BLEU-4:          2.0753
+ROUGE-L (F1):    18.9776
+METEOR:          30.8865
+BERTScore (F1):  61.3861
+
+r_NL_sft_without_sentences_2_sentencesSFT.txt
+BLEU-4:          4.3453
+ROUGE-L (F1):    25.6416
+METEOR:          29.1893
+BERTScore (F1):  65.3224
+
+r_NL_sft_without_sentences_2_without_sentencesSFT.txt
+BLEU-4:          4.3393
+ROUGE-L (F1):    25.6297
+METEOR:          29.3031
+BERTScore (F1):  65.3437
+
+BLEU-4:          6.2576
+ROUGE-L (F1):    31.3740
+METEOR:          32.9449

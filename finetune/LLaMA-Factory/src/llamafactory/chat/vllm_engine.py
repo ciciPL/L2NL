@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 from typing_extensions import override
 
+from .base_engine import BaseEngine, Response
 from ..data import get_template_and_fix_tokenizer
 from ..extras import logging
 from ..extras.constants import AUDIO_PLACEHOLDER, IMAGE_PLACEHOLDER, VIDEO_PLACEHOLDER, EngineName
@@ -26,8 +27,6 @@ from ..extras.packages import is_vllm_available
 from ..model import load_config, load_tokenizer
 from ..model.model_utils.quantization import QuantizationMethod
 from ..model.model_utils.visual import LlavaMultiModalProjectorForYiVLForVLLM
-from .base_engine import BaseEngine, Response
-
 
 if is_vllm_available():
     from vllm import AsyncEngineArgs, AsyncLLMEngine, RequestOutput, SamplingParams

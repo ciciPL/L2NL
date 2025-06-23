@@ -3,14 +3,14 @@
 import argparse
 import re
 import xml.sax.saxutils
-import MyscoreBert
+
 import nltk
-from bert_score import score
 from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score
 from rouge_score import rouge_scorer
 
+import MyscoreBert
 import bleu
 
 # bert_score import and calculation might fail, handle gracefully
@@ -37,63 +37,11 @@ import os
 import traceback
 
 
-def evaluate_and_choose_summary(summary: str, ref_summary: str) -> str:
-    # 提取摘要的第一句话
-    first_sentence = summary.strip().split('.')[0].strip()
-    if not first_sentence.endswith('.'):
-        first_sentence += '.'  # 补充句号
-
-    # Tokenize
-    summary_tokens = nltk.word_tokenize(summary.lower())
-    first_sentence_tokens = nltk.word_tokenize(first_sentence.lower())
-    ref_tokens = nltk.word_tokenize(ref_summary.lower())
-
-    # 平滑函数（用于 BLEU）
-    smoothing = SmoothingFunction().method1
-
-    def get_scores(candidate, ref):
-        # 输入已经是token了
-        # BLEU-4
-        bleu4 = sentence_bleu([ref], candidate,
-                              weights=(0.25, 0.25, 0.25, 0.25), smoothing_function=smoothing)
-
-        # ROUGE-L
-        scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-        rouge_l_score = scorer.score(
-            ' '.join(ref),
-            ' '.join(candidate)
-        )['rougeL'].fmeasure
-
-        # METEOR
-        try:
-            meteor = single_meteor_score(ref, candidate)
-        except:
-            meteor = 0.0
-
-        return bleu4, rouge_l_score, meteor
-
-    # 获取两者的分数
-    bleu4_1, rouge_l1, meteor1 = get_scores(summary_tokens, ref_tokens)
-    bleu4_2, rouge_l2, meteor2 = get_scores(first_sentence_tokens, ref_tokens)
-
-    # 综合评分（可调整权重）
-    score1 = bleu4_1 + rouge_l1 + meteor1
-    score2 = bleu4_2 + rouge_l2 + meteor2
-
-    print(f"Original Summary Score (BLEU-4 + ROUGE-L + METEOR): {score1:.3f}")
-    print(f"First Sentence Score: {score2:.3f}")
-
-    if score1 >= score2:
-        return summary
-    else:
-        return first_sentence
-
-
 def faith_id():
     # id=[]
-    # with open('../lua_result/lua_2_python_4081.txt','r',encoding='utf-8') as f:
+    # with open('../experiment/ds_1B/r_result/r_NL_sft_without_sentences_2_without_sentencesSFT_check2400.txt','r',encoding='utf-8') as f:
     #     for line in f:
-    #         if line.find("转换失败")>-1:
+    #         if line.find('Error processing')>-1:
     #             id.append(line.strip().split(':')[0])
     return id
 
@@ -119,7 +67,7 @@ def read_files(ref_path, hyp_path, num, size):
         for i, line in enumerate(f_ref):
             line = line.strip()
             # if not line: continue
-            parts = line.split('\t', 1)
+            parts = line.split(':', 1)
             if parts[0] == str(size): break
             # if parts[0] in ids:continue
             if len(parts) == 2:
@@ -134,15 +82,10 @@ def read_files(ref_path, hyp_path, num, size):
             # if not line: continue
             parts = line.split(':', 1)
             if parts[0] == str(size): break
-            # if parts[0] in ids:
-            #     with open('../experiment/unixcoder/BASE/base_result/result_julia_nl_unx-base.txt', 'r', encoding='utf-8') as f_empty:
-            #         for line in f_empty:
-            #             if line.split('\t')[0] in ids:
-            #                 hypotheses.append(line.split('\t')[1].strip())
             if len(parts) == 2:
                 clean_code = re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9\s]', '', parts[1].strip())
-                hypotheses.append(parts[1].strip().split('CODE:')[0])
-                # hypotheses.append(parts[1].strip().replace('{', '').replace('}', '').replace('[', '').replace(']', '').replace('/', ''))
+                hypotheses.append(parts[1].strip().split('.')[0])
+                # hypotheses.append(parts[1].strip().replace('{', '').replace('}', '').replace('[', '').replace(']', '').replace('/', '').replace('\'',''))
             else:
                 hypotheses.append('')
                 # malformed_hyps += 1
@@ -268,11 +211,11 @@ def evaluate_summaries(references, hypotheses, local_model_path):
                 # 4. *** Call the score method of the BERTScorer instance ***
                 print(f"Calculating BERTScore using scorer instance...")
                 # The scorer's score method takes only candidates and references
-                P, R, F1 = MyscoreBert.score(hypotheses, references, lang="en", batch_size=12,
-                                             model_type=local_model_path)  # Add batch_size
+                # P, R, F1 = MyscoreBert.score(hypotheses, references, lang="en", batch_size=12,
+                #                              model_type=local_model_path)  # Add batch_size
                 # ---!!! IMPORTANT CORRECTION ENDS HERE !!!---
 
-                bert_f1_scores = F1.tolist()
+                # bert_f1_scores = F1.tolist()
                 bertscore_failed = False  # Mark as success!
                 print("BERTScore calculation completed successfully.")
 
@@ -315,10 +258,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../finetune/dataset/Clean_PCSD/train/ref.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/r_result/r_ref_3840.txt",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str,
-                        default="../finetune/dataset/Clean_PCSD/train/PCSD_ref_gen_vllm_clean.txt",
+    parser.add_argument("-p", "--prediction", type=str,default="../experiment/ds-coder-1_3B/r_result/r_2_python_2_NL_sentences_2th_clean.txt",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default="../model/microsoft/deberta-xlarge-mnli",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
@@ -331,7 +273,7 @@ if __name__ == "__main__":
         exit(1)
 
     try:
-        references, hypotheses = read_files(args.reference, args.prediction, -1, size=57850)
+        references, hypotheses = read_files(args.reference, args.prediction, -1, size=3760)
 
         if references and hypotheses:
             results = evaluate_summaries(references, hypotheses, args.model_path)

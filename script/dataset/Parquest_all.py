@@ -1,5 +1,4 @@
 import pandas as pd
-import re  # 可选导入，用于更高级的空格规范化处理
 
 
 def convert_parquet_content_to_indexed_single_lines(input_parquet_path, output_text_file_path):

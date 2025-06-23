@@ -24,11 +24,10 @@ import torch
 from transformers import Trainer
 from typing_extensions import override
 
-from ...extras import logging
-from ...extras.packages import is_transformers_version_greater_than
 from ..callbacks import FixValueHeadModelCallback, SaveProcessorCallback
 from ..trainer_utils import create_custom_optimizer, create_custom_scheduler
-
+from ...extras import logging
+from ...extras.packages import is_transformers_version_greater_than
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, ProcessorMixin

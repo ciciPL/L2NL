@@ -21,7 +21,6 @@ from transformers.integrations import is_deepspeed_zero3_enabled
 
 from ...extras import logging
 
-
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer
 

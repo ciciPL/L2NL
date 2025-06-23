@@ -36,7 +36,6 @@ from ..extras.packages import (
     is_transformers_version_greater_than,
 )
 
-
 if is_librosa_available():
     import librosa
 

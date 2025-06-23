@@ -1,11 +1,12 @@
-import torch
-from torch.utils.data import Dataset, DataLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import time
-from tqdm import tqdm
+import logging
 import os
 import re
-import logging
+import time
+
+import torch
+from torch.utils.data import Dataset, DataLoader
+from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 try:
     from vllm import LLM, SamplingParams
