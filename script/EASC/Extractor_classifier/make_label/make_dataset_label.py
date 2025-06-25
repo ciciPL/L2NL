@@ -456,10 +456,10 @@ if __name__ == '__main__':
     # input_root = f'../../../../dataset/CSN/{language}/'
     # output_root = f'../../../../dataset/CSN/{language}-cls/'
 
-    input_root = f'../../../../dataset/finetune/aliPCSDData/output6k.json'
-    output_root = f'../../../../dataset/ready_sentences_dataset/6k_sentences.json'
+    input_root = f'../../../../dataset/LowData/r/code.txt'
+    output_root = f'../../../../dataset/LowData/r/R_sentences.jsonl'
 
-    make_pcsd_dataset(input_root, output_root,language)
+    make_LRPL_sentences_ast(input_root, output_root,language)
     # 确保输出目录存在
     # if not os.path.exists(output_root):
     #     os.makedirs(output_root)

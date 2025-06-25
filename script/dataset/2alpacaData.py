@@ -2,7 +2,7 @@ import json
 
 # 输入和输出文件路径
 # input_file_path = '../../dataset/ready_sentences_dataset/Clean_PCSD-ast/train/output6k.json'  # 替换为你的输入文件路径
-output_file_path = '../../dataset/finetune/alpacaPCSD/train_6k_with_sentence.json'  # 替换为你想要的输出文件路径
+output_file_path = '../../dataset/finetune/alpacaPCSD/ocaml_python_alpaca.json'  # 替换为你想要的输出文件路径
 
 # 系统提示词（适合摘要任务）
 # system_prompt = "You are an expert code summarization AI. Your task is to generate a concise, ONE-LINE summary based on the provided CODE and its important Snippets."
@@ -19,20 +19,25 @@ alpaca_data = []
 # 打开输入文件并读取内容
 with open('../../dataset/ready_sentences_dataset/6k_sentences.json', 'r',
           encoding='utf-8') as in_preds, \
-        open('../../dataset/finetune/aliPCSDData/output6k.json', 'r', encoding='utf-8') as in_code, \
-        open("../../dataset/finetune/aliPCSDData/aliref.txt", 'r', encoding='utf-8') as in_nl:
+        open('../../experiment/ds-coder-1_3B/ocaml_result/ocaml_2_python_clean.txt', 'r', encoding='utf-8') as in_code, \
+        open("../../experiment/ds-coder-1_3B/ocaml_result/ocaml_ref_4081.txt", 'r', encoding='utf-8') as in_nl:
     codes = []
     for line in in_code:
-        code_json = json.loads(line)
-        code = code_json.get('raw_code', '')
-        codes.append(code.strip())
-    print(len(codes))
+        code = line.split(":",1)[1].strip()
+        codes.append(code)
+        if len(codes) ==4081: break
+    # for line in in_code:
+    #     code_json = json.loads(line)
+    #     code = code_json.get('raw_code', '')
+    #     codes.append(code.strip())
+    # print(len(codes))
     nls = []
     for line in in_nl:
         nl = line.split(':')[1]
         nls.append(nl.strip())
     faith_nl = 0
     for index, line in enumerate(in_preds):
+        if index ==4081:break
         # 解析 JSONL 行
         data = json.loads(line)
 
@@ -105,11 +110,13 @@ with open('../../dataset/ready_sentences_dataset/6k_sentences.json', 'r',
         #     instruction = i_without_sentence
         #     prompt = prompt_without_sentence
         # 创建 Alpaca 格式的字典
+        i = f"""
+        Code: {code}"""
         alpaca_format = {
-            "instruction": instruction,
-            "input": prompt,  # 用户输入（选填），这里留空
+            "instruction": "Generate a ONE-LINE summary for this code:",
+            "input": i,  # 用户输入（选填），这里留空
             "output": nl,
-            "system": system_prompt,
+            "system": "",
             "history": []  # 历史记录留空
         }
 

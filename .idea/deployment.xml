@@ -3,38 +3,24 @@
   <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="buli4090">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="buliA102">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" web="" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@connect.westb.seetacloud.com:22426 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/root/autodl-tmp/L2NL" local="$PROJECT_DIR$" web="/root/autodl-tmp/L2NL" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@nm.tools.buluai.cn:10565 password">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="star@172.25.214.16:22 password">
+      <paths name="root@connect.westc.gpuhub.com:48377 password">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@nm.tools.buluai.cn:10027 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="star@192.168.1.144:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
