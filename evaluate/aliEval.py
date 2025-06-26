@@ -4,7 +4,7 @@ from nltk.tokenize import word_tokenize
 from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
 
-from . import MyscoreBert
+import MyscoreBert
 
 # 下载 NLTK 数据（仅第一次需要）
 nltk.download('punkt')
@@ -74,7 +74,7 @@ def compute_bertscore(refs, hyps):
     P, R, F1 = MyscoreBert.score(
         hyps,
         refs,
-        model_type='model/microsoft/deberta-xlarge-mnli',  # 不使用预设模型名
+        model_type='../model/microsoft/deberta-xlarge-mnli',  # 不使用预设模型名
         lang="en",
     )
     scores = F1.tolist()
@@ -83,8 +83,8 @@ def compute_bertscore(refs, hyps):
 def main():
     #python -m evaluate.aliEval
 
-    HYP_PATH = "experiment/ds-coder-1_3B/rkt_result/rkt_python_NL_4051_2th_c_sft_b.txt"
-    REF_PATH = "experiment/ds-coder-1_3B/rkt_result/rkt_ref_4051.txt"
+    HYP_PATH = "../experiment/ds-coder-1_3B/rkt_result/rkt_python_NL_4051_2th_c_sft_b.txt"
+    REF_PATH = "../experiment/ds-coder-1_3B/rkt_result/rkt_ref_4051.txt"
 
     references = read_file(REF_PATH)
     hypotheses = read_file(HYP_PATH)
@@ -96,7 +96,7 @@ def main():
     avg_bleu, bleu_list = compute_bleu(references, hypotheses)
     avg_rouge, rouge_list = compute_rouge(references, hypotheses)
     avg_meteor, meteor_list = compute_meteor(references, hypotheses)
-    avg_bertscore, bertscore_list = compute_bertscore(references, hypotheses)
+    avg_bertscore,  bertscore_list = compute_bertscore(references, hypotheses)
 
     # 可选：打印每句结果
     # for i, (b, r, m, bs) in enumerate(zip(bleu_list, rouge_list, meteor_list, bertscore_list)):

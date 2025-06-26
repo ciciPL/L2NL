@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
-    <option name="confirmBeforeUploading" value="false" />
+  <component name="PublishConfigData">
     <serverData>
+      <paths name="root@connect.westb.seetacloud.com:22426 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="root@connect.westc.gpuhub.com:48377 password">
         <serverdata>
           <mappings>
@@ -17,10 +23,10 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="star@192.168.1.144:22 password">
+      <paths name="star@172.25.214.16:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

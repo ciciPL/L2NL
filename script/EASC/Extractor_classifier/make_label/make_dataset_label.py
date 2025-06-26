@@ -459,7 +459,7 @@ if __name__ == '__main__':
     input_root = f'../../../../dataset/LowData/r/code.txt'
     output_root = f'../../../../dataset/LowData/r/R_sentences.jsonl'
 
-    make_LRPL_sentences_ast(input_root, output_root,language)
+    make_LRPL_sentences_ast(input_root, output_root,3760)
     # 确保输出目录存在
     # if not os.path.exists(output_root):
     #     os.makedirs(output_root)

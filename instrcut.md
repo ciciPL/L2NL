@@ -1,10 +1,13 @@
 ```bash
-export MODEL_PATH="../../model/deepseek-coder-1.3b-instruct"
-export DATASET_PATH="train_6k_sentences_split"
-export EVAL_PATH="val_6k_sentences"
-export OUTPUT_PATH="../output_train_6k_with_sentence_shiyanshi"
+ssh -p 48377 root@connect.westc.gpuhub.com
+VK26pgE4zNIw
 
-torchrun --nproc_per_node=2 src/train.py \
+export MODEL_PATH="../../model/deepseek-ai/deepseek-coder-1.3b-instruct"
+export DATASET_PATH="train_6k_with_sentence_split"
+export EVAL_PATH="val_6k_with_sentence"
+export OUTPUT_PATH="../output_train_6k_with_sentence"
+
+torchrun --nproc_per_node=1 src/train.py \
     --stage sft \
     --do_train \
     --do_eval \
@@ -27,17 +30,17 @@ torchrun --nproc_per_node=2 src/train.py \
     --weight_decay 0.005 \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 32 \
-    --gradient_accumulation_steps 2 \
+    --gradient_accumulation_steps 4 \
     --learning_rate 2e-5 \
     --lr_scheduler_type cosine \
-    --logging_steps 10 \
-    --cutoff_len 1150 \
-    --save_steps 200 \
+    --logging_steps 1 \
+    --cutoff_len 1024 \
+    --save_steps 100 \
     --plot_loss \
-    --num_train_epochs 10 \
+    --num_train_epochs 8 \
     --bf16 \
     --eval_strategy="steps" \
-    --eval_steps 200 \
+    --eval_steps 100 \
     --max_new_tokens 25 \
     --temperature 0.1 \
     --top_p 0.9 \
@@ -52,25 +55,25 @@ torchrun --nproc_per_node=2 src/train.py \
     # 可选：根据需要调整lora_rank和lora_alpha
     # --lora_rank 32 \
     # --lora_alpha 64
-
+    
+cd finetune/LLaMA-Factory
 export MODEL_PATH="../../model/deepseek-coder-1.3b-instruct"
-export EVAL_PATH="val_6k_sentences"
-export OUTPUT_PATH="../output_train_6k_with_sentence_shiyanshi/checkpoint-1000"
-export EVAL_OUTPUT_PATH="../predictions_do_eval_predict/python_nl_do_predict.jsonl"
+export EVAL_PATH="val_6k_with_sentence"
+export OUTPUT_PATH="../output_train_6k_with_sentence_shiyanshi/checkpoint-1200"
 torchrun --nproc_per_node=1 src/train.py \
     --stage sft \
     --do_predict \
+    --predict_with_generate \
     --model_name_or_path $MODEL_PATH \
-    --template deepseek \
-    --finetuning_type lora \
     --adapter_name_or_path $OUTPUT_PATH \
     --eval_dataset $EVAL_PATH \
-    --output_dir "../predictions_do_eval_predict_logs" \
-    --per_device_eval_batch_size 16 \
+    --template deepseek \
+    --finetuning_type lora \
+    --output_dir ../eval_result/PYTHON_sentences \
+    --per_device_eval_batch_size 8 \
+    --max_new_tokens 25 \
     --temperature 0.1 \
     --top_p 0.9 \
     --repetition_penalty 1.5 \
-    --max_new_tokens 25 \
     --do_sample \
-    --predict_with_generate \
     --use_fast_tokenizer

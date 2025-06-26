@@ -77,6 +77,22 @@ def run_sft(
     gen_kwargs["eos_token_id"] = [tokenizer.eos_token_id] + tokenizer.additional_special_tokens_ids
     gen_kwargs["pad_token_id"] = tokenizer.pad_token_id
 
+    # =====================> 在这里插入打印代码 <=====================
+    if training_args.do_predict:  # 只在预测时打印，避免训练时干扰
+        import json
+        from ...extras.logging import get_logger
+        logger = get_logger(__name__)
+        logger.warning("--- Detected `do_predict`, printing generation arguments: ---")
+
+        # 为了更清晰地显示，我们复制一份字典并移除一些不那么重要的值
+        printable_kwargs = gen_kwargs.copy()
+        printable_kwargs.pop("eos_token_id", None)
+        printable_kwargs.pop("pad_token_id", None)
+
+        logger.warning(json.dumps(printable_kwargs, indent=2))
+        logger.warning("-------------------------------------------------------------")
+    # =====================> 插入代码结束 <=====================
+
     # Initialize our Trainer
     trainer = CustomSeq2SeqTrainer(
         model=model,

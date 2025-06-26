@@ -1,17 +1,12 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import re
-import xml.sax.saxutils
-
-import nltk
+import json
 from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score
 from rouge_score import rouge_scorer
-
-import MyscoreBert
 import bleu
+
 
 # bert_score import and calculation might fail, handle gracefully
 
@@ -64,31 +59,46 @@ def read_files(ref_path, hyp_path, num, size):
     print(ids)
     print(f"Reading references from: {ref_path}")
     with open(ref_path, 'r', encoding='utf-8') as f_ref:
+        # datas = json.load(f_ref)
+        # for data in datas:
+        #     label = data['decoded_label']
+        #     references.append(label)
         for i, line in enumerate(f_ref):
             line = line.strip()
-            # if not line: continue
-            parts = line.split(':', 1)
-            if parts[0] == str(size): break
-            # if parts[0] in ids:continue
-            if len(parts) == 2:
-                references.append(parts[1].strip())
-            else:
-                malformed_refs += 1
+            data = json.loads(line)
+            label = data['decoded_label']
+            references.append(label)
+            # # if not line: continue
+            # parts = line.split(':', 1)
+            # if parts[0] == str(size): break
+            # # if parts[0] in ids:continue
+            # if len(parts) == 2:
+            #     references.append(parts[1].strip())
+            # else:
+            #     malformed_refs += 1
 
     print(f"Reading hypotheses from: {hyp_path}")
     with open(hyp_path, 'r', encoding='utf-8') as f_hyp:
+        # datas = json.load(f_hyp)
+        # for data in datas:
+        #     label = data['decoded_predict']
+        #     hypotheses.append(label)
         for i, line in enumerate(f_hyp):
-            # line = line.strip()
-            # if not line: continue
-            parts = line.split(':', 1)
-            if parts[0] == str(size): break
-            if len(parts) == 2:
-                clean_code = re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9\s]', '', parts[1].strip())
-                hypotheses.append(parts[1].strip().split('.')[0])
-                # hypotheses.append(parts[1].strip().replace('{', '').replace('}', '').replace('[', '').replace(']', '').replace('/', '').replace('\'',''))
-            else:
-                hypotheses.append('')
-                # malformed_hyps += 1
+
+            line = line.strip()
+            data = json.loads(line)
+            pre = data['decoded_predict']
+            hypotheses.append(pre)
+            # # if not line: continue
+            # parts = line.split(':', 1)
+            # if parts[0] == str(size): break
+            # if len(parts) == 2:
+            #     clean_code = re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9\s]', '', parts[1].strip())
+            #     hypotheses.append(parts[1].strip().split('.')[0])
+            #     # hypotheses.append(parts[1].strip().replace('{', '').replace('}', '').replace('[', '').replace(']', '').replace('/', '').replace('\'',''))
+            # else:
+            #     hypotheses.append('')
+            #     # malformed_hyps += 1
 
     if malformed_refs > 0:
         print(f"Warning: Found {malformed_refs} potentially malformed lines in reference file (missing ':').")
@@ -113,18 +123,6 @@ def read_files(ref_path, hyp_path, num, size):
     print(f"Successfully read {len(references)} reference-hypothesis pairs.")
     return references, hypotheses
 
-
-def normalize(s):
-    if type(s) is not str:
-        s = " ".join(s)
-    for (pattern, replace) in bleu.normalize1:
-        s = re.sub(pattern, replace, s)
-    s = xml.sax.saxutils.unescape(s, {"&quot;": ""})
-    for (pattern, replace) in bleu.normalize2:
-        s = re.sub(pattern, replace, s)
-    return s.split()
-
-
 # --- Evaluation Function ---
 def evaluate_summaries(references, hypotheses, local_model_path):
     """计算各种评估指标"""
@@ -145,7 +143,7 @@ def evaluate_summaries(references, hypotheses, local_model_path):
     print(bleu_score)
 
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-    smooth_func = SmoothingFunction().method1
+    smooth_func = SmoothingFunction().method4
 
     print(f"\nEvaluating {len(references)} summaries...")
 
@@ -254,13 +252,12 @@ def evaluate_summaries(references, hypotheses, local_model_path):
         "BERTScore Failed": bertscore_failed
     }
 
-
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-1_3B/r_result/r_ref_3840.txt",
+    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-sentences/raw_predictions_with_decoded_text.jsonl",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str,default="../experiment/ds-coder-1_3B/r_result/r_2_python_2_NL_sentences_2th_clean.txt",
+    parser.add_argument("-p", "--prediction", type=str,default="../finetune/eval_result/PYTHON_sentences/raw_predictions.jsonl",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default="../model/microsoft/deberta-xlarge-mnli",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")
