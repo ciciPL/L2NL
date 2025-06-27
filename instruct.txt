@@ -36,12 +36,13 @@ ROUGE-L Score: 15.4693
 
 cd ../star/Downloads/cyqProjects/L2NL
 conda activate ../env/L2NL
+cd finetune/LLaMA-Factory
 watch -n 1 nvidia-smi
 export HF_ENDPOINT=https://hf-mirror.com
 huggingface-cli download --resume-download deepseek-ai/deepseek-coder-1.3b-instruct --local-dir model/deepseek-ai/deepseek-coder-1.3b-instruct
 
     --deepspeed $DS_CONFIG_PATH \
-tensorboard --logdir finetune/output_train_6k_with_sentence/runs --port 6007 --bind_all
+tensorboard --logdir finetune/output_train_6k_with_sentence_myMetric/runs --port 6007 --bind_all
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" --name my-elasticsearch docker.elastic.co/elasticsearch/elasticsearch:7.17.0
 torchrun --nproc_per_node 1 src/train.py --stage sft --do_train --use_fast_tokenizer --model_name_or_path '../../model/Qwen2.5-Coder-1.5B-Instruct' --dataset train_pcsd --template qwen --finetuning_type lora --lora_target q_proj,v_proj --output_dir '../qwen2.5-1.3b' --overwrite_cache --overwrite_output_dir --warmup_steps 100 --weight_decay 0.1 --per_device_train_batch_size 2 --gradient_accumulation_steps 4 --ddp_timeout 9000 --learning_rate 5e-6 --lr_scheduler_type cosine --logging_steps 1 --cutoff_len 4096 --save_steps 1000 --plot_loss --num_train_epochs 5 --bf16
 

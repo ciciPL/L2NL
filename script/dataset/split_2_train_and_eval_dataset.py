@@ -93,9 +93,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     split_dataset(
-        input_file_path='../../dataset/finetune/alpacaPCSD/train_6k_with_sentence.json',
-        train_file_path='../../dataset/finetune/alpacaPCSD/train_6k_with_sentence_split.json',
-        val_file_path='../../dataset/finetune/alpacaPCSD/val_6k_with_sentence.json',
+        input_file_path='../../dataset/finetune/alpacaPCSD/train_6k_without_sentence.json',
+        train_file_path='../../finetune/LLaMA-Factory/data/train_6k_without_sentence_split.json',
+        val_file_path='../../finetune/LLaMA-Factory/data/val_6k_without_sentence.json',
         val_ratio=args.val_ratio,
         shuffle=args.shuffle,
         random_seed=args.seed

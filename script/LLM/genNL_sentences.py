@@ -19,7 +19,7 @@ np.random.seed(SEED)
 # --- 1. 配置 ---
 BATCH_SIZE = 8
 base_model_path = "../../model/deepseek-coder-1.3b-instruct"
-lora_checkpoint_path = "../../finetune/output_train_6k_with_sentence_shiyanshi/checkpoint-1200"
+lora_checkpoint_path = "../../finetune/output_train_6k_with_sentence_myMetric/checkpoint-600"
 data_file_path = "../../finetune/LLaMA-Factory/data/val_6k_with_sentence.json"
 
 # --- [明确] 定义唯一的输出文件路径，并明确其为JSONL格式 ---
@@ -39,7 +39,7 @@ tokenizer.padding_side = "left"
 base_model = AutoModelForCausalLM.from_pretrained(
     base_model_path,
     torch_dtype=torch.bfloat16,
-    device_map="auto",
+    device_map={'1'},
     trust_remote_code=True,
 )
 
