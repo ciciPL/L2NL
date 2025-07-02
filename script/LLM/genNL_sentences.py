@@ -20,10 +20,10 @@ np.random.seed(SEED)
 BATCH_SIZE = 8
 base_model_path = "../../model/deepseek-coder-1.3b-instruct"
 lora_checkpoint_path = "../../finetune/output_train_6k_with_sentence_myMetric/checkpoint-600"
-data_file_path = "../../dataset/finetune/alpacaPCSD/R_python_with_sentence_structure.json"
+data_file_path = "../../dataset/finetune/alpacaPCSD/Racket_python_with_sentence_structure.json"
 
 # --- [明确] 定义唯一的输出文件路径，并明确其为JSONL格式 ---
-output_raw_ids_path = "../../experiment/ds-coder-sentences/R_python_nl_sentences_structure.jsonl"
+output_raw_ids_path = "../../experiment/ds-coder-sentences/Racket_python_nl_sentences_structure.jsonl"
 
 # --- 2. 加载模型和分词器 ---
 print("正在加载模型和分词器...")
@@ -119,7 +119,7 @@ for i in tqdm(range(num_batches), desc="推理进度"):
 
     generation_output = model.generate(
         **inputs,
-        max_new_tokens=25,
+        max_new_tokens=20,
         temperature=0.1,
         top_p=0.5,
         top_k=50,

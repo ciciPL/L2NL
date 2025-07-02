@@ -2,7 +2,7 @@ import json
 
 # 输入和输出文件路径
 # input_file_path = '../../dataset/ready_sentences_dataset/Clean_PCSD-ast/train/output6k.json'  # 替换为你的输入文件路径
-output_file_path = '../../dataset/finetune/alpacaPCSD/Ocaml_python_with_sentence_structure.json'  # 替换为你想要的输出文件路径
+output_file_path = '../../dataset/finetune/alpacaPCSD/Racket_python_with_sentence_structure.json'  # 替换为你想要的输出文件路径
 
 # 系统提示词（适合摘要任务）
 # system_prompt = "You are an expert code summarization AI. Your task is to generate a concise, ONE-LINE summary based on the provided CODE and its important Snippets."
@@ -25,10 +25,10 @@ with open("../../dataset/LowData/r/code.txt", 'r', encoding='utf8') as f:
         R_code.append(code)
         if len(R_code) == 3759: break
 # 打开输入文件并读取内容
-with open('../../script/EASC/output/python/predictions/python_Ocaml_structure_preds.jsonl', 'r',
+with open('../../script/EASC/output/python/predictions/python_Racket_structure_preds.jsonl', 'r',
           encoding='utf-8') as in_preds, \
-        open('../../experiment/ds-coder-1_3B/ocaml_result/ocaml_2_python_clean.txt', 'r', encoding='utf-8') as in_code, \
-        open("../../experiment/ds-coder-1_3B/ocaml_result/ocaml_ref_4081.txt", 'r', encoding='utf-8') as in_nl:
+        open('../../experiment/ds-coder-1_3B/rkt_result/rkt_2_python_40510.txt', 'r', encoding='utf-8') as in_code, \
+        open("../../experiment/ds-coder-1_3B/rkt_result/rkt_ref_4051.txt", 'r', encoding='utf-8') as in_nl:
     codes = []
     for line in in_code:
         code = line.split(":",1)[1].strip()

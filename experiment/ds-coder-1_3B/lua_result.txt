@@ -22,8 +22,15 @@ BLEU-4:          3.1560
 ROUGE-L (F1):    24.9829
 METEOR:          29.1325
 BERTScore (F1):  63.4641
-base top10
-BLEU-4:          2.1076
-ROUGE-L (F1):    19.2610
-METEOR:          23.4802
-BERTScore (F1):  62.5370
+
+Lua_python_nl_sentences_structure.jsonl
+BLEU-4:          3.7701
+ROUGE-L (F1):    27.7753
+METEOR:          20.9540
+BERTScore (F1):  67.4618
+
+                                        base top10
+                                        BLEU-4:          2.1076
+                                        ROUGE-L (F1):    19.2610
+                                        METEOR:          23.4802
+                                        BERTScore (F1):  62.5370

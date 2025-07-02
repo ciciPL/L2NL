@@ -34,6 +34,16 @@ ROUGE-L (F1):    27.8635
 METEOR:          29.2283
 BERTScore (F1):  65.1621
 
+BLEU-4:          3.8850
+ROUGE-L (F1):    28.3555
+METEOR:          21.5862
+BERTScore (F1):  67.5533
+
+
+
+
+
+
 BLEU-4:          2.4237
 ROUGE-L (F1):    21.4661
 METEOR:          26.1642

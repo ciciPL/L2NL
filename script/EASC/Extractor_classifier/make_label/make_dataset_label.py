@@ -538,7 +538,7 @@ def make_LRPL_sentences_structure(input_path, output_path, stop_index, r_script_
     total_num = 0
     no_ex_seqs_num = 0
     ast_failed_num = 0
-
+    only_fuction_def = 0
     total_lines = 0
     with open(input_path, encoding="utf-8") as f:
         for _ in f:
@@ -552,7 +552,7 @@ def make_LRPL_sentences_structure(input_path, output_path, stop_index, r_script_
             if int(idx) == stop_index:
                 break
 
-            parsed_result, ast_success = split_julia_by_structure(raw_code)
+            ast_success, parsed_result = split_racket_by_structure(raw_code)
 
             code_seqs = []
             if ast_success:
@@ -571,6 +571,13 @@ def make_LRPL_sentences_structure(input_path, output_path, stop_index, r_script_
                 # if not non_others_nonempty:
                 #     no_ex_seqs_num += 1
             else:
+                # grammer_result = split_broken_julia_structure(raw_code)
+                # for key in ['function_def', 'loops', 'conditionals', 'assignments', 'others']:
+                #     for stmt in grammer_result.get(key, []):
+                #         tokens = stmt.split()
+                #         cleaned = ' '.join(tokens).lower()
+                #         if cleaned.strip():
+                #             code_seqs.append(cleaned)
                 ast_failed_num += 1
 
             out_js = {
@@ -583,17 +590,22 @@ def make_LRPL_sentences_structure(input_path, output_path, stop_index, r_script_
                 'assignments': parsed_result.get('assignments', []),
                 'others': parsed_result.get('others', [])
             }
-            if len(out_js.get("cleaned_seqs")) == 1 or len(out_js.get("cleaned_seqs")) == 0:
+            if len(out_js.get("cleaned_seqs")) == len(out_js.get("function_def")) and len(out_js.get("cleaned_seqs"))!=0:
+                only_fuction_def+=1
+            if len(out_js.get("cleaned_seqs")) == 0:
                 no_ex_seqs_num += 1
+
             out_f.write(out_js)
             total_num += 1
 
     print('total num:', total_num)
     print('no ex seqs num:', no_ex_seqs_num)
     print('AST parse failed num:', ast_failed_num)
+    print('only_fuction_def num:', only_fuction_def)
     if total_num > 0:
         print('no ex seqs %:', np.round(no_ex_seqs_num / total_num, 4))
         print('AST parse failed %:', np.round(ast_failed_num / total_num, 4))
+        print('only_fuction_def num %:', np.round(only_fuction_def / total_num, 4))
     else:
         print('no ex seqs %: 0.0')
         print('AST parse failed %: 0.0')
@@ -606,8 +618,8 @@ if __name__ == '__main__':
     # input_root = f'../../../../dataset/CSN/{language}/'
     # output_root = f'../../../../dataset/CSN/{language}-cls/'
 
-    input_root = f'../../../../dataset/LowData/julia/code.txt'
-    output_root = f'../../../../dataset/LowData/julia/Julia_structure.jsonl'
+    input_root = f'../../../../dataset/LowData/racket/code_rkt.txt'
+    output_root = f'../../../../dataset/LowData/racket/Racket_structure.jsonl'
 
     make_LRPL_sentences_structure(input_root, output_root,3760,'../../../../vendor/parse_structure.R')
     # 确保输出目录存在

@@ -1,4 +1,5 @@
 import ast
+import ctypes
 import json
 import os
 import subprocess
@@ -7,6 +8,7 @@ from io import StringIO
 import sys
 
 import tree_sitter_julia
+import tree_sitter_lua
 import tree_sitter_ocaml
 from tree_sitter import Language, Parser
 
@@ -39,7 +41,6 @@ def split_java_to_seqs(code_token_list):
         else:
             code_seqs.append(' '.join(code_snap))
     return code_seqs
-
 # def split_python_to_seqs(code_seq, code_token_list):
 #     '''
 #     1. 需要去除\'''\'''的内容
@@ -940,3 +941,312 @@ def split_julia_by_structure(julia_code: str):
     classify_node(root_node, code_bytes, results)
     return  results,True
 
+def split_broken_julia_structure(julia_code: str) -> dict:
+    def preprocess_julia_code(code: str) -> str:
+        """
+        把长的一行多语句代码，尽量拆成多行，方便后续分析。
+        这里简单用分号拆分，并把关键字前后加换行尝试拆分。
+        """
+        # 先用分号拆分
+        parts = []
+        for part in code.split(';'):
+            parts.append(part.strip())
+
+        code = '\n'.join(parts)
+
+        # 关键字周围加换行
+        keywords = ['function', 'for', 'while', 'if', 'try', 'catch', 'elseif', 'else', 'end']
+        for kw in keywords:
+            # 前后加换行
+            code = code.replace(f' {kw} ', f'\n{kw}\n')
+            code = code.replace(f' {kw}(', f'\n{kw}(')
+            code = code.replace(f'){kw} ', f'){kw}\n')
+            code = code.replace(f'{kw} ', f'{kw}\n')
+
+        # 额外清理多余空行
+        lines = [line.strip() for line in code.splitlines()]
+        lines = [line for line in lines if line]
+        return '\n'.join(lines)
+    code = preprocess_julia_code(julia_code)
+
+    function_def = []
+    loops = []
+    conditionals = []
+    bindings = []
+    others = []
+
+    lines = code.splitlines()
+    stack = []  # (block_type, acc_lines)
+
+    block_keywords = {
+        'function': 'function_def',
+        'for': 'loops',
+        'while': 'loops',
+        'if': 'conditionals',
+        'try': 'conditionals',
+    }
+
+    conditional_sub_keywords = {'elseif', 'else', 'catch', 'finally'}
+
+    def flush_block(block_type, acc_lines):
+        code_str = '\n'.join(acc_lines).strip()
+        if not code_str:
+            return
+        if block_type == 'function_def':
+            function_def.append(code_str)
+        elif block_type == 'loops':
+            loops.append(code_str)
+        elif block_type == 'conditionals':
+            conditionals.append(code_str)
+
+    for line in lines:
+        stripped = line.strip()
+
+        # 检查块起始关键字
+        found_start = False
+        for kw, btype in block_keywords.items():
+            if stripped.startswith(kw + ' ') or stripped == kw or stripped.startswith(kw + '('):
+                stack.append((btype, [line]))
+                found_start = True
+                break
+        if found_start:
+            continue
+
+        # 检查条件子关键字
+        if stack and any(stripped.startswith(k) for k in conditional_sub_keywords):
+            stack[-1][1].append(line)
+            continue
+
+        # 检查end
+        if stripped == 'end':
+            if stack:
+                btype, acc_lines = stack.pop()
+                acc_lines.append(line)
+                flush_block(btype, acc_lines)
+            else:
+                others.append(line)
+            continue
+
+        # 非关键字语句
+        if stack:
+            stack[-1][1].append(line)
+        else:
+            # 顶层赋值判断
+            if '=' in stripped and not stripped.startswith('='):
+                left = stripped.split('=')[0].strip()
+                if left.replace('.', '').replace('_', '').isalnum():
+                    bindings.append(line)
+                else:
+                    others.append(line)
+            else:
+                others.append(line)
+
+    # 处理残留块
+    while stack:
+        btype, acc_lines = stack.pop()
+        flush_block(btype, acc_lines)
+
+    return {
+        "function_def": function_def,
+        "loops": loops,
+        "conditionals": conditionals,
+        "assignments": bindings,
+        "others": others,
+    }
+
+def split_lua_by_structure(lua_code: str):
+    # --- 辅助函数 ---
+    def node_text(node, code_bytes):
+        if not node:
+            return ""
+        return code_bytes[node.start_byte:node.end_byte].decode('utf8')
+
+    def find_child_by_type(parent_node, target_type, recursive=False):
+        if not parent_node:
+            return None
+        queue = list(parent_node.children)
+        while queue:
+            node = queue.pop(0)
+            if node.type == target_type:
+                return node
+            if recursive:
+                queue.extend(node.children)
+        return None
+
+    def classify_node(node, code_bytes, results_dict):
+        if not node or not node.is_named:
+            return
+
+        node_type = node.type
+
+        # 函数定义
+        if node_type in ['function_declaration', 'function_definition', 'function_expression']:
+            full_text = node_text(node, code_bytes)
+            body_node = find_child_by_type(node, 'block', recursive=True)  # Lua函数体一般是block节点
+            if body_node:
+                body_text = node_text(body_node, code_bytes)
+                decl_text = full_text.replace(body_text, '{}')
+                results_dict['function_def'].append(decl_text)
+                classify_node(body_node, code_bytes, results_dict)
+            else:
+                results_dict['function_def'].append(full_text)
+            return
+
+        # 循环
+        elif node_type in ['for_statement', 'while_statement', 'repeat_statement']:
+            results_dict['loops'].append(node_text(node, code_bytes))
+            body_node = find_child_by_type(node, 'block', recursive=True)
+            classify_node(body_node, code_bytes, results_dict)
+            return
+
+        # 条件
+        elif node_type == 'if_statement':
+            results_dict['conditionals'].append(node_text(node, code_bytes))
+            consequence_node = find_child_by_type(node, 'block', recursive=True)
+            else_node = find_child_by_type(node, 'else', recursive=True)
+            classify_node(consequence_node, code_bytes, results_dict)
+            classify_node(else_node, code_bytes, results_dict)
+            return
+
+        # 赋值语句
+        elif node_type in ['variable_declaration', 'assignment_statement', 'local_variable_declaration']:
+            results_dict['assignments'].append(node_text(node, code_bytes))
+            return
+
+
+        else:
+
+            for child in node.children:
+                classify_node(child, code_bytes, results_dict)
+
+            if node.type in ['return_statement', 'call_expression', 'expression_statement']:
+                results_dict['others'].append(node_text(node, code_bytes))
+
+    # --- 主逻辑 ---
+    code_bytes = lua_code.encode('utf8')
+
+    parser = Parser(Language(tree_sitter_lua.language()))
+
+    tree = parser.parse(code_bytes)
+    root_node = tree.root_node
+
+    results = {
+        "function_def": [],
+        "loops": [],
+        "conditionals": [],
+        "assignments": [],
+        "others": []
+    }
+
+    for top_node in root_node.children:
+        classify_node(top_node, code_bytes, results)
+
+    return results, True
+
+def split_racket_by_structure(racket_code: str):
+    """
+    解析Racket代码字符串，并将其扁平化、互不重叠地分类。
+    返回一个布尔成功标志和包含结果或错误的字典。
+
+    Args:
+        racket_code (str): 要解析的 Racket 源代码。
+
+    Returns:
+        tuple[bool, dict]: 一个包含两个元素的元组:
+              - success (bool): 解析是否成功。
+              - result (dict): 成功时是包含分类结果的字典，
+                               失败时是包含错误信息的字典 e.g., {"error": "..."}。
+    """
+    lib_path = '../../../../vendor/build/racket-parser.so'
+
+    # --- 1. 加载已编译的库 ---
+    try:
+        lib = ctypes.cdll.LoadLibrary(lib_path)
+        language_func = getattr(lib, 'tree_sitter_racket')
+        language_func.restype = ctypes.c_void_p
+        language_ptr = language_func()
+        RACKET_LANGUAGE = Language(language_ptr)
+    except (OSError, AttributeError) as e:
+        error_msg = (
+            f"加载解析器库 '{lib_path}' 失败: {e}\n\n"
+            "请确保您已通过命令行成功手动编译了该库。"
+        )
+        # **修改点**: 返回 False 和一个包含错误的字典
+        return False, {"error": error_msg}
+
+    parser = Parser(RACKET_LANGUAGE)
+
+    # --- 辅助函数和核心逻辑 (不变) ---
+    def node_text(node, code_bytes):
+        if not node: return ""
+        return code_bytes[node.start_byte:node.end_byte].decode('utf8')
+
+    def classify_node(node, code_bytes, results_dict):
+        if not node or not node.is_named or node.type == 'comment':
+            return
+
+        node_type = node.type
+
+        if node_type == 'extension':
+            results_dict['others'].append(node_text(node, code_bytes))
+            return
+
+        if node_type == 'list':
+            children = [child for child in node.children if child.is_named]
+            if not children: return
+
+            first_element = children[0]
+            if first_element.type != 'symbol':
+                results_dict['others'].append(node_text(node, code_bytes))
+                return
+
+            op_name = node_text(first_element, code_bytes)
+
+            if op_name == 'define':
+                if len(children) > 1 and children[1].type == 'list':
+                    sig_node = children[1]
+                    results_dict['function_def'].append(f"(define {node_text(sig_node, code_bytes)} ...)")
+                    for body_expr in children[2:]:
+                        classify_node(body_expr, code_bytes, results_dict)
+                else:
+                    results_dict['bindings'].append(node_text(node, code_bytes))
+                return
+
+            elif 'let' in op_name:
+                results_dict['bindings'].append(node_text(node, code_bytes))
+                if len(children) > 2:
+                    for body_expr in children[2:]:
+                        classify_node(body_expr, code_bytes, results_dict)
+                return
+
+            elif 'for' in op_name:
+                results_dict['loops'].append(node_text(node, code_bytes))
+                return
+
+            elif op_name in ['if', 'cond']:
+                results_dict['conditionals'].append(node_text(node, code_bytes))
+                return
+
+            else:
+                results_dict['others'].append(node_text(node, code_bytes))
+                return
+
+        elif node_type not in ['program']:
+            results_dict['others'].append(node_text(node, code_bytes))
+
+    # --- 主逻辑 ---
+    code_bytes = racket_code.encode('utf8')
+    tree = parser.parse(code_bytes)
+    root_node = tree.root_node
+    if root_node.has_error:
+        # **修改点**: 返回 False 和一个包含错误的字典
+        return False, {"error": "解析错误: Racket代码包含语法错误。"}
+
+    results = {
+        "function_def": [], "loops": [], "conditionals": [], "bindings": [], "others": []
+    }
+    for top_level_expr in root_node.children:
+        classify_node(top_level_expr, code_bytes, results)
+
+    # **修改点**: 返回 True 和包含结果的字典
+    return True, results

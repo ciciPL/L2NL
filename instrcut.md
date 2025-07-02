@@ -58,8 +58,8 @@ torchrun --nproc_per_node=1 src/train.py \
     
 cd finetune/LLaMA-Factory
 export MODEL_PATH="../../model/deepseek-coder-1.3b-instruct"
-export EVAL_PATH="val_6k_with_sentence"
-export OUTPUT_PATH="../output_train_6k_with_sentence_myMetric/checkpoint-800"
+export EVAL_PATH="Racket_python_with_sentence_structure"
+export OUTPUT_PATH="../output_train_6k_with_sentence_myMetric/checkpoint-600"
 torchrun --nproc_per_node=1 src/train.py \
     --stage sft \
     --do_predict \
@@ -69,12 +69,13 @@ torchrun --nproc_per_node=1 src/train.py \
     --eval_dataset $EVAL_PATH \
     --template deepseek \
     --finetuning_type lora \
-    --output_dir ../llama_result/predict/ \
+    --output_dir ../llama_result/predict/rkt/ \
     --per_device_eval_batch_size 8 \
     --max_new_tokens 25 \
     --temperature 0.1 \
     --top_p 0.9 \
     --top_k 50 \
+    --num_beams 1 \
     --repetition_penalty 1.5 \
     --do_sample True \
     --use_fast_tokenizer

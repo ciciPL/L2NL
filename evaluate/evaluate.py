@@ -66,7 +66,7 @@ def read_files(ref_path, hyp_path, num, size):
         for i, line in enumerate(f_ref):
             line = line.strip()
             data = json.loads(line)
-            label = data['decoded_label']
+            label = data['label']
             references.append(label)
             # # if not line: continue
             # parts = line.split(':', 1)
@@ -87,7 +87,7 @@ def read_files(ref_path, hyp_path, num, size):
 
             line = line.strip()
             data = json.loads(line)
-            pre = data['decoded_predict']
+            pre = data['predict']
             hypotheses.append(pre)
             # # if not line: continue
             # parts = line.split(':', 1)
@@ -254,9 +254,9 @@ def evaluate_summaries(references, hypotheses, local_model_path):
 # --- 主程序 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate code summaries.")
-    parser.add_argument("-r", "--reference", type=str, default="../experiment/ds-coder-sentences/R_python_nl_sentences_structure.jsonl",
+    parser.add_argument("-r", "--reference", type=str, default="../finetune/llama_result/predict/rkt/generated_predictions.jsonl",
                         help="Path to the reference summaries file (format: index:content).")
-    parser.add_argument("-p", "--prediction", type=str,default="../experiment/ds-coder-sentences/R_python_nl_sentences_structure.jsonl",
+    parser.add_argument("-p", "--prediction", type=str,default="../finetune/llama_result/predict/rkt/generated_predictions.jsonl",
                         help="Path to the predicted summaries file (format: index\\tcontent).")
     parser.add_argument("--model_path", type=str, default="../model/microsoft/deberta-xlarge-mnli",  # 改为 None，明确要求用户提供
                         help="Path to the local directory containing the pre-trained model files for BERTScore (e.g., unixcoder-base). Required for BERTScore.")

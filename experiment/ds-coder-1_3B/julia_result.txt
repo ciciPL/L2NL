@@ -20,3 +20,9 @@ L->H->NL sft
     ROUGE-L (F1):    23.1446
     METEOR:          29.9198
     BERTScore (F1):  61.9483
+
+Julia_python_nl_sentences_structure.jsonl
+BLEU-4:          3.8876
+ROUGE-L (F1):    27.8565
+METEOR:          21.2362
+BERTScore (F1):  67.2120

@@ -261,7 +261,7 @@ def main(language):
     parser.add_argument("--do_save_ex", default=True, help="是否保存带预测的样本")
     parser.add_argument("--eval_batch_size", default=32, type=int, help="评估/预测批次大小")
     parser.add_argument("--load_model_path", default='../output/python/checkpoint-best-loss/pytorch_model.bin', type=str, help="指定加载模型的路径 (默认为最佳模型)")
-    parser.add_argument("--predict_file", default="../../../dataset/LowData/ocaml/Ocaml_structure.jsonl", type=str, help="要预测的文件 (train, valid, or test)")
+    parser.add_argument("--predict_file", default="../../../dataset/LowData/racket/Racket_structure.jsonl", type=str, help="要预测的文件 (train, valid, or test)")
 
     ## 其他参数 (与 train.py 保持一致)
     parser.add_argument("--do_lower_case", action='store_true')
