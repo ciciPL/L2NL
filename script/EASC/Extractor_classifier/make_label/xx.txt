@@ -1,21 +1,16 @@
-Processing train.jsonl: 100%|██████████| 164923/164923 [07:10<00:00, 383.44it/s]
-total num: 164923
-no ex blocks num: 0
-no ex seqs num: 4987
-no ex blocks %: 0.0
-no ex seqs %: 0.0302
-Processing valid.jsonl: 100%|██████████| 5183/5183 [00:10<00:00, 509.88it/s]
-total num: 5183
-no ex blocks num: 0
-no ex seqs num: 155
-no ex blocks %: 0.0
-no ex seqs %: 0.0299
-Processing test.jsonl: 100%|██████████| 10955/10955 [00:27<00:00, 398.31it/s]
-total num: 10955
-no ex blocks num: 0
-no ex seqs num: 411
-no ex blocks %: 0.0
-no ex seqs %: 0.0375
+解析错误: OCaml代码在行 1, 列 153 附近包含语法错误。
+total num: 3759
+no ex seqs num: 11
+AST parse failed num: 10
+no ex seqs %: 0.0029
+AST parse failed %: 0.0027
+
+R
+total num: 3759
+no ex seqs num: 13
+AST parse failed num: 3
+no ex seqs %: 0.0035
+AST parse failed %: 0.0008
 
 BLEURT：一种学习的评估指标，使用迁移学习和人工注释来捕捉摘要的语义和语用方面。
 SIDE：一种专为代码摘要设计的指标，使用对比学习对合适和不合适的代码摘要的特征进行建模。

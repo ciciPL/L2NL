@@ -1,8 +1,3 @@
-{
-    "epoch": 2.9934640522875817,
-    "total_flos": 31065512214528.0,
-    "train_loss": 1.6002962555801659,
-    "train_runtime": 4270.7701,
-    "train_samples_per_second": 2.149,
-    "train_steps_per_second": 0.067
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:48614f2915d5d67a54aeb78e1cc722551fc6aeca36fbd9eb17532f5f5b30edb2
+size 217

@@ -20,10 +20,10 @@ np.random.seed(SEED)
 BATCH_SIZE = 8
 base_model_path = "../../model/deepseek-coder-1.3b-instruct"
 lora_checkpoint_path = "../../finetune/output_train_6k_with_sentence_myMetric/checkpoint-600"
-data_file_path = "../../finetune/LLaMA-Factory/data/val_6k_with_sentence.json"
+data_file_path = "../../dataset/finetune/alpacaPCSD/R_python_with_sentence_structure.json"
 
 # --- [明确] 定义唯一的输出文件路径，并明确其为JSONL格式 ---
-output_raw_ids_path = "../../experiment/ds-coder-sentences/raw_predictions_with_decoded_text.jsonl"
+output_raw_ids_path = "../../experiment/ds-coder-sentences/R_python_nl_sentences_structure.jsonl"
 
 # --- 2. 加载模型和分词器 ---
 print("正在加载模型和分词器...")
@@ -39,7 +39,7 @@ tokenizer.padding_side = "left"
 base_model = AutoModelForCausalLM.from_pretrained(
     base_model_path,
     torch_dtype=torch.bfloat16,
-    device_map={'1'},
+    device_map='auto',
     trust_remote_code=True,
 )
 
@@ -59,7 +59,7 @@ def build_deepseek_prompt(system_prompt, instruction, input_text):
     # 在system_prompt的前面加上一个换行符 `\n`
     # 这将使得分词器在自动添加BOS token后，紧接着就是这个换行符的ID (185)
     prompt_str = (
-        f"\n{system_prompt}\n\n" # <--- 在这里加上换行符
+        f"\n{system_prompt}\n\n"  # <--- 在这里加上换行符
         f"User: {user_content}\n\n"
         f"Assistant:"
     )
@@ -121,10 +121,10 @@ for i in tqdm(range(num_batches), desc="推理进度"):
         **inputs,
         max_new_tokens=25,
         temperature=0.1,
-        top_p=0.9,
+        top_p=0.5,
         top_k=50,
         num_beams=1,
-        length_penalty=1.0,
+        length_penalty=1.5,
         repetition_penalty=1.5,
         do_sample=True,
         eos_token_id=[tokenizer.eos_token_id, 32021]
@@ -150,7 +150,7 @@ for i in tqdm(range(num_batches), desc="推理进度"):
             "label_ids": labels_tokenized["input_ids"][j].tolist(),
             "decoded_input": decoded_inputs[j],
             "decoded_predict": decoded_predicts[j].strip(),
-            "decoded_label":decoded_labels[j]
+            "decoded_label": decoded_labels[j]
         })
 
 # --- 5. 将收集到的所有结果以JSONL格式写入文件 ---

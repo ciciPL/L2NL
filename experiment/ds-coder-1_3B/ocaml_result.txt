@@ -14,3 +14,9 @@ BLEU-4:          3.0475
 ROUGE-L (F1):    22.9025
 METEOR:          26.7940
 BERTScore (F1):  64.1991
+
+Ocaml_python_nl_sentences_structure.jsonl
+BLEU-4:          3.4141
+ROUGE-L (F1):    27.6888
+METEOR:          20.8668
+BERTScore (F1):  67.4370

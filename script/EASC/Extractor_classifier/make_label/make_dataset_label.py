@@ -48,7 +48,6 @@ def split_code_to_blocks(code_token_list):
             code_seqs.append(' '.join(code_snap))
     return code_seqs
 
-
 def split_java_to_seqs(code_token_list):
     lf_bracket_up = 0
     idxs = []
@@ -74,7 +73,6 @@ def split_java_to_seqs(code_token_list):
         else:
             code_seqs.append(' '.join(code_snap))
     return code_seqs
-
 
 def get_code_ex(code_seqs, nl_seq):
     if len(code_seqs) == 0 or len(nl_seq) == 0:
@@ -123,7 +121,6 @@ def get_code_ex(code_seqs, nl_seq):
     ex_words_num.append(len(ex_words))
     return ex_codes, ex_ids, fs, ps, rs, max_Rouge_l_r
 
-
 def make_pcsd_dataset(input_path, output_path, language):
     total_num = 0
     no_ex_seqs_num = 0
@@ -144,7 +141,7 @@ def make_pcsd_dataset(input_path, output_path, language):
             code_tokens_full = js['code'].split()
 
             # 1. 使用 AST 分割代码，并获取成功标志
-            code_statement_strings, ast_success = split_python_with_ast(raw_code)  # <--- 接收标志
+            code_statement_strings, ast_success = split_python_by_structure(raw_code)  # <--- 接收标志
             if not ast_success:
                 ast_failed_num += 1  # <--- 如果失败，增加计数
 
@@ -206,6 +203,95 @@ def make_pcsd_dataset(input_path, output_path, language):
         print('no ex seqs %: 0.0')
         print('AST parse failed %: 0.0')
 
+def make_pcsd_dataset_structure(input_path, output_path, language):
+    total_num = 0
+    no_ex_seqs_num = 0
+    ast_failed_num = 0  # AST 失败计数器
+
+    total_lines = sum(1 for _ in open(input_path, encoding="utf-8"))
+
+    with open(input_path, encoding="utf-8") as in_f, jsonlines.open(output_path, mode='w') as out_f:
+        for line in tqdm(in_f, total=total_lines, desc=f"Processing PCSD {os.path.basename(input_path)}"):
+            js = json.loads(line.strip())
+
+            idx = js['id']
+            raw_code = js['raw_code']
+            nl_tokens = js['comment'].split()
+            code_tokens_full = js['code'].split()
+
+            # ✅ 使用结构化 AST 分割代码
+            struct_blocks, ast_success = split_python_by_structure(raw_code)
+            if not ast_success:
+                ast_failed_num += 1
+
+            # ✅ 合并所有结构块
+            code_blocks = []
+            if struct_blocks['function_def']:
+                code_blocks.append(struct_blocks['function_def'])
+            code_blocks.extend(struct_blocks['loops'])
+            code_blocks.extend(struct_blocks['conditionals'])
+            code_blocks.extend(struct_blocks['assignments'])
+            code_blocks.extend(struct_blocks['others'])
+
+            # ✅ 每个结构块分词处理
+            code_seqs = []
+            for stmt_str in code_blocks:
+                stmt_tokens = stmt_str.split()
+                stmt_split_ids = split_identifier_into_parts(' '.join(stmt_tokens))
+                stmt_lower = ' '.join(stmt_split_ids).lower()
+                if stmt_lower.strip():
+                    code_seqs.append(stmt_lower)
+
+            # ✅ 若为空，fallback 为整个代码
+            if not code_seqs:
+                code_seqs = [' '.join([s.lower() for s in split_identifier_into_parts(' '.join(code_tokens_full))])]
+
+            # ✅ 自然语言摘要处理
+            nl = ' '.join(nl_tokens).replace('\n', '')
+            nl = split_identifier_into_parts(nl)
+            nl_seq = [' '.join(nl).lower()]
+
+            # ✅ 全代码处理（未分段）
+            code_full_str = ' '.join(code_tokens_full).replace('\n', '')
+            code_full_split = split_identifier_into_parts(code_full_str)
+            code_lower = [s.lower() for s in code_full_split]
+
+            # ✅ 输出字段构造
+            out_js = {'idx': idx}
+            out_js['cleaned_nl'] = nl_seq
+            out_js['cleaned_codes'] = code_lower
+            out_js['cleaned_blocks'] = []  # 预留字段
+            out_js['cleaned_blocks_ex'] = []
+
+            # ✅ 获取与摘要最匹配的片段（ROUGE）
+            ex_seqs, ex_ids, fs, ps, rs, max_Rouge_l_r = get_code_ex(code_seqs, nl_seq)
+
+            if len(ex_seqs) == 0:
+                ex_seqs = [' '.join(code_lower)]
+                no_ex_seqs_num += 1
+                out_js['ex_labels'] = [0] * len(code_seqs) if code_seqs else [0]
+            else:
+                out_js['ex_labels'] = [1 if i in ex_ids else 0 for i in range(len(code_seqs))]
+
+            out_js['fs'] = fs
+            out_js['ps'] = ps
+            out_js['rs'] = rs
+            out_js['max_Rouge_l_r'] = max_Rouge_l_r
+            out_js['cleaned_seqs'] = code_seqs
+            out_js['cleaned_seqs_ex'] = ex_seqs
+
+            out_f.write(out_js)
+            total_num += 1
+
+    print('total num:', total_num)
+    print('no ex seqs num:', no_ex_seqs_num)
+    print('AST parse failed num:', ast_failed_num)
+    if total_num > 0:
+        print('no ex seqs %:', np.round(no_ex_seqs_num / total_num, 4))
+        print('AST parse failed %:', np.round(ast_failed_num / total_num, 4))
+    else:
+        print('no ex seqs %: 0.0')
+        print('AST parse failed %: 0.0')
 
 def make_py_dataset(input_path, output_path, language):
     total_num = 0
@@ -293,7 +379,6 @@ def make_py_dataset(input_path, output_path, language):
     else:
         print('no ex blocks %: 0.0')
         print('no ex seqs %: 0.0')
-
 
 def make_pcsd_dataset_modified(input_path, output_path):
     total_processed_num = 0
@@ -449,6 +534,71 @@ def make_LRPL_sentences_ast(input_path, output_path,stop_index):
         print('no ex seqs %: 0.0')
         print('AST parse failed %: 0.0')
 
+def make_LRPL_sentences_structure(input_path, output_path, stop_index, r_script_path):
+    total_num = 0
+    no_ex_seqs_num = 0
+    ast_failed_num = 0
+
+    total_lines = 0
+    with open(input_path, encoding="utf-8") as f:
+        for _ in f:
+            total_lines += 1
+
+    with open(input_path, encoding="utf-8") as in_f, jsonlines.open(output_path, mode='w') as out_f:
+        for line in tqdm(in_f, total=total_lines, desc=f"Processing LRPL {os.path.basename(input_path)}"):
+
+            idx = line.split(':',1)[0].strip()
+            raw_code = line.split(':',1)[1].strip()
+            if int(idx) == stop_index:
+                break
+
+            parsed_result, ast_success = split_julia_by_structure(raw_code)
+
+            code_seqs = []
+            if ast_success:
+                for key in ['function_def', 'loops', 'conditionals', 'assignments', 'others']:
+                    for stmt in parsed_result.get(key, []):
+                        tokens = stmt.split()
+                        cleaned = ' '.join(tokens).lower()
+                        if cleaned.strip():
+                            code_seqs.append(cleaned)
+
+                # # 判断失败条件：除 others 外，其他4个类别都为空
+                # non_others_nonempty = any(
+                #     len(parsed_result.get(k, [])) > 0
+                #     for k in ['function_def', 'loops', 'conditionals', 'assignments']
+                # )
+                # if not non_others_nonempty:
+                #     no_ex_seqs_num += 1
+            else:
+                ast_failed_num += 1
+
+            out_js = {
+                'idx': idx,
+                'raw_codes': raw_code,
+                'cleaned_seqs': code_seqs,
+                'function_def': parsed_result.get('function_def', []),
+                'loops': parsed_result.get('loops', []),
+                'conditionals': parsed_result.get('conditionals', []),
+                'assignments': parsed_result.get('assignments', []),
+                'others': parsed_result.get('others', [])
+            }
+            if len(out_js.get("cleaned_seqs")) == 1 or len(out_js.get("cleaned_seqs")) == 0:
+                no_ex_seqs_num += 1
+            out_f.write(out_js)
+            total_num += 1
+
+    print('total num:', total_num)
+    print('no ex seqs num:', no_ex_seqs_num)
+    print('AST parse failed num:', ast_failed_num)
+    if total_num > 0:
+        print('no ex seqs %:', np.round(no_ex_seqs_num / total_num, 4))
+        print('AST parse failed %:', np.round(ast_failed_num / total_num, 4))
+    else:
+        print('no ex seqs %: 0.0')
+        print('AST parse failed %: 0.0')
+
+
 if __name__ == '__main__':
     language = 'python'  # <--- 确保这里是你想要的语言
 
@@ -456,10 +606,10 @@ if __name__ == '__main__':
     # input_root = f'../../../../dataset/CSN/{language}/'
     # output_root = f'../../../../dataset/CSN/{language}-cls/'
 
-    input_root = f'../../../../dataset/LowData/r/code.txt'
-    output_root = f'../../../../dataset/LowData/r/R_sentences.jsonl'
+    input_root = f'../../../../dataset/LowData/julia/code.txt'
+    output_root = f'../../../../dataset/LowData/julia/Julia_structure.jsonl'
 
-    make_LRPL_sentences_ast(input_root, output_root,3760)
+    make_LRPL_sentences_structure(input_root, output_root,3760,'../../../../vendor/parse_structure.R')
     # 确保输出目录存在
     # if not os.path.exists(output_root):
     #     os.makedirs(output_root)

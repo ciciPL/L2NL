@@ -16,9 +16,8 @@ language_ocaml = Language(tree_sitter_ocaml.language_ocaml())
 parser = Parser(language_ocaml)
 tree = parser.parse(
     b"""
-    module M : sig
-      val x : int
-    end
+let center (bbox : int list) : int list =   let x = (List.nth bbox 0) + (List.nth bbox 2) in   let y = (List.nth bbox 1) + (List.nth bbox 3) in   [x / 2; y / 2] ;;
+
     """
 )
 

@@ -10,8 +10,16 @@ L->H->NL
                                 METEOR:          31.2856
                                 BERTScore (F1):  63.5953
 
+                                R_python_nl_sentences_structure.jsonl
+                                BLEU-4:          4.5054
+                                ROUGE-L (F1):    28.0984
+                                METEOR:          22.2176
+                                BERTScore (F1):  67.5831
+
 r_2_NL_3k_c_sft.txt             r_2_python_2_NL_3k_c_sft.txt
 BLEU-4:          4.3232         BLEU-4:          5.4452
 ROUGE-L (F1):    26.4343        ROUGE-L (F1):    31.4024   30 10 1.2
 METEOR:          30.1500        METEOR:          33.9344
 BERTScore (F1):  69.1672        BERTScore (F1):  70.5895
+
+

@@ -1,3 +1,4 @@
+import json
 import subprocess
 import os
 
@@ -72,40 +73,79 @@ def split_r_into_statements(raw_r_code: str, r_script_path: str) -> tuple[list[s
         fallback_sequences = [line.strip() for line in raw_r_code.strip().split('\n') if line.strip()]
         return fallback_sequences if fallback_sequences else [raw_r_code.strip()], False
 
-# --- 如何在您的 make_pcsd_dataset_modified 函数中使用 ---
-#
-# 假设您将上述 R 脚本保存为 "parse_r_statements.R"
-# 并且 `split_r_into_statements` 函数也已定义。
-#
-# 您需要修改 `make_pcsd_dataset_modified` 函数（或创建一个新版本，如 `make_pcsd_dataset_for_r`）：
-#
-# 1. 将调用 `split_python_with_ast(raw_code)` 的地方替换为：
-#    `code_statement_strings, ast_success = split_r_into_statements(raw_code, "path/to/your/parse_r_statements.R")`
-#
-# 2. `split_identifier_into_parts(stmt_str_cleaned)` 这部分是针对Python标识符的。
-#    对于R语言，您可能需要一个不同的逻辑来分割标识符（R的标识符可以包含点 `.`）。
-#    或者，您可以暂时简化处理，例如，直接将整个R语句转为小写，或者使用更通用的基于非字母数字字符的分割。
-#    例如，一个非常简单的替代品可能是：
-#    `stmt_lower = stmt_str_cleaned.lower()` (不进一步分割，只转小写)
-#    或者
-#    `r_tokens = re.split(r'[^a-zA-Z0-9_.]+', stmt_str_cleaned)` (一个粗略的分割)
-#    `stmt_lower = ' '.join(r_tokens).lower()`
-#
-# 下面是一个演示如何使用的示例：
-if __name__ == "__main__":
-    # 将 parse_r_statements.R 脚本放在与此Python脚本相同的目录下，或提供正确路径
-    r_parser_script = "parse_fixed.R" # 或者 "path/to/your/parse_r_statements.R"
 
-    sample_r_code_1 = """
-    dela0 <- function(n, a0, a1, x, y) {   sum(a0 + a1 * x - y) / n }
+def split_r_by_structure(raw_r_code: str, r_script_path: str) -> tuple[dict, bool]:
     """
+    使用结构化 tree-sitter-R 语法分析，将 R 代码分为所需的结构类型。
+    返回结构字典 + 是否成功。
+    """
+    default_result = {
+        "function_def": [],
+        "loops": [],
+        "conditionals": [],
+        "assignments": [],
+        "others": []
+    }
 
-    print(f"--- 解析 R 代码 1 ---")
-    statements1, success1 = split_r_into_statements(sample_r_code_1, r_parser_script)
-    print(f"成功: {success1}")
-    if success1:
-        for i, stmt in enumerate(statements1):
-            print(f"语句 {i+1}: {stmt}")
-    else:
-        print(f"回退的语句: {statements1}")
+    if not raw_r_code.strip():
+        return default_result, True
 
+    if not os.path.exists(r_script_path):
+        print(f"[错误] R 脚本未找到: {r_script_path}")
+        return default_result, False
+
+    try:
+        process = subprocess.run(
+            ["Rscript", r_script_path, raw_r_code],
+            capture_output=True,
+            text=True,
+            check=True,
+            encoding='UTF-8'
+        )
+        # 打印 stderr 方便调试 R 代码中的 message() 输出
+        if process.stderr.strip():
+            print("[R stderr]:")
+            print(process.stderr.strip())
+
+        output = process.stdout.strip()
+        if not output:
+            print("[警告] R 脚本没有输出内容")
+            return default_result, True
+
+        try:
+            parsed = json.loads(output)
+        except json.JSONDecodeError as e:
+            print("[JSON解析错误] 无法解析 R 脚本输出为 JSON:")
+            print(output)
+            print(f"错误信息: {e}")
+            return default_result, False
+
+        # 确保所有关键字段存在
+        for key in default_result:
+            if key not in parsed:
+                parsed[key] = []
+
+        return parsed, True
+
+    except subprocess.CalledProcessError as e:
+        print(f"Rscript 执行失败:\n{e.stderr}")
+        return default_result, False
+    except Exception as e:
+        print(f"其他错误: {e}")
+        return default_result, False
+
+
+if __name__ == "__main__":
+    r_code = """vector_subtract <- function(u, v) {     diff <- c()     for (i in 1:3) {         diff <- c(diff, u[i] - v[i])     }     return(diff) }"""
+
+    r_script_path = "parse_structure.R"
+    result, success = split_r_by_structure(r_code, r_script_path)
+
+    print("成功:", success)
+    if success:
+        for key, stmts in result.items():
+            print(f"== {key.upper()} ==")
+            for stmt in stmts:
+                cleaned_stmt = ' '.join(stmt.split())
+                print(cleaned_stmt)
+            print("---")
