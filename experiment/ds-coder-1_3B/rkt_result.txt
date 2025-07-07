@@ -39,7 +39,14 @@ ROUGE-L (F1):    28.3555
 METEOR:          21.5862
 BERTScore (F1):  67.5533
 
-
+repeat 1 max20
+BLEU-4:          10.7944
+ROUGE-L (F1):    40.1424
+METEOR:          33.2373
+llama-factory predict
+BLEU-4:          10.8579
+ROUGE-L (F1):    41.1364
+METEOR:          34.0231
 
 
 

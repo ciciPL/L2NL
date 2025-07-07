@@ -23,7 +23,7 @@ lora_checkpoint_path = "../../finetune/output_train_6k_with_sentence_myMetric/ch
 data_file_path = "../../dataset/finetune/alpacaPCSD/Racket_python_with_sentence_structure.json"
 
 # --- [明确] 定义唯一的输出文件路径，并明确其为JSONL格式 ---
-output_raw_ids_path = "../../experiment/ds-coder-sentences/Racket_python_nl_sentences_structure.jsonl"
+output_raw_ids_path = "../../experiment/ds-coder-sentences/Racket_python_nl_sentences_structure_changshi_repeat1point05.jsonl"
 
 # --- 2. 加载模型和分词器 ---
 print("正在加载模型和分词器...")
@@ -58,8 +58,12 @@ def build_deepseek_prompt(system_prompt, instruction, input_text):
     # 【【【关键修改】】】
     # 在system_prompt的前面加上一个换行符 `\n`
     # 这将使得分词器在自动添加BOS token后，紧接着就是这个换行符的ID (185)
+    # prompt_str = (
+    #     f"\n{system_prompt}\n\n"  # <--- 在这里加上换行符
+    #     f"User: {user_content}\n\n"
+    #     f"Assistant:"
+    # )
     prompt_str = (
-        f"\n{system_prompt}\n\n"  # <--- 在这里加上换行符
         f"User: {user_content}\n\n"
         f"Assistant:"
     )
@@ -116,16 +120,17 @@ for i in tqdm(range(num_batches), desc="推理进度"):
     inputs = tokenizer(prompts, return_tensors="pt", padding=True).to(model.device)
     labels_text = [record.get("output", "") for record in batch_data]
     labels_tokenized = tokenizer(labels_text, return_tensors="pt", padding=True).to(model.device)
-
+    # length_penalty = 1.5,
     generation_output = model.generate(
         **inputs,
-        max_new_tokens=20,
+        max_new_tokens=25,
+        min_new_tokens=10,
         temperature=0.1,
         top_p=0.5,
         top_k=50,
         num_beams=1,
-        length_penalty=1.5,
-        repetition_penalty=1.5,
+        no_repeat_ngram_size=2,
+        repetition_penalty=1.05,
         do_sample=True,
         eos_token_id=[tokenizer.eos_token_id, 32021]
     )
