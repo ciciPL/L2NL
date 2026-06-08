@@ -3,20 +3,28 @@ from app.models.llm import FakeLLMClient
 from app.schemas import Example, CoreBlock
 
 
-def test_generate_extracts_tagged_summary_and_returns_prompt():
-    llm = FakeLLMClient(responses=["noise <summary>It adds two numbers.</summary> trailing"])
+def test_generate_cleans_summary_and_builds_paper_prompt():
+    # With stop="</SUMMARY>" the model returns just the summary body.
+    llm = FakeLLMClient(responses=["It adds two numbers."])
     gen = Generator(llm)
     examples = [Example(code="def add(a,b): return a+b",
                         core_blocks=[CoreBlock(text="return a+b", block_type="other", prob=1.0)],
                         summary="Adds two numbers.", score=1.0)]
     blocks = [CoreBlock(text="return a+b", block_type="other", prob=1.0)]
     summary, prompt = gen.generate("def add(a,b): return a+b", blocks, examples)
+
     assert summary == "It adds two numbers."
-    assert "<code>" in prompt and "<summary>" in prompt
-    assert "Adds two numbers." in prompt  # few-shot reference present
+    # Paper prompt structure present
+    assert "# [USER INPUT CODE]" in prompt
+    assert "# [KEY LOGIC TRACE]" in prompt
+    assert "# > return a+b" in prompt          # core block rendered as trace line
+    assert "<SUMMARY>\nAdds two numbers.\n</SUMMARY>" in prompt  # few-shot answer
+    assert prompt.rstrip().endswith("<SUMMARY>")  # target left open for completion
+    # stop sequence is passed through
+    assert llm.calls[0]["stop"] == ["</SUMMARY>"]
 
 
-def test_generate_falls_back_to_full_text_when_no_tags():
-    llm = FakeLLMClient(responses=["plain summary no tags"])
+def test_generate_strips_echoed_tags():
+    llm = FakeLLMClient(responses=["noise <SUMMARY>\nClean body.\n</SUMMARY>"])
     summary, _ = Generator(llm).generate("code", [], [])
-    assert summary == "plain summary no tags"
+    assert summary == "Clean body."

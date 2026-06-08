@@ -20,18 +20,18 @@ def _pipeline(llm):
 
 
 def test_run_returns_summary_and_full_trace():
-    llm = FakeLLMClient(responses=["<summary>It does X.</summary>"])
+    llm = FakeLLMClient(responses=["It does X."])
     resp = _pipeline(llm).run("def foo(): return 1", "ruby", Params(), trace=True)
     assert resp.error is None
     assert resp.summary == "It does X."
     assert resp.trace is not None
     assert resp.trace.translation.pivot_code == "def foo(): return 1"
     assert len(resp.trace.retrieved) == Params().k
-    assert resp.trace.prompt.startswith("<code>") or "<code>" in resp.trace.prompt
+    assert "# [USER INPUT CODE]" in resp.trace.prompt
 
 
 def test_run_without_trace_omits_trace():
-    llm = FakeLLMClient(responses=["<summary>Y.</summary>"])
+    llm = FakeLLMClient(responses=["Y."])
     resp = _pipeline(llm).run("x", "ruby", Params(), trace=False)
     assert resp.summary == "Y."
     assert resp.trace is None
@@ -42,7 +42,7 @@ def test_stage_failure_is_reported():
         def retrieve(self, pivot_code, k):
             raise RuntimeError("index missing")
 
-    llm = FakeLLMClient(responses=["<summary>Z.</summary>"])
+    llm = FakeLLMClient(responses=["Z."])
     emb = Embedder(); params = Params()
     pipe = Pipeline(
         translator=Translator(llm, emb, params),

@@ -9,9 +9,11 @@ class LLMClient:
         self.model = model
         self._client = OpenAI(base_url=base_url, api_key=api_key or "sk-no-key")
 
-    def chat(self, messages: list[dict], temperature: float) -> str:
+    def chat(self, messages: list[dict], temperature: float,
+             stop: list[str] | None = None) -> str:
         resp = self._client.chat.completions.create(
             model=self.model, messages=messages, temperature=temperature,
+            stop=stop,
         )
         return resp.choices[0].message.content or ""
 
@@ -25,8 +27,10 @@ class FakeLLMClient(LLMClient):
         self._i = 0
         self.calls: list[dict] = []
 
-    def chat(self, messages: list[dict], temperature: float) -> str:
-        self.calls.append({"messages": messages, "temperature": temperature})
+    def chat(self, messages: list[dict], temperature: float,
+             stop: list[str] | None = None) -> str:
+        self.calls.append({"messages": messages, "temperature": temperature,
+                           "stop": stop})
         if self._responses is not None:
             out = self._responses[min(self._i, len(self._responses) - 1)]
             self._i += 1

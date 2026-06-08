@@ -6,7 +6,7 @@ from app.models.llm import FakeLLMClient
 def _client(monkeypatch):
     # Force the app to use a deterministic LLM regardless of request model config.
     monkeypatch.setattr(main, "make_llm",
-                        lambda cfg: FakeLLMClient(responses=["<summary>It runs.</summary>"]))
+                        lambda cfg: FakeLLMClient(responses=["It runs."]))
     return TestClient(main.app)
 
 
