@@ -6,7 +6,8 @@ from app.models.llm import FakeLLMClient
 def _client(monkeypatch):
     # Force the app to use a deterministic LLM regardless of request model config.
     monkeypatch.setattr(main, "make_llm",
-                        lambda cfg: FakeLLMClient(responses=["It runs."]))
+                        lambda cfg: FakeLLMClient(
+                            responses=["<PYTHON>\ndef foo():\n    pass\n</PYTHON>", "It runs."]))
     return TestClient(main.app)
 
 
@@ -23,13 +24,14 @@ def test_summarize_returns_summary_and_trace(monkeypatch):
         "code": "def foo; 1; end",
         "language": "ruby",
         "model": {"base_url": "http://x/v1", "api_key": "k", "model": "m"},
+        "params": {"temperatures": [0.0]},
         "trace": True,
     }
     r = c.post("/summarize", json=body)
     assert r.status_code == 200
     data = r.json()
     assert data["summary"] == "It runs."
-    assert data["trace"]["translation"]["pivot_code"] == "def foo; 1; end"
+    assert data["trace"]["translation"]["pivot_code"] == "def foo():\n    pass"
 
 
 def test_summarize_validation_error_returns_422(monkeypatch):
