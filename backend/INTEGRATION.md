@@ -13,10 +13,10 @@ DeepSeek). No API / schema / extension / pipeline changes are required.
 
 | Shell component | Research source | Reusable logic | Status |
 |---|---|---|---|
-| `components/translator.py` | `02_translation/translate_stepBystep_vllm.py` (multi-temp forward + AST repair), `translate_back_2_lrpl*.py` (back-translation), `translate_find_bestCode_from_back_vllm.py` (BLEU + Jina selection) | `validate_syntax`, `extract_clean_code`, `format_prompt_translate/repair`, `JinaVLLMScorer` scoring | Portable now. LLM calls → `LLMClient`. Selection needs an embedder (see Embedder). |
-| `components/retriever.py` | `03_retrieval/BM25.py` (`run_retrieval`, `clean_python_code`) | whole file (pure `rank_bm25`) | Portable now. **Needs HR corpus data** (CodeSearchNet Python/Ruby). |
-| `components/extractor.py` | `04_core_block/classfier_BM25.py` (inference driver) + `utils.py` (`split_python_by_structure`, `split_ruby_by_structure`, … per-language AST splitters) | AST splitters in `utils.py` are pure/portable | **BLOCKED** — classifier needs 3 missing pieces (below). |
-| `components/generator.py` | `05_summary_gen/finalScript_genNL.py` (`build_completion_prompt`, `format_block_annotation_style`, `clean_extracted_summary`) | prompt construction | Already real in shell; align template with research `build_completion_prompt` when wiring. |
+| `components/translator.py` | `02_translation/translate_stepBystep_vllm.py` (multi-temp forward + AST repair), `translate_back_2_lrpl*.py` (back-translation), `translate_find_bestCode_from_back_vllm.py` (BLEU + Jina selection) | `validate_syntax`, `extract_clean_code`, `format_prompt_translate/repair`, `JinaVLLMScorer` scoring | **DONE** — forward + AST repair ported, LLM via `LLMClient`, verified live on DeepSeek. Back-translation selection still TODO (needs embedder); uses tau=0 fallback. |
+| `components/retriever.py` | `03_retrieval/BM25.py` (`run_retrieval`, `clean_python_code`) | whole file (pure `rank_bm25`) | Portable now. **Needs HR corpus data** (CodeSearchNet Python/Ruby) → still stub. |
+| `components/extractor.py` | `04_core_block/classfier_BM25.py` (inference driver) + `utils.py` (`split_python_by_structure`, `split_ruby_by_structure`, … per-language AST splitters) | AST splitters in `utils.py` are pure/portable | AST split portable now (pivot is Python); **classifier BLOCKED** on 3 missing pieces (below). |
+| `components/generator.py` | `05_summary_gen/finalScript_genNL.py` (`build_completion_prompt`, `format_block_annotation_style`, `clean_extracted_summary`) | prompt construction | **DONE** — paper "full" variant prompt ported, verified live on DeepSeek. |
 | `models/embedder.py` | `JinaVLLMScorer` in `02_translation/...` | — | Research uses `jinaai/jina-code-embeddings-1.5b` via vllm. Shell uses sentence-transformers. Pick one (see Open questions). |
 
 ## Missing assets (none are in `L2NL_release.zip`)
@@ -43,11 +43,14 @@ through `LLMClient` (online API or a local vllm/llama-server). No placeholder
 needed beyond the model config already in the request.
 
 ## Placeholder state today
-- `extractor.py` → naive line-split stub; swap in AST split + SelectorNet once
-  (1)(2)(3) are available. Env `CS_EXTRACTOR_WEIGHTS` reserved.
+- `generator.py` → ✅ real (paper full-variant prompt).
+- `translator.py` → ✅ real forward + AST repair (LLM via client). Back-translation
+  selection TODO in `_select_best` (needs embedder); tau=0 fallback for now.
+- `extractor.py` → naive line-split stub. Next non-server step: port the Python
+  AST splitter from `utils.py` for real semantic blocks; classifier still needs
+  (1)(2)(3). Env `CS_EXTRACTOR_WEIGHTS` reserved.
 - `retriever.py` → canned examples; swap in BM25 once corpus path is provided.
   Env `CS_CORPUS_PATH` reserved.
-- `translator.py` → echo stub; port the 3-step algorithm, routing LLM via client.
 - `embedder.py` → hash-vector stub; set `CS_LOAD_SBERT=1` for real model.
 
 ## Open questions before wiring
