@@ -1,0 +1,54 @@
+{
+  "name": "code-summary",
+  "displayName": "Low-Resource Code Summary",
+  "description": "Pivot-retrieval code summarization (paper artifact).",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.88.0" },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "codeSummary.summarizeSelection", "title": "Code Summary: Summarize Selection" },
+      { "command": "codeSummary.startBackend", "title": "Code Summary: Start Backend" },
+      { "command": "codeSummary.stopBackend", "title": "Code Summary: Stop Backend" },
+      { "command": "codeSummary.toggleMode", "title": "Code Summary: Toggle Online/Offline" }
+    ],
+    "menus": {
+      "editor/context": [
+        { "command": "codeSummary.summarizeSelection", "when": "editorHasSelection", "group": "navigation" }
+      ]
+    },
+    "configuration": {
+      "title": "Code Summary",
+      "properties": {
+        "codeSummary.mode": { "type": "string", "enum": ["online", "offline"], "default": "online" },
+        "codeSummary.online.baseUrl": { "type": "string", "default": "https://api.openai.com/v1" },
+        "codeSummary.online.apiKey": { "type": "string", "default": "" },
+        "codeSummary.online.model": { "type": "string", "default": "gpt-4o-mini" },
+        "codeSummary.offline.baseUrl": { "type": "string", "default": "http://localhost:8080/v1" },
+        "codeSummary.offline.model": { "type": "string", "default": "local-model" },
+        "codeSummary.params.k": { "type": "number", "default": 5 },
+        "codeSummary.params.temperatures": { "type": "array", "default": [0, 0.4, 0.8] },
+        "codeSummary.params.lambda": { "type": "number", "default": 0.5 },
+        "codeSummary.params.threshold": { "type": "number", "default": 0.5 },
+        "codeSummary.params.maxRepairIters": { "type": "number", "default": 3 },
+        "codeSummary.backend.url": { "type": "string", "default": "http://localhost:8000" },
+        "codeSummary.backend.autoStart": { "type": "boolean", "default": true },
+        "codeSummary.backend.pythonPath": { "type": "string", "default": "python" },
+        "codeSummary.backend.cwd": { "type": "string", "default": "" }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.88.0",
+    "@types/node": "^20",
+    "esbuild": "^0.21",
+    "typescript": "^5.4",
+    "vitest": "^1.6"
+  }
+}
