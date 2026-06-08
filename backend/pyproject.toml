@@ -1,0 +1,23 @@
+[project]
+name = "code-summary-backend"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+  "pydantic>=2.6",
+  "openai>=1.30",
+]
+
+[project.optional-dependencies]
+# Heavy ML deps needed only when plugging in real component implementations.
+full = [
+  "rank-bm25>=0.2.2",
+  "sentence-transformers>=2.7",
+  "tree-sitter>=0.21",
+]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
