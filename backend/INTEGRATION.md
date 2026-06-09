@@ -53,16 +53,44 @@ needed beyond the model config already in the request.
   Env `CS_CORPUS_PATH` reserved.
 - `embedder.py` → hash-vector stub; set `CS_LOAD_SBERT=1` for real model.
 
-## Open questions before wiring
-1. Can you provide EACS `model.py` (SelectorNet), or should we re-derive the
-   head from the paper's §3.4 description?
-2. Where will the classifier checkpoint live (path on the box running the
-   backend), and how big is it?
-3. Where is the HR BM25 corpus (CodeSearchNet Python) on disk?
-4. Embedder for back-translation selection: keep research's Jina
-   (`jina-code-embeddings-1.5b`) or substitute a lighter SBERT?
+## RESOLVED — asset locations (2026-06-08)
+
+All located. Backend will run ON star (Linux, 2×4090). Extension connects over
+Tailscale to `http://100.122.192.123:8000`.
+
+| Asset | Location |
+|---|---|
+| Translator/Summarizer LLM | DeepSeek API (`deepseek-v4-flash`), via `LLMClient`. Done. |
+| BM25 corpus (CodeXGLUE python train) | `star:~/code_sum_rag/external/codexglue_python_train.jsonl` |
+| Core-block classifier checkpoint | `myci:F:\PycharmProjects\L2NL\script\EASC\output_structure\python\checkpoint-best-loss\pytorch_model.bin` (301MB) → transfer to star |
+| SelectorNet code + AST splitter | vendored in `backend/vendor/easc/` (model.py, utils.py, classfier_BM25.py, ast_split_utils.py, make_dataset_label.py) |
+| CodeBERT encoder | `star:~/.cache/huggingface/hub/models--microsoft--codebert-base` |
+
+## Extractor wiring recipe (SelectorNet)
+
+The classifier does NOT split code — it takes an already-split statement list.
+1. AST split: `ast_split_utils.py::split_python_by_structure(code)` → list of
+   statement strings (`cleaned_seqs`). Pivot is Python, so only the Python
+   splitter is needed.
+2. Build features: per `classfier_BM25.py::convert_examples_to_features`
+   (max_stat_length=32, max_word_length=32, RobertaTokenizer of codebert-base).
+3. Model: `model.py::SelectorNet(batch_size, word_embeddings_weight,
+   word_hidden_size=128, stat_hidden_size=256, max_word_len=32, max_stat_len=32,
+   vocab_size=50265, embed_size=768, num_classes=2, imbalance_loss_fct=True)`;
+   word_embeddings_weight from `RobertaModel.from_pretrained(codebert).embeddings
+   .word_embeddings.weight`; `load_state_dict(torch.load(checkpoint))`.
+4. Forward: `model(source_ids, word_masks, stat_masks, None)` → `(num,
+   active_mask, probs)`; `argmax(probs,1)` per statement; label==1 statements are
+   the core blocks (→ `CoreBlock`).
+
+Needs `[full]` extra + torch + transformers in the backend env on star.
+
+## Retriever wiring recipe (BM25)
+Port `03_retrieval/BM25.py` (`run_retrieval`, `clean_python_code`); build the
+rank-bm25 index from `codexglue_python_train.jsonl` at startup; query with the
+pivot code.
 
 ## Reference copy
-Research code currently at: `~/Downloads/L2NL_release/` (unzipped).
-Decide whether to vendor a copy under `backend/reference/L2NL_release/` or keep
-it external and port on demand.
+`L2NL_release/` unzipped at `/tmp/l2nl_inspect/` (clears on reboot; canonical zip
+in `~/Downloads/`). Fuller copy on star at `~/Downloads/cyqProjects/L2NL` and on
+myci at `F:\PycharmProjects\L2NL`.
