@@ -5,6 +5,8 @@ import os
 class Settings:
     corpus_path: str | None = os.getenv("CS_CORPUS_PATH")
     extractor_weights: str | None = os.getenv("CS_EXTRACTOR_WEIGHTS")
+    codebert_path: str = os.getenv("CS_CODEBERT_PATH", "microsoft/codebert-base")
+    device: str | None = os.getenv("CS_DEVICE")  # e.g. "cuda" / "cpu"; None = auto
     load_sbert: bool = os.getenv("CS_LOAD_SBERT", "0") == "1"
 
 

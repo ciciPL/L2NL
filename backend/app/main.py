@@ -15,7 +15,9 @@ app = FastAPI(title="Code Summary Backend")
 # Resident resources loaded once at import (process start).
 embedder = Embedder(load=settings.load_sbert)
 retriever = Retriever(settings.corpus_path)
-extractor = Extractor(settings.extractor_weights)
+extractor = Extractor(settings.extractor_weights,
+                      codebert_path=settings.codebert_path,
+                      device=settings.device)
 
 
 def make_llm(cfg: ModelConfig) -> LLMClient:
