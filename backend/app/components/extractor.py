@@ -130,12 +130,13 @@ class Extractor:
         with torch.no_grad():
             _num, active_mask, probs = self._model(si, wm, sm, None)
         active_probs = probs[active_mask][:len(items)]  # first copy's real statements
-        preds = torch.argmax(active_probs, 1).tolist()
-        p1 = active_probs[:, 1].tolist()
+        p1 = active_probs[:, 1].tolist()                # P(core) per statement
 
+        # Paper §3.4: select blocks whose core probability exceeds the threshold
+        # (threshold=0.5 is equivalent to argmax; lower it to be more inclusive).
         out: list[CoreBlock] = []
-        for (raw, _cleaned, btype), label, prob in zip(items, preds, p1):
-            if label == 1:
+        for (raw, _cleaned, btype), prob in zip(items, p1):
+            if prob >= threshold:
                 out.append(CoreBlock(text=raw, block_type=btype, prob=float(prob)))
         return out
 
