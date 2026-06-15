@@ -1,8 +1,15 @@
 import * as vscode from "vscode";
-import { ChildProcess, spawn } from "child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { ChildProcess, spawn, execFile } from "node:child_process";
 import { RawSettings, buildRequest } from "./config";
 import { getHealth, postSummarize } from "./client";
 import { ResultPanel } from "./panel";
+import { provPaths } from "./paths";
+import { detectPython } from "./env";
+import { parseManifest, downloadAsset, verifyAsset, sha256File } from "./assets";
+import { readState, writeState } from "./state";
+import { provision, ProvDeps } from "./provision";
 
 let backendProc: ChildProcess | undefined;
 let statusItem: vscode.StatusBarItem;
@@ -43,35 +50,102 @@ function updateStatus() {
   statusItem.show();
 }
 
-async function ensureBackend(): Promise<boolean> {
+// Run a command to completion, capturing output. maxBuffer is large because
+// pip install produces a lot of output (torch wheels etc.).
+function run(cmd: string, args: string[] = [], extraEnv?: Record<string, string>) {
+  return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
+    execFile(cmd, args,
+      { env: { ...process.env, ...extraEnv }, maxBuffer: 64 * 1024 * 1024 },
+      (err, stdout, stderr) =>
+        resolve({ code: err ? ((err as any).code ?? 1) : 0, stdout, stderr }));
+  });
+}
+
+async function provisionAndStart(ctx: vscode.ExtensionContext): Promise<string | undefined> {
+  const root = ctx.globalStorageUri.fsPath;
+  fs.mkdirSync(root, { recursive: true });
+  const paths = provPaths(root, process.platform);
+  const cfg = vscode.workspace.getConfiguration("codeSummary");
+  const backendCwd = path.join(ctx.extensionPath, "backend");
+  const requirementsPath = path.join(backendCwd, "requirements.txt");
+  const manifest = parseManifest(
+    fs.readFileSync(path.join(backendCwd, "assets", "manifest.json"), "utf8"));
+
+  const py = await detectPython(
+    process.platform, cfg.get("backend.pythonPath", "") || undefined, run);
+  if (!py) {
+    vscode.window.showErrorMessage(
+      "Code Summary needs Python ≥3.10. Install it from https://www.python.org/downloads/ and retry.");
+    return undefined;
+  }
+  const device = cfg.get("backend.device", "cpu");
+  const reqHash = await sha256File(requirementsPath);
+
+  const deps: ProvDeps = {
+    run,
+    spawnBackend: (python, args, o) => {
+      const log = fs.createWriteStream(o.logPath, { flags: "a" });
+      backendProc = spawn(python, args, { cwd: o.cwd, env: { ...process.env, ...o.env } });
+      backendProc.stdout?.pipe(log);
+      backendProc.stderr?.pipe(log);
+      backendProc.on("exit", () => (backendProc = undefined));
+      return { pid: backendProc.pid };
+    },
+    download: (url, dest, onBytes) => downloadAsset(url, dest, onBytes),
+    verify: (p2, a) => verifyAsset(p2, a),
+    health: (url) => getHealth(url),
+    mkdirp: (d) => fs.mkdirSync(d, { recursive: true }),
+    readState: () => readState(paths.state),
+    writeState: (inputs, cb) => writeState(paths.state, inputs, cb),
+    onStep: (s, st, detail) =>
+      console.log(`[provision] ${s}: ${st}${detail ? " " + detail : ""}`),
+  };
+
+  return await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Code Summary: setting up backend",
+      cancellable: false,
+    },
+    async () => {
+      const { backendUrl: newUrl } = await provision(paths, {
+        device,
+        hostPython: py.cmd.join(" "),
+        extVersion: ctx.extension.packageJSON.version,
+        reqHash,
+        requirementsPath,
+        backendCwd,
+        baseUrlOverride: cfg.get("assets.baseUrl", "") || undefined,
+        manifest,
+      }, deps);
+      await cfg.update("backend.url", newUrl, vscode.ConfigurationTarget.Global);
+      await cfg.update("backend.managed", true, vscode.ConfigurationTarget.Global);
+      return newUrl;
+    });
+}
+
+async function ensureBackend(ctx: vscode.ExtensionContext): Promise<boolean> {
   const url = backendUrl();
   if (await getHealth(url)) return true;
   const cfg = vscode.workspace.getConfiguration("codeSummary");
-  if (!cfg.get("backend.autoStart", true)) {
+  if (!cfg.get("backend.autoStart", true) && !cfg.get("backend.managed", false)) {
     vscode.window.showErrorMessage(
       `Code Summary backend not reachable at ${url}. Start it manually.`);
     return false;
   }
-  startBackend();
-  for (let i = 0; i < 20; i++) {
-    await new Promise((r) => setTimeout(r, 500));
-    if (await getHealth(url)) return true;
+  try {
+    const newUrl = await provisionAndStart(ctx);
+    if (!newUrl) return false;
+    for (let i = 0; i < 10; i++) {
+      if (await getHealth(newUrl)) return true;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    return await getHealth(newUrl);
+  } catch (e: any) {
+    vscode.window.showErrorMessage(
+      `Backend setup failed: ${e.message}. See the developer console and ${backendUrl()}.`);
+    return false;
   }
-  vscode.window.showErrorMessage("Backend did not become healthy in time.");
-  return false;
-}
-
-function startBackend() {
-  if (backendProc) return;
-  const cfg = vscode.workspace.getConfiguration("codeSummary");
-  const python = cfg.get("backend.pythonPath", "python");
-  const cwd = cfg.get("backend.cwd", "") ||
-    (vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd());
-  backendProc = spawn(
-    python, ["-m", "uvicorn", "app.main:app", "--port", "8000"],
-    { cwd, env: process.env });
-  backendProc.stderr?.on("data", (d) => console.log(`[backend] ${d}`));
-  backendProc.on("exit", () => (backendProc = undefined));
 }
 
 function stopBackend() {
@@ -79,7 +153,7 @@ function stopBackend() {
   backendProc = undefined;
 }
 
-async function summarizeSelection() {
+async function summarizeSelection(ctx: vscode.ExtensionContext) {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.selection.isEmpty) {
     vscode.window.showWarningMessage("Select some code first.");
@@ -87,7 +161,7 @@ async function summarizeSelection() {
   }
   const code = editor.document.getText(editor.selection);
   const language = editor.document.languageId;
-  if (!(await ensureBackend())) return;
+  if (!(await ensureBackend(ctx))) return;
 
   ResultPanel.loading();
   try {
@@ -107,9 +181,10 @@ export function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     statusItem,
-    vscode.commands.registerCommand("codeSummary.summarizeSelection", summarizeSelection),
-    vscode.commands.registerCommand("codeSummary.startBackend", startBackend),
+    vscode.commands.registerCommand("codeSummary.summarizeSelection", () => summarizeSelection(ctx)),
+    vscode.commands.registerCommand("codeSummary.startBackend", () => provisionAndStart(ctx)),
     vscode.commands.registerCommand("codeSummary.stopBackend", stopBackend),
+    vscode.commands.registerCommand("codeSummary.setup", () => provisionAndStart(ctx)),
     vscode.commands.registerCommand("codeSummary.toggleMode", async () => {
       const cfg = vscode.workspace.getConfiguration("codeSummary");
       const next = cfg.get("mode", "online") === "online" ? "offline" : "online";
