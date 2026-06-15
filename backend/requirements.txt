@@ -1,0 +1,18 @@
+# Runtime dependencies for the bundled backend, installed by the extension's
+# first-run provisioner into a private venv (globalStorage).
+#
+# torch: the default PyPI wheel is CPU-only and works everywhere. Users with a
+# CUDA GPU can reinstall the matching CUDA wheel for speed; the pipeline is
+# small enough to run on CPU for interactive single-snippet use.
+
+# Web / API layer
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2.6
+openai>=1.30
+
+# Pipeline (paper components)
+rank-bm25>=0.2.2          # §3.3 retrieval
+torch>=2.2                # §3.4 SelectorNet classifier
+transformers>=4.45        # CodeBERT encoder/tokenizer
+sentence-transformers>=2.7  # §3.2 back-translation selection (when wired)
