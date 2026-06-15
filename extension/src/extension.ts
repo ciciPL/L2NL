@@ -1,17 +1,10 @@
 import * as vscode from "vscode";
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { ChildProcess, spawn, execFile } from "node:child_process";
 import { RawSettings, buildRequest } from "./config";
 import { getHealth, postSummarize } from "./client";
 import { ResultPanel } from "./panel";
 import { provPaths } from "./paths";
-import { detectPython } from "./env";
-import { parseManifest, downloadAsset, verifyAsset, sha256File } from "./assets";
-import { readState, writeState } from "./state";
-import { provision, ProvDeps } from "./provision";
+import { runProvision, stopBackend } from "./backend";
 
-let backendProc: ChildProcess | undefined;
 let statusItem: vscode.StatusBarItem;
 
 function readSettings(): RawSettings {
@@ -50,78 +43,15 @@ function updateStatus() {
   statusItem.show();
 }
 
-// Run a command to completion, capturing output. maxBuffer is large because
-// pip install produces a lot of output (torch wheels etc.).
-function run(cmd: string, args: string[] = [], extraEnv?: Record<string, string>) {
-  return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
-    execFile(cmd, args,
-      { env: { ...process.env, ...extraEnv }, maxBuffer: 64 * 1024 * 1024 },
-      (err, stdout, stderr) =>
-        resolve({ code: err ? ((err as any).code ?? 1) : 0, stdout, stderr }));
-  });
-}
-
 async function provisionAndStart(ctx: vscode.ExtensionContext): Promise<string | undefined> {
-  const root = ctx.globalStorageUri.fsPath;
-  fs.mkdirSync(root, { recursive: true });
-  const paths = provPaths(root, process.platform);
-  const cfg = vscode.workspace.getConfiguration("codeSummary");
-  const backendCwd = path.join(ctx.extensionPath, "backend");
-  const requirementsPath = path.join(backendCwd, "requirements.txt");
-  const manifest = parseManifest(
-    fs.readFileSync(path.join(backendCwd, "assets", "manifest.json"), "utf8"));
-
-  const py = await detectPython(
-    process.platform, cfg.get("backend.pythonPath", "") || undefined, run);
-  if (!py) {
-    vscode.window.showErrorMessage(
-      "Code Summary needs Python ≥3.10. Install it from https://www.python.org/downloads/ and retry.");
-    return undefined;
-  }
-  const device = cfg.get("backend.device", "cpu");
-  const reqHash = await sha256File(requirementsPath);
-
-  const deps: ProvDeps = {
-    run,
-    spawnBackend: (python, args, o) => {
-      const log = fs.createWriteStream(o.logPath, { flags: "a" });
-      backendProc = spawn(python, args, { cwd: o.cwd, env: { ...process.env, ...o.env } });
-      backendProc.stdout?.pipe(log);
-      backendProc.stderr?.pipe(log);
-      backendProc.on("exit", () => (backendProc = undefined));
-      return { pid: backendProc.pid };
-    },
-    download: (url, dest, onBytes) => downloadAsset(url, dest, onBytes),
-    verify: (p2, a) => verifyAsset(p2, a),
-    health: (url) => getHealth(url),
-    mkdirp: (d) => fs.mkdirSync(d, { recursive: true }),
-    readState: () => readState(paths.state),
-    writeState: (inputs, cb) => writeState(paths.state, inputs, cb),
-    onStep: (s, st, detail) =>
-      console.log(`[provision] ${s}: ${st}${detail ? " " + detail : ""}`),
-  };
-
   return await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
       title: "Code Summary: setting up backend",
       cancellable: false,
     },
-    async () => {
-      const { backendUrl: newUrl } = await provision(paths, {
-        device,
-        hostPython: py.cmd,
-        extVersion: ctx.extension.packageJSON.version,
-        reqHash,
-        requirementsPath,
-        backendCwd,
-        baseUrlOverride: cfg.get("assets.baseUrl", "") || undefined,
-        manifest,
-      }, deps);
-      await cfg.update("backend.url", newUrl, vscode.ConfigurationTarget.Global);
-      await cfg.update("backend.managed", true, vscode.ConfigurationTarget.Global);
-      return newUrl;
-    });
+    () => runProvision(ctx, (s, st, d) =>
+      console.log(`[provision] ${s}: ${st}${d ? " " + d : ""}`)));
 }
 
 async function ensureBackend(ctx: vscode.ExtensionContext): Promise<boolean> {
@@ -142,11 +72,6 @@ async function ensureBackend(ctx: vscode.ExtensionContext): Promise<boolean> {
     vscode.window.showErrorMessage(`Backend setup failed: ${e.message}. See ${log}.`);
     return false;
   }
-}
-
-function stopBackend() {
-  backendProc?.kill();
-  backendProc = undefined;
 }
 
 async function summarizeSelection(ctx: vscode.ExtensionContext) {
