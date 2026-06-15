@@ -120,13 +120,16 @@ class Extractor:
         source_ids += [[tok.pad_token_id] * _MAX_WORD] * pad
         word_masks += [[0] * _MAX_WORD] * pad
 
-        si = torch.tensor([source_ids], dtype=torch.long, device=self._dev)
-        wm = torch.tensor([word_masks], dtype=torch.long, device=self._dev)
-        sm = torch.tensor([stat_masks], dtype=torch.long, device=self._dev)
+        # The vendored SelectorNet squeezes the batch dim, which collapses shapes
+        # when batch_size==1. Run a batch of 2 (the same example twice) and keep
+        # the first example's statement predictions.
+        si = torch.tensor([source_ids, source_ids], dtype=torch.long, device=self._dev)
+        wm = torch.tensor([word_masks, word_masks], dtype=torch.long, device=self._dev)
+        sm = torch.tensor([stat_masks, stat_masks], dtype=torch.long, device=self._dev)
 
         with torch.no_grad():
             _num, active_mask, probs = self._model(si, wm, sm, None)
-        active_probs = probs[active_mask]
+        active_probs = probs[active_mask][:len(items)]  # first copy's real statements
         preds = torch.argmax(active_probs, 1).tolist()
         p1 = active_probs[:, 1].tolist()
 
