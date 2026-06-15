@@ -15,7 +15,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -34,7 +34,8 @@
       {
         "command": "codeSummary.toggleMode",
         "title": "Code Summary: Toggle Online/Offline"
-      }
+      },
+      { "command": "codeSummary.setup", "title": "Code Summary: Run Setup" }
     ],
     "menus": {
       "editor/context": [
@@ -115,13 +116,31 @@
         "codeSummary.backend.cwd": {
           "type": "string",
           "default": ""
+        },
+        "codeSummary.assets.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Override the asset download base URL (e.g. a local folder for testing). Empty = use the shipped manifest."
+        },
+        "codeSummary.backend.device": {
+          "type": "string",
+          "enum": ["cpu", "cuda"],
+          "default": "cpu",
+          "description": "Inference device for the backend (CUDA needs an NVIDIA GPU)."
+        },
+        "codeSummary.backend.managed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set automatically when the extension provisions and manages the backend."
         }
       }
     }
   },
   "scripts": {
     "build": "node esbuild.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "copy-backend": "node scripts/copy-backend.js",
+    "package": "npm run copy-backend && npm run build && vsce package"
   },
   "devDependencies": {
     "@types/node": "^20",

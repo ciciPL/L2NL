@@ -1,5 +1,6 @@
 src/**
 test/**
+scripts/**
 node_modules/**
 .gitignore
 tsconfig.json
@@ -7,3 +8,11 @@ esbuild.js
 vitest.config.ts
 **/*.map
 .vscode/**
+backend/**/__pycache__/**
+backend/**/*.pyc
+backend/.venv/**
+backend/.pytest_cache/**
+backend/tests/**
+backend/**/*.egg-info/**
+backend/assets/extractor/**
+backend/assets/corpus/**
