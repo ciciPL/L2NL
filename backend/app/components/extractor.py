@@ -138,6 +138,13 @@ class Extractor:
         for (raw, _cleaned, btype), prob in zip(items, p1):
             if prob >= threshold:
                 out.append(CoreBlock(text=raw, block_type=btype, prob=float(prob)))
+        # The classifier is weakly calibrated (probabilities cluster near 0.5); for
+        # some functions every statement falls just below the threshold. Keep the
+        # single most-core block so a parseable function never yields an empty trace.
+        if not out and items:
+            i = max(range(len(items)), key=lambda j: p1[j])
+            raw, _cleaned, btype = items[i]
+            out = [CoreBlock(text=raw, block_type=btype, prob=float(p1[i]))]
         return out
 
     def extract(self, code: str, threshold: float) -> list[CoreBlock]:
