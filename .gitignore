@@ -12,3 +12,6 @@ extension/out/
 
 # OS
 .DS_Store
+
+# VS Code package
+extension/*.vsix
