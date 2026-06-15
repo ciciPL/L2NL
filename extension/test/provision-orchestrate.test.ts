@@ -17,7 +17,7 @@ function fakeDeps(record: string[]): ProvDeps {
 }
 
 const opts: ProvOptions = {
-  platform: "darwin", device: "cpu", extVersion: "0.2.0", reqHash: "abc",
+  device: "cpu", extVersion: "0.2.0", reqHash: "abc",
   hostPython: "python3.11",
   requirementsPath: "/ext/backend/requirements.txt", backendCwd: "/ext/backend",
   baseUrlOverride: undefined,
@@ -48,5 +48,23 @@ describe("provision (fresh install)", () => {
     const rec: string[] = [];
     await provision(provPaths("/gs", "darwin"), { ...opts, device: "cuda" }, fakeDeps(rec));
     expect(rec.join("\n")).toContain("download.pytorch.org/whl/cu121");
+  });
+
+  it("skips install/download steps when prior state matches (idempotent)", async () => {
+    const rec: string[] = [];
+    const deps: ProvDeps = {
+      ...fakeDeps(rec),
+      readState: () => ({
+        schemaVersion: 1, extVersion: "0.2.0", device: "cpu", reqHash: "abc",
+        assets: { "extractor/pytorch_model.bin": "h1", "corpus/corpus_30k.jsonl": "h2" },
+        codebertReady: true,
+      }),
+    };
+    await provision(provPaths("/gs", "darwin"), opts, deps);
+    const joined = rec.join("\n");
+    expect(joined).not.toContain("-m venv");
+    expect(joined).not.toContain("pip install");
+    expect(joined).toContain("spawn");        // launch always runs
+    expect(rec).toContain("writeState");
   });
 });

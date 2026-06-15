@@ -47,7 +47,6 @@ export interface ProvDeps {
 }
 
 export interface ProvOptions {
-  platform: NodeJS.Platform;
   device: string;
   extVersion: string;
   reqHash: string;
@@ -79,66 +78,78 @@ export async function provision(
   const need = stepsNeeded(deps.readState(), inputs);
   const did = (s: Step) => deps.onStep(s, need.has(s) ? "done" : "skipped");
   let codebertReady = !need.has("codebert");
+  let current: Step = "venv";
 
-  if (need.has("venv")) {
-    deps.onStep("venv", "running");
-    deps.mkdirp(p.root);
-    const [hp, ...hpArgs] = opts.hostPython.split(" ");
-    await deps.run(hp, [...hpArgs, "-m", "venv", p.venv]);
-    await deps.run(p.venvPython, ["-m", "pip", "install", "--upgrade", "pip"]);
-  }
-  did("venv");
-
-  if (need.has("torch")) {
-    deps.onStep("torch", "running");
-    const index = TORCH_INDEX[opts.device] ?? TORCH_INDEX.cpu;
-    await deps.run(p.venvPython, ["-m", "pip", "install", "torch", "--index-url", index]);
-  }
-  did("torch");
-
-  if (need.has("deps")) {
-    deps.onStep("deps", "running");
-    await deps.run(p.venvPython, ["-m", "pip", "install", "-r", opts.requirementsPath]);
-  }
-  did("deps");
-
-  if (need.has("assets")) {
-    deps.onStep("assets", "running");
-    for (const a of opts.manifest.assets) {
-      const dest = a.name.includes("extractor") ? p.extractorWeights : p.corpus;
-      if (await deps.verify(dest, a)) continue;
-      const url = assetUrl(opts.manifest, a, opts.baseUrlOverride);
-      await deps.download(url, dest, (d, t) => deps.onStep("assets", "running", `${a.file} ${d}/${t}`));
-      if (!(await deps.verify(dest, a))) throw new Error(`checksum mismatch: ${a.file}`);
+  try {
+    if (need.has("venv")) {
+      current = "venv";
+      deps.onStep("venv", "running");
+      deps.mkdirp(p.root);
+      const [hp, ...hpArgs] = opts.hostPython.split(" ");
+      await deps.run(hp, [...hpArgs, "-m", "venv", p.venv]);
+      await deps.run(p.venvPython, ["-m", "pip", "install", "--upgrade", "pip"]);
     }
-  }
-  did("assets");
+    did("venv");
 
-  if (need.has("codebert")) {
-    deps.onStep("codebert", "running");
-    await deps.run(
-      p.venvPython,
-      ["-c", "from transformers import AutoModel,AutoTokenizer;AutoModel.from_pretrained('microsoft/codebert-base');AutoTokenizer.from_pretrained('microsoft/codebert-base')"],
-      { HF_HOME: p.hfCache },
-    );
-    codebertReady = true;
-  }
-  did("codebert");
+    if (need.has("torch")) {
+      current = "torch";
+      deps.onStep("torch", "running");
+      const index = TORCH_INDEX[opts.device] ?? TORCH_INDEX.cpu;
+      await deps.run(p.venvPython, ["-m", "pip", "install", "torch", "--index-url", index]);
+    }
+    did("torch");
 
-  deps.onStep("launch", "running");
-  const port = await findFreePort(8000);
-  const env = { ...buildBackendEnv(p, opts.device) };
-  deps.spawnBackend(p.venvPython, ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", String(port)],
-    { cwd: opts.backendCwd, env, logPath: p.backendLog });
-  const url = `http://127.0.0.1:${port}`;
-  let healthy = false;
-  for (let i = 0; i < 60; i++) {
-    if (await deps.health(url)) { healthy = true; break; }
-    await new Promise((r) => setTimeout(r, 1000));
-  }
-  if (!healthy) { deps.onStep("launch", "error", "backend did not become healthy"); throw new Error("backend health timeout"); }
-  deps.onStep("launch", "done");
+    if (need.has("deps")) {
+      current = "deps";
+      deps.onStep("deps", "running");
+      await deps.run(p.venvPython, ["-m", "pip", "install", "-r", opts.requirementsPath]);
+    }
+    did("deps");
 
-  deps.writeState(inputs, codebertReady);
-  return { backendUrl: url };
+    if (need.has("assets")) {
+      current = "assets";
+      deps.onStep("assets", "running");
+      for (const a of opts.manifest.assets) {
+        const dest = a.name.includes("extractor") ? p.extractorWeights : p.corpus;
+        if (await deps.verify(dest, a)) continue;
+        const url = assetUrl(opts.manifest, a, opts.baseUrlOverride);
+        await deps.download(url, dest, (d, t) => deps.onStep("assets", "running", `${a.file} ${d}/${t}`));
+        if (!(await deps.verify(dest, a))) throw new Error(`checksum mismatch: ${a.file}`);
+      }
+    }
+    did("assets");
+
+    if (need.has("codebert")) {
+      current = "codebert";
+      deps.onStep("codebert", "running");
+      await deps.run(
+        p.venvPython,
+        ["-c", "from transformers import AutoModel,AutoTokenizer;AutoModel.from_pretrained('microsoft/codebert-base');AutoTokenizer.from_pretrained('microsoft/codebert-base')"],
+        { HF_HOME: p.hfCache },
+      );
+      codebertReady = true;
+    }
+    did("codebert");
+
+    current = "launch";
+    deps.onStep("launch", "running");
+    const port = await findFreePort(8000);
+    const env = buildBackendEnv(p, opts.device);
+    deps.spawnBackend(p.venvPython, ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", String(port)],
+      { cwd: opts.backendCwd, env, logPath: p.backendLog });
+    const url = `http://127.0.0.1:${port}`;
+    let healthy = false;
+    for (let i = 0; i < 60; i++) {
+      if (await deps.health(url)) { healthy = true; break; }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (!healthy) throw new Error("backend did not become healthy in time");
+    deps.onStep("launch", "done");
+
+    deps.writeState(inputs, codebertReady);
+    return { backendUrl: url };
+  } catch (e) {
+    deps.onStep(current, "error", (e as Error).message);
+    throw e;
+  }
 }
