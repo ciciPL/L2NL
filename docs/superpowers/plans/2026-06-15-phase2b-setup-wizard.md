@@ -48,8 +48,8 @@ import { getHealth } from "./client";
 import { provPaths } from "./paths";
 import { detectPython, detectGpu } from "./env";
 import { parseManifest, downloadAsset, verifyAsset, sha256File } from "./assets";
-import { readState, writeState } from "./state";
-import { provision, ProvDeps, Step, StepStatus } from "./provision";
+import { readState, writeState, Step } from "./state";
+import { provision, ProvDeps, StepStatus } from "./provision";
 import { buildTestRequest, ModelConfig } from "./models";
 
 let backendProc: ChildProcess | undefined;
