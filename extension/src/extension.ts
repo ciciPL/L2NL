@@ -4,6 +4,7 @@ import { getHealth, postSummarize } from "./client";
 import { ResultPanel } from "./panel";
 import { provPaths } from "./paths";
 import { runProvision, stopBackend } from "./backend";
+import { WizardPanel } from "./wizard";
 
 let statusItem: vscode.StatusBarItem;
 
@@ -105,7 +106,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("codeSummary.summarizeSelection", () => summarizeSelection(ctx)),
     vscode.commands.registerCommand("codeSummary.startBackend", () => provisionAndStart(ctx)),
     vscode.commands.registerCommand("codeSummary.stopBackend", stopBackend),
-    vscode.commands.registerCommand("codeSummary.setup", () => provisionAndStart(ctx)),
+    vscode.commands.registerCommand("codeSummary.setup", () => WizardPanel.open(ctx)),
     vscode.commands.registerCommand("codeSummary.toggleMode", async () => {
       const cfg = vscode.workspace.getConfiguration("codeSummary");
       const next = cfg.get("mode", "online") === "online" ? "offline" : "online";
@@ -116,6 +117,11 @@ export function activate(ctx: vscode.ExtensionContext) {
       if (e.affectsConfiguration("codeSummary")) updateStatus();
     }),
   );
+
+  const cfg = vscode.workspace.getConfiguration("codeSummary");
+  if (!cfg.get("backend.managed", false)) {
+    WizardPanel.open(ctx);
+  }
 }
 
 export function deactivate() {
