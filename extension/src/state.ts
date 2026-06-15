@@ -24,6 +24,9 @@ export function stepsNeeded(old: ProvState | null, next: ProvInputs): Set<Step> 
     (["venv", "torch", "deps", "assets", "codebert"] as Step[]).forEach((s) => steps.add(s));
     return steps;
   }
+  // extVersion is recorded for diagnostics but is not itself a re-provision
+  // trigger: dependency changes are captured by reqHash, and the bundled backend
+  // source is read live from extensionPath on every launch (not copied in).
   const envChanged = old.reqHash !== next.reqHash;
   const deviceChanged = old.device !== next.device;
   if (deviceChanged || envChanged) { steps.add("torch"); steps.add("deps"); }

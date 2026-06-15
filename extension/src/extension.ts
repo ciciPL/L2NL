@@ -110,7 +110,7 @@ async function provisionAndStart(ctx: vscode.ExtensionContext): Promise<string |
     async () => {
       const { backendUrl: newUrl } = await provision(paths, {
         device,
-        hostPython: py.cmd.join(" "),
+        hostPython: py.cmd,
         extVersion: ctx.extension.packageJSON.version,
         reqHash,
         requirementsPath,
@@ -136,14 +136,10 @@ async function ensureBackend(ctx: vscode.ExtensionContext): Promise<boolean> {
   try {
     const newUrl = await provisionAndStart(ctx);
     if (!newUrl) return false;
-    for (let i = 0; i < 10; i++) {
-      if (await getHealth(newUrl)) return true;
-      await new Promise((r) => setTimeout(r, 500));
-    }
-    return await getHealth(newUrl);
+    return true; // provision() already polled /health and threw on timeout
   } catch (e: any) {
-    vscode.window.showErrorMessage(
-      `Backend setup failed: ${e.message}. See the developer console and ${backendUrl()}.`);
+    const log = provPaths(ctx.globalStorageUri.fsPath, process.platform).backendLog;
+    vscode.window.showErrorMessage(`Backend setup failed: ${e.message}. See ${log}.`);
     return false;
   }
 }

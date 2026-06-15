@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as path from "node:path";
 import * as crypto from "node:crypto";
 import { Readable } from "node:stream";
 
@@ -46,7 +47,7 @@ export async function verifyAsset(path: string, a: AssetEntry): Promise<boolean>
 export async function downloadAsset(
   url: string, dest: string, onBytes?: (done: number, total: number) => void,
 ): Promise<void> {
-  fs.mkdirSync(require("node:path").dirname(dest), { recursive: true });
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
   if (!/^https?:\/\//.test(url)) {
     // Local-path / file source (used by codeSummary.assets.baseUrl override).
     const src = url.replace(/^file:\/\//, "");
@@ -63,7 +64,8 @@ export async function downloadAsset(
   const nodeStream = Readable.fromWeb(res.body as any);
   nodeStream.on("data", (c: Buffer) => { done += c.length; onBytes?.(done, total); });
   await new Promise<void>((resolve, reject) => {
-    nodeStream.pipe(out).on("finish", () => resolve()).on("error", reject);
+    out.on("error", reject);
     nodeStream.on("error", reject);
+    nodeStream.pipe(out).on("finish", () => resolve());
   });
 }

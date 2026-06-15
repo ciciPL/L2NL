@@ -18,7 +18,7 @@ function fakeDeps(record: string[]): ProvDeps {
 
 const opts: ProvOptions = {
   device: "cpu", extVersion: "0.2.0", reqHash: "abc",
-  hostPython: "python3.11",
+  hostPython: ["python3.11"],
   requirementsPath: "/ext/backend/requirements.txt", backendCwd: "/ext/backend",
   baseUrlOverride: undefined,
   manifest: {
@@ -66,5 +66,20 @@ describe("provision (fresh install)", () => {
     expect(joined).not.toContain("pip install");
     expect(joined).toContain("spawn");        // launch always runs
     expect(rec).toContain("writeState");
+  });
+
+  it("throws and reports the failing step when a command exits non-zero", async () => {
+    const rec: string[] = [];
+    const deps: ProvDeps = {
+      ...fakeDeps(rec),
+      run: async (cmd, args = []) => {
+        if (`${cmd} ${args.join(" ")}`.includes("-m venv")) {
+          return { code: 1, stdout: "", stderr: "venv boom" };
+        }
+        return { code: 0, stdout: "ok", stderr: "" };
+      },
+    };
+    await expect(provision(provPaths("/gs", "darwin"), opts, deps)).rejects.toThrow(/exited 1/);
+    expect(rec.join("\n")).toContain("step venv:error");
   });
 });

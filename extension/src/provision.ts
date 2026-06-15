@@ -50,7 +50,7 @@ export interface ProvOptions {
   device: string;
   extVersion: string;
   reqHash: string;
-  hostPython: string;
+  hostPython: string[];
   requirementsPath: string;
   backendCwd: string;
   baseUrlOverride?: string;
@@ -77,6 +77,10 @@ export async function provision(
   };
   const need = stepsNeeded(deps.readState(), inputs);
   const did = (s: Step) => deps.onStep(s, need.has(s) ? "done" : "skipped");
+  const mustRun = async (cmd: string, args: string[], env?: Record<string, string>) => {
+    const r = await deps.run(cmd, args, env);
+    if (r.code !== 0) throw new Error(`${cmd} exited ${r.code}: ${r.stderr.slice(0, 300)}`);
+  };
   let codebertReady = !need.has("codebert");
   let current: Step = "venv";
 
@@ -85,9 +89,9 @@ export async function provision(
       current = "venv";
       deps.onStep("venv", "running");
       deps.mkdirp(p.root);
-      const [hp, ...hpArgs] = opts.hostPython.split(" ");
-      await deps.run(hp, [...hpArgs, "-m", "venv", p.venv]);
-      await deps.run(p.venvPython, ["-m", "pip", "install", "--upgrade", "pip"]);
+      const [hp, ...hpArgs] = opts.hostPython;
+      await mustRun(hp, [...hpArgs, "-m", "venv", p.venv]);
+      await mustRun(p.venvPython, ["-m", "pip", "install", "--upgrade", "pip"]);
     }
     did("venv");
 
@@ -95,14 +99,14 @@ export async function provision(
       current = "torch";
       deps.onStep("torch", "running");
       const index = TORCH_INDEX[opts.device] ?? TORCH_INDEX.cpu;
-      await deps.run(p.venvPython, ["-m", "pip", "install", "torch", "--index-url", index]);
+      await mustRun(p.venvPython, ["-m", "pip", "install", "torch", "--index-url", index]);
     }
     did("torch");
 
     if (need.has("deps")) {
       current = "deps";
       deps.onStep("deps", "running");
-      await deps.run(p.venvPython, ["-m", "pip", "install", "-r", opts.requirementsPath]);
+      await mustRun(p.venvPython, ["-m", "pip", "install", "-r", opts.requirementsPath]);
     }
     did("deps");
 
@@ -122,7 +126,7 @@ export async function provision(
     if (need.has("codebert")) {
       current = "codebert";
       deps.onStep("codebert", "running");
-      await deps.run(
+      await mustRun(
         p.venvPython,
         ["-c", "from transformers import AutoModel,AutoTokenizer;AutoModel.from_pretrained('microsoft/codebert-base');AutoTokenizer.from_pretrained('microsoft/codebert-base')"],
         { HF_HOME: p.hfCache },
