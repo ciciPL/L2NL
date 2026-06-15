@@ -1,0 +1,18 @@
+{
+  "release": "v0.1-assets",
+  "baseUrl": "https://github.com/ciciPL/L2NL/releases/download/v0.1-assets/",
+  "assets": [
+    {
+      "name": "extractor/pytorch_model.bin",
+      "file": "pytorch_model.bin",
+      "sha256": "638efb2ab2862843d987e98117ad679065c4037f7246793f1e9ec4c3f8477de8",
+      "size": 316071890
+    },
+    {
+      "name": "corpus/corpus_30k.jsonl",
+      "file": "corpus_30k.jsonl",
+      "sha256": "08b64305f2a846cad3283ab3340a95ae2c403120be5da42fe942055467860258",
+      "size": 71406879
+    }
+  ]
+}
