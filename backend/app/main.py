@@ -14,7 +14,7 @@ app = FastAPI(title="Code Summary Backend")
 
 # Resident resources loaded once at import (process start).
 embedder = Embedder(load=settings.load_sbert)
-retriever = Retriever(settings.corpus_path)
+retriever = Retriever(settings.corpus_path, limit=settings.corpus_limit)
 extractor = Extractor(settings.extractor_weights,
                       codebert_path=settings.codebert_path,
                       device=settings.device)

@@ -40,8 +40,9 @@ class Retriever:
     one (stub shell / local dev), returns canned examples so the pipeline runs.
     """
 
-    def __init__(self, corpus_path: str | None = None):
+    def __init__(self, corpus_path: str | None = None, limit: int | None = None):
         self.corpus_path = corpus_path
+        self.limit = limit
         self._bm25 = None
         self._codes: list[str] = []
         self._summaries: list[str] = []
@@ -53,6 +54,8 @@ class Retriever:
         codes, summaries = [], []
         with open(path, encoding="utf-8") as f:
             for line in f:
+                if self.limit and len(codes) >= self.limit:
+                    break
                 line = line.strip()
                 if not line:
                     continue
