@@ -1,0 +1,35 @@
+# Core inference / training
+torch==2.5.1
+transformers>=4.45.0
+vllm>=0.6.0
+sentence-transformers>=3.0.0
+accelerate>=0.30.0
+deepspeed>=0.14.0      # only for 08_finetune_optional/
+
+# Retrieval & ranking
+rank_bm25>=0.2.2
+
+# NLP utilities
+spacy>=3.7.0
+language-tool-python>=2.7.1
+
+# Evaluation
+evaluate>=0.4.2
+nltk>=3.8.1
+rouge-score>=0.1.2
+sacrebleu>=2.4.0
+bert-score>=0.3.13
+
+# AST parsing
+tree-sitter>=0.21.0
+tree-sitter-languages>=1.10.2   # bundles parsers for Julia/Lua/OCaml/R/Racket
+
+# Plotting (Fig 5)
+matplotlib>=3.8.0
+seaborn>=0.13.0
+pandas>=2.0.0
+numpy>=1.26.0
+
+# Misc
+tqdm
+PyYAML
