@@ -37,10 +37,20 @@ function backendUrl(): string {
 }
 
 function updateStatus() {
+  const cfg = vscode.workspace.getConfiguration("codeSummary");
+  if (!cfg.get("backend.managed", false)) {
+    statusItem.text = "$(rocket) Summary: setup";
+    statusItem.tooltip = "Run Code Summary setup";
+    statusItem.command = "codeSummary.setup";
+    statusItem.show();
+    return;
+  }
   const s = readSettings();
   const icon = s.mode === "offline" ? "$(vm)" : "$(cloud)";
   const model = s.mode === "offline" ? s.offline.model : s.online.model;
   statusItem.text = `${icon} Summary: ${s.mode} · ${model}`;
+  statusItem.tooltip = "Toggle online/offline";
+  statusItem.command = "codeSummary.toggleMode";
   statusItem.show();
 }
 
@@ -98,7 +108,6 @@ async function summarizeSelection(ctx: vscode.ExtensionContext) {
 export function activate(ctx: vscode.ExtensionContext) {
   statusItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right, 100);
-  statusItem.command = "codeSummary.toggleMode";
   updateStatus();
 
   ctx.subscriptions.push(
