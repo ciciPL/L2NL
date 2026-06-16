@@ -1,6 +1,16 @@
 import * as vscode from "vscode";
 import { detectEnv, runProvision, testConnection } from "./backend";
-import { CLOUD_VENDORS, LOCAL_PRESETS } from "./models";
+import { CLOUD_VENDORS, LOCAL_PRESETS, mergeModelConfig, SavedModel } from "./models";
+import { BASE_CSS } from "./ui";
+
+function currentModel(): SavedModel {
+  const c = vscode.workspace.getConfiguration("codeSummary");
+  return {
+    mode: c.get("mode", "online"),
+    online: { baseUrl: c.get("online.baseUrl", ""), apiKey: c.get("online.apiKey", ""), model: c.get("online.model", "") },
+    offline: { baseUrl: c.get("offline.baseUrl", ""), model: c.get("offline.model", "") },
+  };
+}
 
 export class WizardPanel {
   private static current: WizardPanel | undefined;
@@ -26,11 +36,12 @@ export class WizardPanel {
   private async handle(msg: any, ctx: vscode.ExtensionContext) {
     const cfg = vscode.workspace.getConfiguration("codeSummary");
     switch (msg.type) {
-      case "detectEnv": {
-        const env = await detectEnv();
-        this.post({ type: "envResult", env });
+      case "requestInit":
+        this.post({ type: "initModel", model: currentModel() });
         break;
-      }
+      case "detectEnv":
+        this.post({ type: "envResult", env: await detectEnv() });
+        break;
       case "selectDevice":
         await cfg.update("backend.device", msg.device, vscode.ConfigurationTarget.Global);
         break;
@@ -46,24 +57,19 @@ export class WizardPanel {
         break;
       }
       case "saveModel": {
-        const p = msg.payload;
-        await cfg.update("mode", p.mode, vscode.ConfigurationTarget.Global);
-        if (p.mode === "online") {
-          await cfg.update("online.baseUrl", p.base_url, vscode.ConfigurationTarget.Global);
-          await cfg.update("online.apiKey", p.api_key, vscode.ConfigurationTarget.Global);
-          await cfg.update("online.model", p.model, vscode.ConfigurationTarget.Global);
-        } else {
-          await cfg.update("offline.baseUrl", p.base_url, vscode.ConfigurationTarget.Global);
-          await cfg.update("offline.model", p.model, vscode.ConfigurationTarget.Global);
-        }
+        const merged = mergeModelConfig(currentModel(), msg.payload);
+        await cfg.update("mode", merged.mode, vscode.ConfigurationTarget.Global);
+        await cfg.update("online.baseUrl", merged.online.baseUrl, vscode.ConfigurationTarget.Global);
+        await cfg.update("online.apiKey", merged.online.apiKey, vscode.ConfigurationTarget.Global);
+        await cfg.update("online.model", merged.online.model, vscode.ConfigurationTarget.Global);
+        await cfg.update("offline.baseUrl", merged.offline.baseUrl, vscode.ConfigurationTarget.Global);
+        await cfg.update("offline.model", merged.offline.model, vscode.ConfigurationTarget.Global);
         this.post({ type: "modelSaved" });
         break;
       }
-      case "testConnection": {
-        const r = await testConnection(msg.payload);
-        this.post({ type: "testResult", ok: r.ok, message: r.message });
+      case "testConnection":
+        this.post({ type: "testResult", ...(await testConnection(msg.payload)) });
         break;
-      }
       case "close":
         this.panel.dispose();
         break;
@@ -72,27 +78,13 @@ export class WizardPanel {
 
   private html(): string {
     const presets = JSON.stringify({ cloud: CLOUD_VENDORS, local: LOCAL_PRESETS });
-    return /* html */ `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-      body { font-family: var(--vscode-font-family); padding: 16px; color: var(--vscode-foreground); }
-      h1 { font-size: 1.3em; } h2 { font-size: 1.05em; margin-top: 0; }
+    return /* html */ `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${BASE_CSS}
       .step { display: none; } .step.active { display: block; }
-      .nav { margin-top: 18px; display: flex; gap: 8px; }
-      button { background: var(--vscode-button-background); color: var(--vscode-button-foreground);
-        border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
-      button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
-      button:disabled { opacity: .5; cursor: default; }
-      input, select { width: 100%; padding: 6px; margin: 4px 0 10px; box-sizing: border-box;
-        background: var(--vscode-input-background); color: var(--vscode-input-foreground);
-        border: 1px solid var(--vscode-input-border, transparent); border-radius: 4px; }
-      .row { display: flex; gap: 6px; align-items: center; }
-      .ok { color: var(--vscode-testing-iconPassed, #3fb950); } .bad { color: var(--vscode-errorForeground); }
-      .steps { font-family: var(--vscode-editor-font-family, monospace); }
-      .steps div { padding: 2px 0; } .muted { color: var(--vscode-descriptionForeground); }
-      .tabs { display: flex; gap: 8px; margin-bottom: 8px; }
-      .tab { padding: 4px 10px; border-radius: 4px; cursor: pointer; background: var(--vscode-button-secondaryBackground); }
-      .tab.sel { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
-      pre.log { max-height: 160px; overflow: auto; background: var(--vscode-textCodeBlock-background); padding: 8px; border-radius: 4px; }
+      .steps div { padding: 2px 0; }
+      pre.log { max-height: 160px; overflow: auto; }
     </style></head><body>
+    <div id="wstepper" class="cs-stepper"></div>
+
     <div id="s-welcome" class="step active">
       <h1>Code Summary — Setup</h1>
       <p>This wizard sets up a private local backend (a Python venv + paper pipeline assets, ~400&nbsp;MB) and your summarization model. Nothing is installed system-wide; removing the extension removes it all.</p>
@@ -100,10 +92,10 @@ export class WizardPanel {
     </div>
 
     <div id="s-env" class="step">
-      <h2>1 · Environment check</h2>
-      <div id="envBody" class="muted">Checking…</div>
+      <h2>Environment check</h2>
+      <div id="envBody" class="cs-card muted">Checking…</div>
       <div id="deviceWrap" style="display:none">
-        <label>Inference device</label>
+        <div class="cs-label">inference device</div>
         <select id="device"><option value="cpu">CPU (works everywhere)</option></select>
       </div>
       <div class="nav"><button class="secondary" onclick="go('welcome')">Back</button>
@@ -111,22 +103,22 @@ export class WizardPanel {
     </div>
 
     <div id="s-install" class="step">
-      <h2>2 · Install backend</h2>
-      <div id="steps" class="steps"></div>
-      <pre id="installLog" class="log muted">Idle.</pre>
+      <h2>Install backend</h2>
+      <div id="steps" class="cs-card steps"></div>
+      <pre id="installLog" class="cs-code log muted">Idle.</pre>
       <div class="nav"><button id="installBtn" onclick="startInstall()">Install</button>
         <button id="installNext" disabled onclick="go('model')">Next</button></div>
     </div>
 
     <div id="s-model" class="step">
-      <h2>3 · Model</h2>
-      <div class="tabs"><div id="tab-online" class="tab sel" onclick="setMode('online')">Cloud API</div>
-        <div id="tab-offline" class="tab" onclick="setMode('offline')">Local runtime</div></div>
-      <label>Provider</label><select id="vendor" onchange="applyVendor()"></select>
-      <label>Base URL</label><input id="baseUrl" placeholder="https://…/v1">
-      <div id="keyWrap"><label>API key</label><input id="apiKey" type="password" placeholder="sk-…"></div>
-      <label>Model</label><input id="model" placeholder="model name">
-      <div class="row"><button class="secondary" onclick="doTest()">Test connection</button>
+      <h2>Model</h2>
+      <div class="cs-seg"><div id="seg-online" class="cs-seg__opt cs-seg__opt--sel" onclick="setMode('online')">Cloud API</div>
+        <div id="seg-offline" class="cs-seg__opt" onclick="setMode('offline')">Local runtime</div></div>
+      <div class="cs-label">provider</div><select id="vendor" onchange="applyVendor()"></select>
+      <div class="cs-label">base URL</div><input id="baseUrl" placeholder="https://…/v1">
+      <div id="keyWrap"><div class="cs-label">API key</div><input id="apiKey" type="password" placeholder="leave blank to keep existing"></div>
+      <div class="cs-label">model</div><input id="model" placeholder="model name">
+      <div style="display:flex;gap:8px;align-items:center"><button class="secondary" onclick="doTest()">Test connection</button>
         <span id="testMsg" class="muted"></span></div>
       <div class="nav"><button class="secondary" onclick="go('install')">Back</button>
         <button onclick="saveModel()">Save & finish</button></div>
@@ -142,20 +134,29 @@ export class WizardPanel {
       const vscode = acquireVsCodeApi();
       const PRESETS = ${presets};
       let mode = "online";
+      let saved = null;
       const STEPS = ["venv","torch","deps","assets","codebert","launch"];
+      const ORDER = ["welcome","env","install","model","done"];
+      const WLABELS = ["Welcome","Environment","Install","Model","Done"];
+      const MARK = { done:"✓", active:"●", pending:"○", error:"✕" };
+
+      function renderStepper(id){ const ai = ORDER.indexOf(id);
+        document.getElementById("wstepper").innerHTML = WLABELS.map((label,i)=>{
+          const st = i<ai?"done":i===ai?"active":"pending";
+          return (i?'<span class="cs-step__line"></span>':'')+
+            '<span class="cs-step cs-step--'+st+'"><span class="cs-step__dot cs-step__dot--'+st+'">'+MARK[st]+'</span><span class="cs-step__label">'+label+'</span></span>';
+        }).join(""); }
 
       function go(id){ document.querySelectorAll(".step").forEach(e=>e.classList.remove("active"));
-        document.getElementById("s-"+id).classList.add("active");
+        document.getElementById("s-"+id).classList.add("active"); renderStepper(id);
         if(id==="env"){ vscode.postMessage({type:"detectEnv"}); }
-        if(id==="model"){ renderVendors(); } }
+        if(id==="model"){ renderVendors(); prefill(); } }
       function closeWizard(){ vscode.postMessage({type:"close"}); }
 
-      function renderSteps(map){ const el=document.getElementById("steps");
-        el.innerHTML = STEPS.map(s=>{ const st=map[s]||"pending";
-          const icon = st==="done"?"✓":st==="error"?"✗":st==="running"?"…":st==="skipped"?"·":"○";
-          const cls = st==="done"||st==="skipped"?"ok":st==="error"?"bad":"muted";
-          return '<div class="'+cls+'">'+icon+' '+s+'</div>'; }).join(""); }
-
+      function renderSteps(map){ document.getElementById("steps").innerHTML = STEPS.map(s=>{
+          const st=map[s]||"pending";
+          const cls = st==="done"||st==="skipped"?"ok":st==="error"?"cs-err":"muted";
+          return '<div class="'+cls+'">'+(MARK[st]||(st==="skipped"?"·":"○"))+' '+s+'</div>'; }).join(""); }
       const stepMap={};
       function startInstall(){ document.getElementById("installBtn").disabled=true;
         STEPS.forEach(s=>stepMap[s]="pending"); renderSteps(stepMap);
@@ -163,35 +164,40 @@ export class WizardPanel {
         vscode.postMessage({type:"startInstall"}); }
 
       function setMode(m){ mode=m;
-        document.getElementById("tab-online").classList.toggle("sel",m==="online");
-        document.getElementById("tab-offline").classList.toggle("sel",m==="offline");
+        document.getElementById("seg-online").classList.toggle("cs-seg__opt--sel",m==="online");
+        document.getElementById("seg-offline").classList.toggle("cs-seg__opt--sel",m==="offline");
         document.getElementById("keyWrap").style.display = m==="online"?"block":"none";
         renderVendors(); }
       function renderVendors(){ const list = mode==="online"?PRESETS.cloud:PRESETS.local;
         const sel=document.getElementById("vendor");
-        sel.innerHTML=list.map(v=>'<option value="'+v.id+'">'+v.label+'</option>').join("");
-        applyVendor(); }
+        sel.innerHTML=list.map(v=>'<option value="'+v.id+'">'+v.label+'</option>').join(""); applyVendor(); }
       function applyVendor(){ const list = mode==="online"?PRESETS.cloud:PRESETS.local;
         const v=list.find(x=>x.id===document.getElementById("vendor").value)||list[0];
         document.getElementById("baseUrl").value=v.baseUrl;
         document.getElementById("model").value=v.defaultModel; }
+      function prefill(){ if(!saved) return;
+        const blk = mode==="online"?saved.online:saved.offline;
+        if(blk && blk.baseUrl) document.getElementById("baseUrl").value=blk.baseUrl;
+        if(blk && blk.model) document.getElementById("model").value=blk.model; }
       function payload(){ return { mode, base_url:document.getElementById("baseUrl").value,
         api_key: mode==="online"?document.getElementById("apiKey").value:"",
         model:document.getElementById("model").value }; }
       function doTest(){ document.getElementById("testMsg").textContent="Testing…";
-        vscode.postMessage({type:"testConnection",payload:payload()}); }
+        const p = payload();
+        if(mode==="online" && !p.api_key && saved && saved.online) p.api_key = saved.online.apiKey;
+        vscode.postMessage({type:"testConnection",payload:p}); }
       function saveModel(){ vscode.postMessage({type:"saveModel",payload:payload()}); }
 
-      window.addEventListener("message", (ev)=>{ const m=ev.data;
+      window.addEventListener("message",(ev)=>{ const m=ev.data;
+        if(m.type==="initModel"){ saved=m.model; if(saved && saved.mode) setMode(saved.mode); }
         if(m.type==="envResult"){ const e=m.env; const py=e.python;
           document.getElementById("envBody").innerHTML =
             (py?'<div class="ok">✓ Python '+py.version.join(".")+'</div>'
-               :'<div class="bad">✗ Python ≥3.10 not found — install from python.org and reopen.</div>')
+               :'<div class="cs-err">✕ Python ≥3.10 not found — install from python.org and reopen.</div>')
             + (e.gpu?'<div class="ok">✓ NVIDIA GPU detected</div>':'<div class="muted">· No NVIDIA GPU — using CPU</div>');
           const dw=document.getElementById("deviceWrap"); const dev=document.getElementById("device");
           dw.style.display="block";
-          if(e.gpu && !dev.querySelector('option[value="cuda"]')){ const o=document.createElement("option");
-            o.value="cuda"; o.text="CUDA (NVIDIA GPU)"; dev.add(o); }
+          if(e.gpu && !dev.querySelector('option[value="cuda"]')){ const o=document.createElement("option"); o.value="cuda"; o.text="CUDA (NVIDIA GPU)"; dev.add(o); }
           dev.onchange=()=>vscode.postMessage({type:"selectDevice",device:dev.value});
           document.getElementById("envNext").disabled = !py; }
         if(m.type==="stepState"){ stepMap[m.step]=m.status; renderSteps(stepMap);
@@ -200,10 +206,12 @@ export class WizardPanel {
           document.getElementById("installNext").disabled=false; }
         if(m.type==="installError"){ document.getElementById("installLog").textContent="Failed: "+m.message;
           document.getElementById("installBtn").disabled=false; }
-        if(m.type==="testResult"){ const el=document.getElementById("testMsg");
-          el.textContent=m.message; el.className=m.ok?"ok":"bad"; }
+        if(m.type==="testResult"){ const el=document.getElementById("testMsg"); el.textContent=m.message; el.className=m.ok?"ok":"cs-err"; }
         if(m.type==="modelSaved"){ go("done"); }
       });
+
+      renderStepper("welcome");
+      vscode.postMessage({type:"requestInit"});
     </script></body></html>`;
   }
 }
