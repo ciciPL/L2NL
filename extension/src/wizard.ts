@@ -150,7 +150,7 @@ export class WizardPanel {
       function go(id){ document.querySelectorAll(".step").forEach(e=>e.classList.remove("active"));
         document.getElementById("s-"+id).classList.add("active"); renderStepper(id);
         if(id==="env"){ vscode.postMessage({type:"detectEnv"}); }
-        if(id==="model"){ renderVendors(); prefill(); } }
+        if(id==="model"){ prefill(); } }
       function closeWizard(){ vscode.postMessage({type:"close"}); }
 
       function renderSteps(map){ document.getElementById("steps").innerHTML = STEPS.map(s=>{
@@ -175,7 +175,8 @@ export class WizardPanel {
         const v=list.find(x=>x.id===document.getElementById("vendor").value)||list[0];
         document.getElementById("baseUrl").value=v.baseUrl;
         document.getElementById("model").value=v.defaultModel; }
-      function prefill(){ if(!saved) return;
+      function prefill(){ mode = (saved && saved.mode) || "online"; setMode(mode);
+        if(!saved) return;
         const blk = mode==="online"?saved.online:saved.offline;
         if(blk && blk.baseUrl) document.getElementById("baseUrl").value=blk.baseUrl;
         if(blk && blk.model) document.getElementById("model").value=blk.model; }
@@ -189,7 +190,7 @@ export class WizardPanel {
       function saveModel(){ vscode.postMessage({type:"saveModel",payload:payload()}); }
 
       window.addEventListener("message",(ev)=>{ const m=ev.data;
-        if(m.type==="initModel"){ saved=m.model; if(saved && saved.mode) setMode(saved.mode); }
+        if(m.type==="initModel"){ saved=m.model; }
         if(m.type==="envResult"){ const e=m.env; const py=e.python;
           document.getElementById("envBody").innerHTML =
             (py?'<div class="ok">✓ Python '+py.version.join(".")+'</div>'

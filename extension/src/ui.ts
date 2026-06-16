@@ -64,6 +64,7 @@ export const BASE_CSS = `
   .cs-step__dot--pending { background: transparent; border: 1px solid var(--vscode-descriptionForeground); color: var(--vscode-descriptionForeground); }
   .cs-step__label { font-size: 12px; color: var(--vscode-descriptionForeground); }
   .cs-step--done .cs-step__label, .cs-step--active .cs-step__label { color: var(--vscode-foreground); }
+  .cs-step--error .cs-step__label { color: var(--vscode-errorForeground); }
   .cs-step__line { flex: 1; min-width: 12px; height: 1px; background: var(--vscode-widget-border, var(--vscode-editorWidget-border, rgba(128,128,128,.35))); }
   .cs-badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 6px; margin-left: 6px; background: var(--vscode-badge-background); color: var(--vscode-badge-foreground); }
   .cs-badge--score { background: color-mix(in srgb, var(--vscode-testing-iconPassed, #3fb950) 22%, transparent); color: var(--vscode-testing-iconPassed, #3fb950); }
@@ -72,7 +73,7 @@ export const BASE_CSS = `
   .cs-code { background: var(--vscode-textCodeBlock-background); padding: 8px 10px; border-radius: 6px; white-space: pre-wrap; font-family: var(--vscode-editor-font-family, monospace); font-size: .92em; overflow-x: auto; margin: 0; }
   .cs-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
   .cs-scorebar { display: inline-block; width: 80px; height: 6px; border-radius: 3px; background: var(--vscode-editorWidget-background); vertical-align: middle; overflow: hidden; }
-  .cs-scorebar__fill { display: block; height: 100%; background: var(--vscode-progressBar-background, var(--vscode-textLink-foreground)); }
+  .cs-scorebar__fill { display: block; height: 100%; background: var(--vscode-progressBar-background, var(--vscode-textLink-foreground, #0078d4)); }
   .cs-scorebar__num { font-size: 11px; color: var(--vscode-descriptionForeground); margin-left: 6px; }
   .cs-hl { background: var(--vscode-editor-findMatchHighlightBackground, rgba(234,92,0,.22)); border-radius: 3px; }
   .cs-chip--prob { font-size: 10px; color: var(--vscode-descriptionForeground); margin-left: 6px; font-family: var(--vscode-editor-font-family, monospace); }
