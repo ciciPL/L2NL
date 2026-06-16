@@ -128,7 +128,11 @@ export function activate(ctx: vscode.ExtensionContext) {
   );
 
   const cfg = vscode.workspace.getConfiguration("codeSummary");
-  if (!cfg.get("backend.managed", false)) {
+  if (cfg.get("backend.managed", false)) {
+    // Already provisioned: bring the managed backend up on launch so it's ready
+    // without a manual trigger (ensureBackend is a no-op if already healthy).
+    void ensureBackend(ctx);
+  } else {
     WizardPanel.open(ctx);
   }
 }
