@@ -1,81 +1,78 @@
 import * as vscode from "vscode";
 import { SummarizeResponse } from "./client";
+import {
+  escapeHtml, BASE_CSS, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks, StepStatus,
+} from "./ui";
 
-function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const PIPE = ["Translate", "Retrieve", "Extract", "Generate"];
+const STAGE_INDEX: Record<string, number> = { translate: 0, retrieve: 1, extract: 2, generate: 3 };
+
+function pipeSteps(resp: SummarizeResponse): { label: string; status: StepStatus }[] {
+  const failAt = resp.error && resp.failed_stage ? (STAGE_INDEX[resp.failed_stage] ?? -1) : -1;
+  return PIPE.map((label, i) => ({
+    label,
+    status: (failAt < 0 ? "done" : i < failAt ? "done" : i === failAt ? "error" : "pending") as StepStatus,
+  }));
 }
 
-function renderBody(resp: SummarizeResponse): string {
+function renderBody(resp: SummarizeResponse, source: string): string {
+  const head = stepper(pipeSteps(resp));
   if (resp.error) {
-    return `<h2>Failed at stage: ${esc(resp.failed_stage ?? "unknown")}</h2>
-            <pre class="err">${esc(resp.error)}</pre>`;
+    return `${head}<div class="cs-card"><h1 class="cs-err">Failed at: ${escapeHtml(resp.failed_stage ?? "unknown")}</h1>
+      <pre class="cs-code cs-err">${escapeHtml(resp.error)}</pre></div>`;
   }
-  let html = `<h1>Summary</h1><p class="summary">${esc(resp.summary)}</p>`;
+  let html = `${head}<p class="cs-summary">${escapeHtml(resp.summary)}</p>`;
   const t = resp.trace;
   if (!t) return html;
 
-  const badge = (b: boolean, label: string) =>
-    b ? `<span class="badge">${label}</span>` : "";
-  html += `<details open><summary>① Pivot translation
-    ${badge(t.translation.repaired, "repaired")}
-    ${badge(t.translation.fell_back, "fell back")}
-    <span class="score">score ${t.translation.selected_score.toFixed(3)}</span>
-    </summary><pre>${esc(t.translation.pivot_code)}</pre></details>`;
+  const cands = t.translation.candidates.length > 1
+    ? `<details><summary>Candidates (${t.translation.candidates.length})</summary>${
+        t.translation.candidates.map((c) => `<pre class="cs-code">${escapeHtml(c)}</pre>`).join("")}</details>`
+    : "";
+  html += `<details open><summary>① Pivot translation ${scoreBadge(t.translation.selected_score)} ${warnBadges(t.translation.repaired, t.translation.fell_back)}</summary>
+    <div class="cs-split">
+      <div><div class="cs-label">source</div><pre class="cs-code">${escapeHtml(source)}</pre></div>
+      <div><div class="cs-label">python pivot</div><pre class="cs-code">${escapeHtml(t.translation.pivot_code)}</pre></div>
+    </div>${cands}</details>`;
 
-  const exs = t.retrieved.map(
-    (e) => `<li><b>[${e.score.toFixed(2)}]</b> ${esc(e.summary)}
-            <pre>${esc(e.code)}</pre></li>`).join("");
-  html += `<details><summary>② Retrieved examples (${t.retrieved.length})</summary>
-           <ul>${exs}</ul></details>`;
+  const maxScore = Math.max(1, ...t.retrieved.map((e) => e.score));
+  const exs = t.retrieved.map((e) =>
+    `<div class="cs-card">${scoreBar(e.score, maxScore)}
+      <div style="margin:6px 0 4px">${escapeHtml(e.summary)}</div>
+      <pre class="cs-code">${escapeHtml(e.code)}</pre></div>`).join("");
+  html += `<details><summary>② Retrieved examples (${t.retrieved.length})</summary>${exs}</details>`;
 
-  const blocks = t.core_blocks.map(
-    (b) => `<li>[${b.block_type} ${b.prob.toFixed(2)}] ${esc(b.text)}</li>`).join("");
+  const hl = highlightCoreBlocks(t.translation.pivot_code, t.core_blocks);
+  const list = t.core_blocks.map((b) =>
+    `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`).join("");
   html += `<details><summary>③ Core statement blocks (${t.core_blocks.length})</summary>
-           <ul class="blocks">${blocks}</ul></details>`;
+    <pre class="cs-code">${hl}</pre><ul class="cs-blocklist">${list}</ul></details>`;
 
-  html += `<details><summary>④ Final prompt</summary>
-           <pre>${esc(t.prompt)}</pre></details>`;
+  html += `<details><summary>④ Final prompt</summary><pre class="cs-code">${escapeHtml(t.prompt)}</pre></details>`;
   return html;
 }
-
-const STYLE = `
-  body { font-family: var(--vscode-font-family); padding: 12px; }
-  .summary { font-size: 1.1em; font-weight: 600; }
-  pre { background: var(--vscode-textCodeBlock-background); padding: 8px;
-        white-space: pre-wrap; border-radius: 4px; }
-  .badge { background: var(--vscode-badge-background);
-           color: var(--vscode-badge-foreground); border-radius: 4px;
-           padding: 0 6px; margin-left: 6px; font-size: 0.8em; }
-  .score { color: var(--vscode-descriptionForeground); margin-left: 6px; }
-  .err { color: var(--vscode-errorForeground); }
-  details { margin-top: 10px; } summary { cursor: pointer; font-weight: 600; }
-`;
 
 export class ResultPanel {
   private static current: vscode.WebviewPanel | undefined;
 
-  static show(resp: SummarizeResponse) {
-    const col = vscode.ViewColumn.Beside;
+  private static ensure(): vscode.WebviewPanel {
     if (!this.current) {
       this.current = vscode.window.createWebviewPanel(
-        "codeSummaryResult", "Code Summary", col, { enableScripts: false });
+        "codeSummaryResult", "Code Summary", vscode.ViewColumn.Beside, { enableScripts: false });
       this.current.onDidDispose(() => (this.current = undefined));
     }
-    this.current.webview.html =
-      `<!DOCTYPE html><html><head><style>${STYLE}</style></head>
-       <body>${renderBody(resp)}</body></html>`;
-    this.current.reveal(col);
+    return this.current;
+  }
+
+  static show(resp: SummarizeResponse, source = "") {
+    const p = this.ensure();
+    p.webview.html = `<!DOCTYPE html><html><head><style>${BASE_CSS}</style></head><body>${renderBody(resp, source)}</body></html>`;
+    p.reveal(vscode.ViewColumn.Beside);
   }
 
   static loading() {
-    if (!this.current) {
-      this.current = vscode.window.createWebviewPanel(
-        "codeSummaryResult", "Code Summary", vscode.ViewColumn.Beside,
-        { enableScripts: false });
-      this.current.onDidDispose(() => (this.current = undefined));
-    }
-    this.current.webview.html =
-      `<!DOCTYPE html><html><head><style>${STYLE}</style></head>
-       <body><p>Summarizing…</p></body></html>`;
+    const p = this.ensure();
+    const head = stepper(PIPE.map((label) => ({ label, status: "pending" as StepStatus })));
+    p.webview.html = `<!DOCTYPE html><html><head><style>${BASE_CSS}</style></head><body>${head}<p class="muted">Summarizing…</p></body></html>`;
   }
 }

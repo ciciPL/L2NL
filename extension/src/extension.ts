@@ -89,7 +89,7 @@ async function summarizeSelection(ctx: vscode.ExtensionContext) {
   try {
     const body = buildRequest(code, language, readSettings());
     const resp = await postSummarize(backendUrl(), body);
-    ResultPanel.show(resp);
+    ResultPanel.show(resp, code);
   } catch (e: any) {
     vscode.window.showErrorMessage(`Summarize failed: ${e.message}`);
   }
