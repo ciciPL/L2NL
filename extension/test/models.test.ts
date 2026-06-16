@@ -27,3 +27,27 @@ describe("buildTestRequest", () => {
     expect(r.headers.Authorization).toBeUndefined();
   });
 });
+
+import { mergeModelConfig } from "../src/models";
+
+describe("mergeModelConfig", () => {
+  const existing = { mode: "online", online: { baseUrl: "u", apiKey: "OLDKEY", model: "m" }, offline: { baseUrl: "lu", model: "lm" } };
+
+  it("keeps the existing online key when the form key is blank", () => {
+    const out = mergeModelConfig(existing, { mode: "online", base_url: "u2", api_key: "", model: "m2" });
+    expect(out.online.apiKey).toBe("OLDKEY");
+    expect(out.online.baseUrl).toBe("u2");
+    expect(out.online.model).toBe("m2");
+  });
+  it("overwrites the key when the form provides one", () => {
+    const out = mergeModelConfig(existing, { mode: "online", base_url: "u", api_key: "NEW", model: "m" });
+    expect(out.online.apiKey).toBe("NEW");
+  });
+  it("writes offline fields and switches mode without touching the key", () => {
+    const out = mergeModelConfig(existing, { mode: "offline", base_url: "http://local/v1", api_key: "", model: "lc" });
+    expect(out.mode).toBe("offline");
+    expect(out.offline.baseUrl).toBe("http://local/v1");
+    expect(out.offline.model).toBe("lc");
+    expect(out.online.apiKey).toBe("OLDKEY");
+  });
+});

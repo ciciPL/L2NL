@@ -33,3 +33,29 @@ export function buildTestRequest(
     body: JSON.stringify({ model: m.model, messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
   };
 }
+
+export interface SavedModel {
+  mode: string;
+  online: { baseUrl: string; apiKey: string; model: string };
+  offline: { baseUrl: string; model: string };
+}
+export interface ModelFormInput { mode: string; base_url: string; api_key: string; model: string; }
+
+// Merge a wizard form submission into the saved config. Never blanks a key:
+// if the online key field is empty, the existing key is preserved.
+export function mergeModelConfig(existing: SavedModel, form: ModelFormInput): SavedModel {
+  const next: SavedModel = {
+    mode: form.mode,
+    online: { ...existing.online },
+    offline: { ...existing.offline },
+  };
+  if (form.mode === "online") {
+    next.online.baseUrl = form.base_url;
+    next.online.model = form.model;
+    if (form.api_key) next.online.apiKey = form.api_key;
+  } else {
+    next.offline.baseUrl = form.base_url;
+    next.offline.model = form.model;
+  }
+  return next;
+}
