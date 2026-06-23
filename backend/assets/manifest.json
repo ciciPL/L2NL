@@ -22,28 +22,38 @@
       "parts": [
         {
           "file": "pytorch_model.bin.part001",
-          "sha256": "79489aadf0d6f9682e8947df612ebb5fbe80864ac7c3f0227f47557d4a58ac38",
-          "size": 73400320
+          "sha256": "864ec56a6de7835eadb084418106b7397d668987b5ad1f566b3f4f0c470a7d1f",
+          "size": 47185920
         },
         {
           "file": "pytorch_model.bin.part002",
-          "sha256": "e4cebbd3f547ff8992afb9d8e27e54aba7694f68c44ed7c5563a8ed9f5851585",
-          "size": 73400320
+          "sha256": "b6ae3729d7c5d70b321e3de51085204ccd94bad0c1a663c94cd8c4eb2911a8bf",
+          "size": 47185920
         },
         {
           "file": "pytorch_model.bin.part003",
-          "sha256": "7d1ef5041105fd50ae542ce8da7cb0565935faa70d92df20c2e7fd9b7ce68916",
-          "size": 73400320
+          "sha256": "b205f0da6150c4850cb829f39e277690842d075a6cea6995079c138b3b6b9746",
+          "size": 47185920
         },
         {
           "file": "pytorch_model.bin.part004",
-          "sha256": "1f425913326907e14b3fc41766481b57e7434534621df5f1e3da9a178a33b535",
-          "size": 73400320
+          "sha256": "9b0c82151493f4511556c5ebf1bf6b52d0b05f8cd83fed086434b56fee45f47a",
+          "size": 47185920
         },
         {
           "file": "pytorch_model.bin.part005",
-          "sha256": "e9bd7649538a2be90efb047f1d224b64e7e15fcbe56d59fff7cf8295e9940190",
-          "size": 22470610
+          "sha256": "34a9c6bda73345a6f1213e7f54808c0b9cf547777cd80c8d5c6452afe2ded266",
+          "size": 47185920
+        },
+        {
+          "file": "pytorch_model.bin.part006",
+          "sha256": "fb305bc1e897e75cb6f5ea4976b16892e3d3e29ac3b1a534078661d979df97d6",
+          "size": 47185920
+        },
+        {
+          "file": "pytorch_model.bin.part007",
+          "sha256": "82e6e78e28154e994985ebc70c232e11648eb74e63da9826c1e2aec0004b4a32",
+          "size": 32956370
         }
       ]
     },
@@ -55,8 +65,13 @@
       "parts": [
         {
           "file": "corpus_30k.jsonl.part001",
-          "sha256": "08b64305f2a846cad3283ab3340a95ae2c403120be5da42fe942055467860258",
-          "size": 71406879
+          "sha256": "6fd13a9cdc9752507249036bd8d7e88aa28becde894cd0981b9c1fbd8a3bd7e4",
+          "size": 47185920
+        },
+        {
+          "file": "corpus_30k.jsonl.part002",
+          "sha256": "c9c163873a9c32836aaecadac5c856b5c6da9ef4504a2744a1a689563485dac5",
+          "size": 24220959
         }
       ]
     },
@@ -68,38 +83,53 @@
       "parts": [
         {
           "file": "codebert-base.tar.gz.part001",
-          "sha256": "a6e29c926cdce2d048a3610a0a8dfc7a9c7e612c96772e984af72cd6de1048e6",
-          "size": 73400320
+          "sha256": "674f82ae8c99c899c6184c0a09f490a2429bff6f811bf31c90d8d993c884eb00",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part002",
-          "sha256": "8a98caa2b8095b2239f830a8f54211dbf8b66776eef7aa103767cf7aaadd57e2",
-          "size": 73400320
+          "sha256": "f7167d9520aa66f3377e1b17410334969f92e8cb0cb44a0dca9a84b3a8ca36fe",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part003",
-          "sha256": "3cf93d1fa7d85390e347472eae8057f8df763a62ca0e305b86c66b4b463524b5",
-          "size": 73400320
+          "sha256": "e3c862e93991579f4272139504b24bd6fcfd8d364c8bf1517ffc92b2be30b3fd",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part004",
-          "sha256": "1a4bc593d6b4c073915389642a4a19a7100593e133b10d6903a86fa0aab97905",
-          "size": 73400320
+          "sha256": "a143d6a51b4380814002207edbd8b051328c7a38dc45f353414099b4b5bb3a18",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part005",
-          "sha256": "6bd312259c53b2742a2c3f04a501dc827b5d599b71b4843b4855367768d219a6",
-          "size": 73400320
+          "sha256": "5879f83c7b3de567d380ef8a996e14b4a94f404dd32e8ff99f12974bacb9acf3",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part006",
-          "sha256": "69fdc5600b5da97b79540819dca349ef46f0b3df00e09ef7321d615b762ff22c",
-          "size": 73400320
+          "sha256": "885121ebbef6f03ecad70247bb1ca598884f6c6ba8e8725f6dd6516341df9d2a",
+          "size": 47185920
         },
         {
           "file": "codebert-base.tar.gz.part007",
-          "sha256": "253a381aa46bb84ffe7ddf8dec89dc591ddfe79925fc4ec66ed27fefe3be4e1a",
-          "size": 23294447
+          "sha256": "279603d93dc94b98c9cd384ec4c749737032bbf6e33f565a70e57db3732b4c5a",
+          "size": 47185920
+        },
+        {
+          "file": "codebert-base.tar.gz.part008",
+          "sha256": "625345875fc6968a674b53d35c6efd134e5854deb55d0ed1619b6b4cd10a749c",
+          "size": 47185920
+        },
+        {
+          "file": "codebert-base.tar.gz.part009",
+          "sha256": "f4431b4c1d3f6614dd78989a8fcbf67ca636d3c2e34a9ccd5f1cea2958529d01",
+          "size": 47185920
+        },
+        {
+          "file": "codebert-base.tar.gz.part010",
+          "sha256": "31ae1e80d7c978e8360ceb1a1ed8bb6ba446dd769b78771a8e4120327c2e6c6c",
+          "size": 39023087
         }
       ],
       "extractTo": "codebert-base"

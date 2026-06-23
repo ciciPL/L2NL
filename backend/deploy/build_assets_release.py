@@ -42,7 +42,7 @@ def build_release_assets(
     release: str,
     gitee_base_url: str,
     global_base_url: str | None = None,
-    split_size: int = 70 * 1024 * 1024,
+    split_size: int = 45 * 1024 * 1024,
 ) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     sources = [{"id": "gitee", "baseUrl": gitee_base_url.rstrip("/"), "enabledByDefault": True}]
@@ -86,7 +86,7 @@ def main() -> None:
     p.add_argument("--release", default="v0.2-assets-cn")
     p.add_argument("--gitee-base-url", required=True)
     p.add_argument("--global-base-url")
-    p.add_argument("--split-size-mib", type=int, default=70)
+    p.add_argument("--split-size-mib", type=int, default=45)
     args = p.parse_args()
     build_release_assets(
         args.src, args.out, args.release, args.gitee_base_url, args.global_base_url,

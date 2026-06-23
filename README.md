@@ -43,7 +43,7 @@ python deploy/build_assets_release.py \
   --release v0.2-assets-cn \
   --gitee-base-url https://gitee.com/ch2n2000/L2NL/releases/download/v0.2-assets-cn \
   --global-base-url https://github.com/ciciPL/L2NL/releases/download/v0.2-assets-cn \
-  --split-size-mib 70
+  --split-size-mib 45
 ```
 
 把 `/path/to/release-assets` 中的 `assets-manifest.v2.json`、`SHA256SUMS.txt`
@@ -51,7 +51,7 @@ python deploy/build_assets_release.py \
 `assets-manifest.v2.json` 覆盖 `backend/assets/manifest.json`，再运行：
 
 Gitee 单个附件限制为 100M，页面实测还会限制一次 Release 的附件数量；因此
-默认使用 70MiB 分片，既远低于单附件上限，也能把 0.2 资产控制在约 20 个附件以内。
+默认使用 45MiB 分片，低于 Gitee 单附件上限，并且比大分片更适合不稳定的网页登录上传。
 
 ```bash
 cd extension
