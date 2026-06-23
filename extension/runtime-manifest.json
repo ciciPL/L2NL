@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "release": "v0.2-runtime-llamacpp",
+  "sources": [
+    {
+      "id": "gitee",
+      "baseUrl": "https://gitee.com/ch2n2000/L2NL/releases/download",
+      "enabledByDefault": true
+    }
+  ],
+  "runtimes": [
+    {
+      "id": "llamacpp",
+      "platform": "darwin-arm64",
+      "target": "llama-b9767-bin-macos-arm64.tar.gz",
+      "sha256": "691706e99957d5750eabd67ea85086e32fb089e06d566520dc18fb7fac2928a9",
+      "size": 10975409,
+      "sourcePath": "v0.2-runtime-llamacpp",
+      "executable": "llama-b9767/llama-server"
+    },
+    {
+      "id": "llamacpp",
+      "platform": "darwin-x64",
+      "target": "llama-b9767-bin-macos-x64.tar.gz",
+      "sha256": "c53cb694aa91a48d4312cff127ad5cb8caf4fd9eff1b61bc8d8e59711ea49a31",
+      "size": 11277826,
+      "sourcePath": "v0.2-runtime-llamacpp",
+      "executable": "llama-b9767/llama-server"
+    },
+    {
+      "id": "llamacpp",
+      "platform": "win32-x64",
+      "target": "llama-b9767-bin-win-cpu-x64.zip",
+      "sha256": "9124f6a100f6a523d81b05a1914bd63ddee4174867bc825120090b81e0c3db28",
+      "size": 17282636,
+      "sourcePath": "v0.2-runtime-llamacpp",
+      "executable": "llama-server.exe"
+    }
+  ]
+}

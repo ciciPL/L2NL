@@ -20,6 +20,7 @@ function fakeDeps(record: string[]): ProvDeps {
 const opts: ProvOptions = {
   device: "cpu", extVersion: "0.2.0", reqHash: "abc",
   hostPython: ["python3.11"],
+  pythonIndexUrl: "https://pypi.tuna.tsinghua.edu.cn/simple",
   requirementsPath: "/ext/backend/requirements.txt", backendCwd: "/ext/backend",
     baseUrlOverride: undefined,
     localAssetDir: undefined,
@@ -45,25 +46,33 @@ const opts: ProvOptions = {
 };
 
 describe("provision (fresh install)", () => {
-  it("runs venv, torch(cpu index), deps, codebert, then launches and reports a url", async () => {
+  it("runs venv, torch/domestic deps, codebert, then launches and reports a url", async () => {
     const rec: string[] = [];
     const res = await provision(provPaths("/gs", "darwin"), opts, fakeDeps(rec));
     expect(res.backendUrl).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
     const joined = rec.join("\n");
     expect(joined).toContain("-m venv");
-    expect(joined).toContain("download.pytorch.org/whl/cpu");
+    expect(joined).toContain("--retries 5 --timeout 60 -i https://pypi.tuna.tsinghua.edu.cn/simple");
+    expect(joined).toContain("-m pip install --retries 5 --timeout 60 -i https://pypi.tuna.tsinghua.edu.cn/simple torch");
     expect(joined).toContain("-r /ext/backend/requirements.txt");
     expect(joined).toContain("tar -xf /gs/assets/codebert-base.tar.gz -C /gs/assets");
     expect(joined).toContain("spawn NO_PROXY=127.0.0.1,localhost,::1 CODEBERT=/gs/assets/codebert-base");
     expect(rec).toContain("writeState");
     expect(joined).not.toContain("download ");  // assets already correct -> no download
+    expect(joined).not.toContain("download.pytorch.org");
     expect(joined).not.toContain("AutoModel.from_pretrained");
   });
 
-  it("uses the cuda wheel index when device=cuda", async () => {
+  it("uses a caller-provided pip mirror instead of PyTorch wheel indexes", async () => {
     const rec: string[] = [];
-    await provision(provPaths("/gs", "darwin"), { ...opts, device: "cuda" }, fakeDeps(rec));
-    expect(rec.join("\n")).toContain("download.pytorch.org/whl/cu121");
+    await provision(provPaths("/gs", "darwin"), {
+      ...opts,
+      device: "cuda",
+      pythonIndexUrl: "https://mirrors.aliyun.com/pypi/simple",
+    }, fakeDeps(rec));
+    const joined = rec.join("\n");
+    expect(joined).toContain("-i https://mirrors.aliyun.com/pypi/simple torch");
+    expect(joined).not.toContain("download.pytorch.org");
   });
 
   it("skips install/download steps when prior state matches (idempotent)", async () => {

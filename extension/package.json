@@ -78,6 +78,21 @@
           "type": "string",
           "default": "local-model"
         },
+        "codeSummary.offline.llamaServerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional absolute path to llama-server/llama-server.exe. Empty = use the managed runtime or PATH."
+        },
+        "codeSummary.offline.modelPath": {
+          "type": "string",
+          "default": "",
+          "description": "Managed local GGUF model path selected by the setup wizard."
+        },
+        "codeSummary.python.indexUrl": {
+          "type": "string",
+          "default": "https://pypi.tuna.tsinghua.edu.cn/simple",
+          "description": "PyPI index used when provisioning the backend. Domestic default; try Aliyun or USTC if it is slow."
+        },
         "codeSummary.params.k": {
           "type": "number",
           "default": 5

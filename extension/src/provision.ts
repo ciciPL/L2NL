@@ -63,6 +63,7 @@ export interface ProvOptions {
   extVersion: string;
   reqHash: string;
   hostPython: string[];
+  pythonIndexUrl: string;
   requirementsPath: string;
   backendCwd: string;
   baseUrlOverride?: string;
@@ -72,10 +73,9 @@ export interface ProvOptions {
   manifest: Manifest;
 }
 
-const TORCH_INDEX: Record<string, string> = {
-  cpu: "https://download.pytorch.org/whl/cpu",
-  cuda: "https://download.pytorch.org/whl/cu121",
-};
+function pipInstallArgs(indexUrl: string, extra: string[]): string[] {
+  return ["-m", "pip", "install", "--retries", "5", "--timeout", "60", "-i", indexUrl, ...extra];
+}
 
 function assetHashes(m: Manifest): Record<string, string> {
   const out: Record<string, string> = {};
@@ -117,22 +117,21 @@ export async function provision(
       deps.mkdirp(p.root);
       const [hp, ...hpArgs] = opts.hostPython;
       await mustRun(hp, [...hpArgs, "-m", "venv", p.venv]);
-      await mustRun(p.venvPython, ["-m", "pip", "install", "--upgrade", "pip"]);
+      await mustRun(p.venvPython, pipInstallArgs(opts.pythonIndexUrl, ["--upgrade", "pip"]));
     }
     did("venv");
 
     if (need.has("torch")) {
       current = "torch";
       deps.onStep("torch", "running");
-      const index = TORCH_INDEX[opts.device] ?? TORCH_INDEX.cpu;
-      await mustRun(p.venvPython, ["-m", "pip", "install", "torch", "--index-url", index]);
+      await mustRun(p.venvPython, pipInstallArgs(opts.pythonIndexUrl, ["torch"]));
     }
     did("torch");
 
     if (need.has("deps")) {
       current = "deps";
       deps.onStep("deps", "running");
-      await mustRun(p.venvPython, ["-m", "pip", "install", "-r", opts.requirementsPath]);
+      await mustRun(p.venvPython, pipInstallArgs(opts.pythonIndexUrl, ["-r", opts.requirementsPath]));
     }
     did("deps");
 

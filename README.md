@@ -8,12 +8,13 @@ Python venv、下载经过校验的流水线资产，并连接 OpenAI-compatible
 1. 从 Gitee Release 下载 `code-summary-0.2.0.vsix`。
 2. VS Code 中执行 `Extensions: Install from VSIX...`。
 3. 首次启动会打开 `Code Summary - Setup`：
+   - 先选择 `Online API` 或 `Offline llama.cpp`。
    - 国内默认走 Gitee Release 分片资产。
    - 如果下载慢或公司网络拦截，先手动下载全部 `.partNNN` 文件到同一目录，再选择 `Use local asset folder`。
    - `try global mirrors` 只在国内源失败且用户明确勾选时使用。
 4. 配置模型：
-   - 云 API：DeepSeek / OpenAI / 兼容服务，API key 存入 VS Code SecretStorage。
-   - 本地模型：Ollama / llama.cpp / vLLM，只要提供 OpenAI-compatible `/v1/chat/completions`。
+   - 在线：DeepSeek / OpenAI / 兼容服务，API key 存入 VS Code SecretStorage，不写 settings 明文。
+   - 离线：默认 llama.cpp，从 ModelScope 选择或搜索 GGUF；插件下载模型、启动本地 `llama-server`，并写入 `http://127.0.0.1:<port>/v1`。
 5. 选中代码后右键 `Code Summary: Summarize Selection`。
 
 ## 生产资产
@@ -54,8 +55,15 @@ Gitee 主 Release `v0.2-assets-cn` 上传 `code-summary-0.2.0.vsix`、
 - `v0.2-assets-cn-corpus`
 - `v0.2-assets-cn-codebert`
 
+离线 llama.cpp 还需要发布 runtime Release：
+
+- Release tag：`v0.2-runtime-llamacpp`
+- 平台：`win32-x64`、`darwin-arm64`、`darwin-x64`
+- 每个平台上传 runtime archive 分片，并把 sha256、size、`executable` 写入 `extension/runtime-manifest.json`
+- 用户已经安装 llama.cpp 时，也可以直接设置 `codeSummary.offline.llamaServerPath`
+
 发布 VSIX 前，用生成出的 `assets-manifest.v2.json` 覆盖
-`backend/assets/manifest.json`，再运行：
+`backend/assets/manifest.json`，确认 `extension/runtime-manifest.json` 已包含 runtime 包，再运行：
 
 Gitee 单个附件限制为 100M，页面实测还会限制一次 Release 的附件数量；因此
 默认使用 30MiB 分片并按资产拆分到多个 Release，降低网页登录上传失败率。
@@ -74,6 +82,17 @@ cd ../backend && .venv/bin/python -m pytest -q
 
 本地模型如果开启系统代理，后端会自动设置 `NO_PROXY/no_proxy` 以绕过
 `127.0.0.1,localhost,::1`，避免 Ollama/vLLM/llama.cpp 被代理劫持。
+
+Python 依赖默认使用清华 PyPI 镜像：
+
+```jsonc
+{
+  "codeSummary.python.indexUrl": "https://pypi.tuna.tsinghua.edu.cn/simple"
+}
+```
+
+如果镜像慢，可切换到阿里云或中科大；安装器所有 pip 命令都会带
+`--retries 5 --timeout 60 -i <indexUrl>`。
 
 ## 评测诚信边界
 
