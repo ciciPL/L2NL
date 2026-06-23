@@ -5,11 +5,12 @@ import { provPaths } from "../src/paths";
 function fakeDeps(record: string[]): ProvDeps {
   return {
     run: async (cmd, args = []) => { record.push(`run ${cmd} ${args.join(" ")}`); return { code: 0, stdout: "ok", stderr: "" }; },
-    spawnBackend: (_python, _args, _opts) => { record.push("spawn"); return { pid: 123 }; },
+    spawnBackend: (_python, _args, opts) => { record.push(`spawn NO_PROXY=${opts.env.NO_PROXY} CODEBERT=${opts.env.CS_CODEBERT_PATH}`); return { pid: 123 }; },
     download: async (_url, dest) => { record.push(`download ${dest}`); },
     verify: async () => true,            // pretend assets are already correct
     health: async () => true,            // backend healthy immediately
     mkdirp: (d) => record.push(`mkdir ${d}`),
+    writeManifest: (p) => record.push(`writeManifest ${p}`),
     readState: () => null,               // fresh install
     writeState: () => record.push("writeState"),
     onStep: (s, st) => record.push(`step ${s}:${st}`),
@@ -20,12 +21,25 @@ const opts: ProvOptions = {
   device: "cpu", extVersion: "0.2.0", reqHash: "abc",
   hostPython: ["python3.11"],
   requirementsPath: "/ext/backend/requirements.txt", backendCwd: "/ext/backend",
-  baseUrlOverride: undefined,
-  manifest: {
-    release: "v0.1-assets", baseUrl: "https://x/",
+    baseUrlOverride: undefined,
+    localAssetDir: undefined,
+    includeGlobalMirrors: false,
+    allowStubs: false,
+    manifest: {
+    version: 2,
+    release: "v0.2-assets-cn",
+    sources: [{ id: "gitee", baseUrl: "https://gitee.example/releases/v0.2-assets-cn", enabledByDefault: true }],
     assets: [
       { name: "extractor/pytorch_model.bin", file: "pytorch_model.bin", sha256: "h1", size: 1 },
       { name: "corpus/corpus_30k.jsonl", file: "corpus_30k.jsonl", sha256: "h2", size: 1 },
+      {
+        name: "codebert-base",
+        target: "codebert-base.tar.gz",
+        sha256: "h3",
+        size: 1,
+        extractTo: "codebert-base",
+        parts: [{ file: "codebert-base.tar.gz.part001", sha256: "p3", size: 1 }],
+      },
     ],
   },
 };
@@ -39,9 +53,11 @@ describe("provision (fresh install)", () => {
     expect(joined).toContain("-m venv");
     expect(joined).toContain("download.pytorch.org/whl/cpu");
     expect(joined).toContain("-r /ext/backend/requirements.txt");
-    expect(joined).toContain("spawn");
+    expect(joined).toContain("tar -xf /gs/assets/codebert-base.tar.gz -C /gs/assets");
+    expect(joined).toContain("spawn NO_PROXY=127.0.0.1,localhost,::1 CODEBERT=/gs/assets/codebert-base");
     expect(rec).toContain("writeState");
     expect(joined).not.toContain("download ");  // assets already correct -> no download
+    expect(joined).not.toContain("AutoModel.from_pretrained");
   });
 
   it("uses the cuda wheel index when device=cuda", async () => {
@@ -56,7 +72,7 @@ describe("provision (fresh install)", () => {
       ...fakeDeps(rec),
       readState: () => ({
         schemaVersion: 1, extVersion: "0.2.0", device: "cpu", reqHash: "abc",
-        assets: { "extractor/pytorch_model.bin": "h1", "corpus/corpus_30k.jsonl": "h2" },
+        assets: { "extractor/pytorch_model.bin": "h1", "corpus/corpus_30k.jsonl": "h2", "codebert-base": "h3" },
         codebertReady: true,
       }),
     };

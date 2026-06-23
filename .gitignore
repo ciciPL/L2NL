@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 
 # Node / VS Code extension
+node_modules/
 extension/node_modules/
 extension/dist/
 extension/out/

@@ -3,7 +3,11 @@ import { stepsNeeded, ProvState, ProvInputs } from "../src/state";
 
 const inputs: ProvInputs = {
   extVersion: "0.2.0", device: "cpu", reqHash: "abc",
-  assets: { "extractor/pytorch_model.bin": "h1", "corpus/corpus_30k.jsonl": "h2" },
+  assets: {
+    "extractor/pytorch_model.bin": "h1",
+    "corpus/corpus_30k.jsonl": "h2",
+    "codebert-base": "h3",
+  },
 };
 
 describe("stepsNeeded", () => {
@@ -38,5 +42,15 @@ describe("stepsNeeded", () => {
   it("re-runs codebert when prior run did not finish it", () => {
     const prev: ProvState = { schemaVersion: 1, ...inputs, codebertReady: false };
     expect(stepsNeeded(prev, inputs).has("codebert")).toBe(true);
+  });
+
+  it("re-runs codebert when the CodeBERT archive hash changes", () => {
+    const prev: ProvState = {
+      schemaVersion: 1, ...inputs, codebertReady: true,
+      assets: { ...inputs.assets, "codebert-base": "OLD" },
+    };
+    const s = stepsNeeded(prev, inputs);
+    expect(s.has("assets")).toBe(true);
+    expect(s.has("codebert")).toBe(true);
   });
 });

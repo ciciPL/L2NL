@@ -18,7 +18,7 @@ class Example(BaseModel):
 class TranslationResult(BaseModel):
     pivot_code: str
     candidates: list[str] = Field(default_factory=list)
-    selected_score: float
+    selected_score: float | None = None
     repaired: bool
     fell_back: bool
 

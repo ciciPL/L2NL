@@ -2,7 +2,7 @@
   "name": "code-summary",
   "displayName": "Low-Resource Code Summary",
   "description": "Pivot-retrieval code summarization (paper artifact).",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "l2nl-artifact",
   "repository": {
     "type": "git",
@@ -63,7 +63,8 @@
         },
         "codeSummary.online.apiKey": {
           "type": "string",
-          "default": ""
+          "default": "",
+          "description": "Deprecated: stored in VS Code SecretStorage by the setup wizard. Existing values are read once for migration."
         },
         "codeSummary.online.model": {
           "type": "string",
@@ -120,7 +121,17 @@
         "codeSummary.assets.baseUrl": {
           "type": "string",
           "default": "",
-          "description": "Override the asset download base URL (e.g. a local folder for testing). Empty = use the shipped manifest."
+          "description": "Override all asset source base URLs. Empty = use the shipped Gitee-first manifest."
+        },
+        "codeSummary.assets.localDir": {
+          "type": "string",
+          "default": "",
+          "description": "Local folder containing release asset parts. Used before any network download."
+        },
+        "codeSummary.assets.tryGlobalMirrors": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow optional global mirrors after the domestic Gitee source fails."
         },
         "codeSummary.backend.device": {
           "type": "string",
@@ -132,6 +143,11 @@
           "type": "boolean",
           "default": false,
           "description": "Set automatically when the extension provisions and manages the backend."
+        },
+        "codeSummary.backend.allowStubs": {
+          "type": "boolean",
+          "default": false,
+          "description": "Developer-only fallback. When false, missing production assets fail instead of using demo stubs."
         }
       }
     }

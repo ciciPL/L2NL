@@ -6,7 +6,7 @@ export interface Example {
 }
 export interface Trace {
   translation: {
-    pivot_code: string; candidates: string[]; selected_score: number;
+    pivot_code: string; candidates: string[]; selected_score: number | null;
     repaired: boolean; fell_back: boolean;
   };
   retrieved: Example[];
@@ -21,7 +21,9 @@ export interface SummarizeResponse {
 export async function getHealth(backendUrl: string): Promise<boolean> {
   try {
     const r = await fetch(`${backendUrl}/health`);
-    return r.ok;
+    if (!r.ok) return false;
+    const data = await r.json() as { ready?: boolean };
+    return data.ready === true;
   } catch {
     return false;
   }

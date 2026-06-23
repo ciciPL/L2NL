@@ -19,8 +19,11 @@ export function stepper(steps: { label: string; status: StepStatus }[]): string 
   return `<div class="cs-stepper">${items}</div>`;
 }
 
-export function scoreBadge(score: number): string {
-  return `<span class="cs-badge cs-badge--score" title="back-translation consistency">↺ ${score.toFixed(2)}</span>`;
+export function scoreBadge(score: number | null | undefined): string {
+  if (score === null || score === undefined || Number.isNaN(score)) {
+    return `<span class="cs-badge" title="selection score unavailable">↺ n/a</span>`;
+  }
+  return `<span class="cs-badge cs-badge--score" title="candidate selection score">↺ ${score.toFixed(2)}</span>`;
 }
 
 export function warnBadges(repaired: boolean, fellBack: boolean): string {

@@ -28,6 +28,12 @@ def test_valid_on_first_try():
     assert res.candidates == ["def f():\n    return 1"]
 
 
+def test_valid_translation_does_not_fabricate_selection_score():
+    tr = _tr(FakeLLMClient(responses=[VALID]))
+    res = tr.translate("def f; 1; end", "ruby")
+    assert res.selected_score is None
+
+
 def test_repair_recovers_invalid_candidate():
     # forward call returns invalid; repair call returns valid
     tr = _tr(FakeLLMClient(responses=[INVALID, VALID]))

@@ -40,9 +40,11 @@ class Retriever:
     one (stub shell / local dev), returns canned examples so the pipeline runs.
     """
 
-    def __init__(self, corpus_path: str | None = None, limit: int | None = None):
+    def __init__(self, corpus_path: str | None = None, limit: int | None = None,
+                 allow_stubs: bool = False):
         self.corpus_path = corpus_path
         self.limit = limit
+        self.allow_stubs = allow_stubs
         self._bm25 = None
         self._codes: list[str] = []
         self._summaries: list[str] = []
@@ -72,6 +74,10 @@ class Retriever:
 
     def retrieve(self, pivot_code: str, k: int) -> list[Example]:
         if self._bm25 is None:
+            if not self.allow_stubs:
+                raise RuntimeError(
+                    "CS_CORPUS_PATH is missing or invalid; run setup or set CS_ALLOW_STUBS=1 for demo mode"
+                )
             return (_CANNED * ((k // len(_CANNED)) + 1))[:k]
         scores = self._bm25.get_scores(clean_python_code(pivot_code).split())
         top = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]

@@ -1,17 +1,28 @@
 import * as net from "node:net";
+import * as fs from "node:fs";
 import { ProvPaths } from "./paths";
-import { Manifest, AssetEntry, assetUrl } from "./assets";
+import { Manifest, AssetEntry, installAsset, assetTarget } from "./assets";
 import { ProvState, ProvInputs, Step, stepsNeeded } from "./state";
 import { Runner } from "./env";
 
-export function buildBackendEnv(p: ProvPaths, device: string): Record<string, string> {
+const LOCAL_NO_PROXY = "127.0.0.1,localhost,::1";
+
+export function buildBackendEnv(
+  p: ProvPaths,
+  opts: { device: string; allowStubs: boolean },
+): Record<string, string> {
   return {
     CS_PYTHON: p.venvPython,
     CS_EXTRACTOR_WEIGHTS: p.extractorWeights,
     CS_CORPUS_PATH: p.corpus,
     CS_CORPUS_LIMIT: "30000",
-    CS_DEVICE: device,
+    CS_DEVICE: opts.device,
+    CS_CODEBERT_PATH: p.codebertDir,
+    CS_ASSETS_MANIFEST: p.assetsManifest,
+    CS_ALLOW_STUBS: opts.allowStubs ? "1" : "0",
     HF_HOME: p.hfCache,
+    NO_PROXY: LOCAL_NO_PROXY,
+    no_proxy: LOCAL_NO_PROXY,
   };
 }
 
@@ -41,6 +52,7 @@ export interface ProvDeps {
   verify: (path: string, a: AssetEntry) => Promise<boolean>;
   health: (url: string) => Promise<boolean>;
   mkdirp: (dir: string) => void;
+  writeManifest: (path: string, text: string) => void;
   readState: () => ProvState | null;
   writeState: (inputs: ProvInputs, codebertReady: boolean) => void;
   onStep: (step: Step, status: StepStatus, detail?: string) => void;
@@ -54,6 +66,9 @@ export interface ProvOptions {
   requirementsPath: string;
   backendCwd: string;
   baseUrlOverride?: string;
+  localAssetDir?: string;
+  includeGlobalMirrors: boolean;
+  allowStubs: boolean;
   manifest: Manifest;
 }
 
@@ -66,6 +81,17 @@ function assetHashes(m: Manifest): Record<string, string> {
   const out: Record<string, string> = {};
   for (const a of m.assets) out[a.name] = a.sha256;
   return out;
+}
+
+function assetDest(p: ProvPaths, a: AssetEntry): string {
+  if (a.name.includes("extractor")) return p.extractorWeights;
+  if (a.name.includes("corpus")) return p.corpus;
+  if (a.extractTo || a.name.toLowerCase().includes("codebert")) return p.codebertArchive;
+  return `${p.assets}/${assetTarget(a)}`;
+}
+
+function codebertAsset(m: Manifest): AssetEntry | undefined {
+  return m.assets.find((a) => a.extractTo === "codebert-base" || a.name.toLowerCase().includes("codebert"));
 }
 
 export async function provision(
@@ -114,23 +140,28 @@ export async function provision(
       current = "assets";
       deps.onStep("assets", "running");
       for (const a of opts.manifest.assets) {
-        const dest = a.name.includes("extractor") ? p.extractorWeights : p.corpus;
-        if (await deps.verify(dest, a)) continue;
-        const url = assetUrl(opts.manifest, a, opts.baseUrlOverride);
-        await deps.download(url, dest, (d, t) => deps.onStep("assets", "running", `${a.file} ${d}/${t}`));
-        if (!(await deps.verify(dest, a))) throw new Error(`checksum mismatch: ${a.file}`);
+        const dest = assetDest(p, a);
+        await installAsset(opts.manifest, a, dest, {
+          localAssetDir: opts.localAssetDir,
+          baseUrlOverride: opts.baseUrlOverride,
+          includeGlobalMirrors: opts.includeGlobalMirrors,
+          download: deps.download,
+          verify: deps.verify,
+          onBytes: (d, t) => deps.onStep("assets", "running", `${assetTarget(a)} ${d}/${t}`),
+        });
       }
+      deps.mkdirp(p.assets);
+      deps.writeManifest(p.assetsManifest, JSON.stringify(opts.manifest, null, 2));
     }
     did("assets");
 
     if (need.has("codebert")) {
       current = "codebert";
       deps.onStep("codebert", "running");
-      await mustRun(
-        p.venvPython,
-        ["-c", "from transformers import AutoModel,AutoTokenizer;AutoModel.from_pretrained('microsoft/codebert-base');AutoTokenizer.from_pretrained('microsoft/codebert-base')"],
-        { HF_HOME: p.hfCache },
-      );
+      const cb = codebertAsset(opts.manifest);
+      if (!cb) throw new Error("manifest is missing the CodeBERT archive asset");
+      fs.rmSync(p.codebertDir, { recursive: true, force: true });
+      await mustRun("tar", ["-xf", assetDest(p, cb), "-C", p.assets]);
       codebertReady = true;
     }
     did("codebert");
@@ -138,7 +169,7 @@ export async function provision(
     current = "launch";
     deps.onStep("launch", "running");
     const port = await findFreePort(8000);
-    const env = buildBackendEnv(p, opts.device);
+    const env = buildBackendEnv(p, { device: opts.device, allowStubs: opts.allowStubs });
     deps.spawnBackend(p.venvPython, ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", String(port)],
       { cwd: opts.backendCwd, env, logPath: p.backendLog });
     const url = `http://127.0.0.1:${port}`;

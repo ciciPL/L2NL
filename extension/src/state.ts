@@ -34,7 +34,10 @@ export function stepsNeeded(old: ProvState | null, next: ProvInputs): Set<Step> 
     (k) => old.assets[k] !== next.assets[k],
   );
   if (assetsChanged) steps.add("assets");
-  if (!old.codebertReady) steps.add("codebert");
+  const codebertChanged = Object.keys(next.assets).some(
+    (k) => k.toLowerCase().includes("codebert") && old.assets[k] !== next.assets[k],
+  );
+  if (!old.codebertReady || codebertChanged) steps.add("codebert");
   // venv only needs (re)building if the schema/ext changed — covered above; an
   // existing matching state implies the venv exists.
   return steps;

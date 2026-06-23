@@ -163,7 +163,7 @@ class Translator:
         return TranslationResult(
             pivot_code=chosen["code"],
             candidates=[c["code"] for c in candidates],
-            selected_score=0.0 if fell_back else 1.0,
+            selected_score=None,
             repaired=chosen["repaired"],
             fell_back=fell_back,
         )

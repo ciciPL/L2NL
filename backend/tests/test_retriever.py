@@ -13,9 +13,19 @@ def test_makestr_joins_tokens():
     assert makestr(["adds", "two", "numbers", "."]) == "adds two numbers."
 
 
-def test_retriever_without_corpus_returns_canned():
-    out = Retriever().retrieve("def f(): pass", 3)
+def test_retriever_without_corpus_returns_canned_only_when_stubs_allowed():
+    out = Retriever(allow_stubs=True).retrieve("def f(): pass", 3)
     assert len(out) == 3
+
+
+def test_retriever_without_corpus_fails_in_production_mode():
+    r = Retriever()
+    try:
+        r.retrieve("def f(): pass", 3)
+    except RuntimeError as e:
+        assert "CS_CORPUS_PATH" in str(e)
+    else:
+        raise AssertionError("production retriever should fail without corpus")
 
 
 def test_retriever_bm25_ranks_relevant_first(tmp_path):

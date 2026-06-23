@@ -1,19 +1,36 @@
 from __future__ import annotations
+from urllib.parse import urlparse
+
+
+def _is_local_base_url(base_url: str) -> bool:
+    host = (urlparse(base_url).hostname or "").lower()
+    return host in {"127.0.0.1", "localhost", "::1"} or host.endswith(".localhost")
 
 
 class LLMClient:
     """OpenAI-compatible chat client. Online vs offline differ only by base_url."""
 
-    def __init__(self, base_url: str, api_key: str, model: str):
+    def __init__(self, base_url: str, api_key: str, model: str,
+                 timeout: float = 60, max_tokens: int = 512):
         from openai import OpenAI
+        import httpx
         self.model = model
-        self._client = OpenAI(base_url=base_url, api_key=api_key or "sk-no-key")
+        self.max_tokens = max_tokens
+        http_client = None
+        if _is_local_base_url(base_url):
+            http_client = httpx.Client(trust_env=False, timeout=timeout)
+        self._client = OpenAI(
+            base_url=base_url,
+            api_key=api_key or "sk-no-key",
+            timeout=timeout,
+            http_client=http_client,
+        )
 
     def chat(self, messages: list[dict], temperature: float,
              stop: list[str] | None = None) -> str:
         resp = self._client.chat.completions.create(
             model=self.model, messages=messages, temperature=temperature,
-            stop=stop,
+            stop=stop, max_tokens=self.max_tokens,
         )
         return resp.choices[0].message.content or ""
 

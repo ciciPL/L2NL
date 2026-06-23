@@ -29,7 +29,16 @@ def test_build_seq_items_empty_on_syntax_error():
     assert build_seq_items("def f( :") == []
 
 
-def test_extractor_fallback_without_weights():
-    # No checkpoint configured -> naive line-split fallback (keeps shell runnable).
-    blocks = Extractor().extract("a = 1\n\nb = 2", 0.5)
+def test_extractor_fallback_without_weights_only_when_stubs_allowed():
+    blocks = Extractor(allow_stubs=True).extract("a = 1\n\nb = 2", 0.5)
     assert [b.text for b in blocks] == ["a = 1", "b = 2"]
+
+
+def test_extractor_without_weights_fails_in_production_mode():
+    ex = Extractor()
+    try:
+        ex.extract("a = 1", 0.5)
+    except RuntimeError as e:
+        assert "CS_EXTRACTOR_WEIGHTS" in str(e)
+    else:
+        raise AssertionError("production extractor should fail without weights")

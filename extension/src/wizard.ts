@@ -2,12 +2,17 @@ import * as vscode from "vscode";
 import { detectEnv, runProvision, testConnection } from "./backend";
 import { CLOUD_VENDORS, LOCAL_PRESETS, mergeModelConfig, SavedModel } from "./models";
 import { BASE_CSS } from "./ui";
+import { loadOnlineApiKey, saveOnlineApiKey } from "./secrets";
 
-function currentModel(): SavedModel {
+async function currentModel(ctx: vscode.ExtensionContext): Promise<SavedModel> {
   const c = vscode.workspace.getConfiguration("codeSummary");
   return {
     mode: c.get("mode", "online"),
-    online: { baseUrl: c.get("online.baseUrl", ""), apiKey: c.get("online.apiKey", ""), model: c.get("online.model", "") },
+    online: {
+      baseUrl: c.get("online.baseUrl", ""),
+      apiKey: await loadOnlineApiKey(ctx.secrets, c.get("online.apiKey", "")),
+      model: c.get("online.model", ""),
+    },
     offline: { baseUrl: c.get("offline.baseUrl", ""), model: c.get("offline.model", "") },
   };
 }
@@ -37,7 +42,14 @@ export class WizardPanel {
     const cfg = vscode.workspace.getConfiguration("codeSummary");
     switch (msg.type) {
       case "requestInit":
-        this.post({ type: "initModel", model: currentModel() });
+        this.post({
+          type: "initModel",
+          model: await currentModel(ctx),
+          assets: {
+            localDir: cfg.get("assets.localDir", ""),
+            tryGlobalMirrors: cfg.get("assets.tryGlobalMirrors", false),
+          },
+        });
         break;
       case "detectEnv":
         this.post({ type: "envResult", env: await detectEnv() });
@@ -56,11 +68,33 @@ export class WizardPanel {
         }
         break;
       }
+      case "pickLocalAssetDir": {
+        const dirs = await vscode.window.showOpenDialog({
+          canSelectFiles: false,
+          canSelectFolders: true,
+          canSelectMany: false,
+          title: "Select Code Summary asset folder",
+        });
+        const selected = dirs?.[0]?.fsPath ?? "";
+        if (selected) {
+          await cfg.update("assets.localDir", selected, vscode.ConfigurationTarget.Global);
+          this.post({ type: "assetSource", localDir: selected });
+        }
+        break;
+      }
+      case "setAssetOptions":
+        await cfg.update("assets.tryGlobalMirrors", !!msg.tryGlobalMirrors, vscode.ConfigurationTarget.Global);
+        break;
+      case "useGiteeAssets":
+        await cfg.update("assets.localDir", "", vscode.ConfigurationTarget.Global);
+        this.post({ type: "assetSource", localDir: "" });
+        break;
       case "saveModel": {
-        const merged = mergeModelConfig(currentModel(), msg.payload);
+        const merged = mergeModelConfig(await currentModel(ctx), msg.payload);
         await cfg.update("mode", merged.mode, vscode.ConfigurationTarget.Global);
         await cfg.update("online.baseUrl", merged.online.baseUrl, vscode.ConfigurationTarget.Global);
-        await cfg.update("online.apiKey", merged.online.apiKey, vscode.ConfigurationTarget.Global);
+        await saveOnlineApiKey(ctx.secrets, merged.online.apiKey);
+        await cfg.update("online.apiKey", "", vscode.ConfigurationTarget.Global);
         await cfg.update("online.model", merged.online.model, vscode.ConfigurationTarget.Global);
         await cfg.update("offline.baseUrl", merged.offline.baseUrl, vscode.ConfigurationTarget.Global);
         await cfg.update("offline.model", merged.offline.model, vscode.ConfigurationTarget.Global);
@@ -104,6 +138,14 @@ export class WizardPanel {
 
     <div id="s-install" class="step">
       <h2>Install backend</h2>
+      <div class="cs-card">
+        <div class="cs-label">asset source</div>
+        <div class="nav"><button class="secondary" onclick="useGitee()">Online via Gitee</button>
+          <button class="secondary" onclick="pickLocalAssets()">Use local asset folder</button>
+          <button class="secondary" onclick="retryParts()">Retry failed parts</button></div>
+        <div id="assetSource" class="muted">Gitee Release multipart assets</div>
+        <label><input id="globalMirrors" type="checkbox" onchange="setAssetOptions()"> try global mirrors</label>
+      </div>
       <div id="steps" class="cs-card steps"></div>
       <pre id="installLog" class="cs-code log muted">Idle.</pre>
       <div class="nav"><button id="installBtn" onclick="startInstall()">Install</button>
@@ -135,6 +177,7 @@ export class WizardPanel {
       const PRESETS = ${presets};
       let mode = "online";
       let saved = null;
+      let assetState = { localDir:"", tryGlobalMirrors:false };
       const STEPS = ["venv","torch","deps","assets","codebert","launch"];
       const ORDER = ["welcome","env","install","model","done"];
       const WLABELS = ["Welcome","Environment","Install","Model","Done"];
@@ -152,6 +195,11 @@ export class WizardPanel {
         if(id==="env"){ vscode.postMessage({type:"detectEnv"}); }
         if(id==="model"){ prefill(); } }
       function closeWizard(){ vscode.postMessage({type:"close"}); }
+      function useGitee(){ assetState.localDir=""; document.getElementById("assetSource").textContent="Gitee Release multipart assets"; vscode.postMessage({type:"useGiteeAssets"}); }
+      function pickLocalAssets(){ vscode.postMessage({type:"pickLocalAssetDir"}); }
+      function retryParts(){ startInstall(); }
+      function setAssetOptions(){ const v=document.getElementById("globalMirrors").checked;
+        assetState.tryGlobalMirrors=v; vscode.postMessage({type:"setAssetOptions",tryGlobalMirrors:v}); }
 
       function renderSteps(map){ document.getElementById("steps").innerHTML = STEPS.map(s=>{
           const st=map[s]||"pending";
@@ -190,7 +238,9 @@ export class WizardPanel {
       function saveModel(){ vscode.postMessage({type:"saveModel",payload:payload()}); }
 
       window.addEventListener("message",(ev)=>{ const m=ev.data;
-        if(m.type==="initModel"){ saved=m.model; }
+        if(m.type==="initModel"){ saved=m.model; assetState=m.assets||assetState;
+          if(assetState.localDir) document.getElementById("assetSource").textContent=assetState.localDir;
+          document.getElementById("globalMirrors").checked=!!assetState.tryGlobalMirrors; }
         if(m.type==="envResult"){ const e=m.env; const py=e.python;
           document.getElementById("envBody").innerHTML =
             (py?'<div class="ok">✓ Python '+py.version.join(".")+'</div>'
@@ -207,6 +257,7 @@ export class WizardPanel {
           document.getElementById("installNext").disabled=false; }
         if(m.type==="installError"){ document.getElementById("installLog").textContent="Failed: "+m.message;
           document.getElementById("installBtn").disabled=false; }
+        if(m.type==="assetSource"){ assetState.localDir=m.localDir; document.getElementById("assetSource").textContent=m.localDir||"Gitee Release multipart assets"; }
         if(m.type==="testResult"){ const el=document.getElementById("testMsg"); el.textContent=m.message; el.className=m.ok?"ok":"cs-err"; }
         if(m.type==="modelSaved"){ go("done"); }
       });

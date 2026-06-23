@@ -1,18 +1,108 @@
 {
-  "release": "v0.1-assets",
-  "baseUrl": "https://github.com/ciciPL/L2NL/releases/download/v0.1-assets/",
+  "version": 2,
+  "release": "v0.2-assets-cn",
+  "sources": [
+    {
+      "id": "gitee",
+      "baseUrl": "https://gitee.com/ch2n2000/L2NL/releases/download/v0.2-assets-cn",
+      "enabledByDefault": true
+    },
+    {
+      "id": "global",
+      "baseUrl": "https://github.com/ciciPL/L2NL/releases/download/v0.2-assets-cn",
+      "global": true
+    }
+  ],
   "assets": [
     {
       "name": "extractor/pytorch_model.bin",
-      "file": "pytorch_model.bin",
+      "target": "extractor/pytorch_model.bin",
       "sha256": "638efb2ab2862843d987e98117ad679065c4037f7246793f1e9ec4c3f8477de8",
-      "size": 316071890
+      "size": 316071890,
+      "parts": [
+        {
+          "file": "pytorch_model.bin.part001",
+          "sha256": "79489aadf0d6f9682e8947df612ebb5fbe80864ac7c3f0227f47557d4a58ac38",
+          "size": 73400320
+        },
+        {
+          "file": "pytorch_model.bin.part002",
+          "sha256": "e4cebbd3f547ff8992afb9d8e27e54aba7694f68c44ed7c5563a8ed9f5851585",
+          "size": 73400320
+        },
+        {
+          "file": "pytorch_model.bin.part003",
+          "sha256": "7d1ef5041105fd50ae542ce8da7cb0565935faa70d92df20c2e7fd9b7ce68916",
+          "size": 73400320
+        },
+        {
+          "file": "pytorch_model.bin.part004",
+          "sha256": "1f425913326907e14b3fc41766481b57e7434534621df5f1e3da9a178a33b535",
+          "size": 73400320
+        },
+        {
+          "file": "pytorch_model.bin.part005",
+          "sha256": "e9bd7649538a2be90efb047f1d224b64e7e15fcbe56d59fff7cf8295e9940190",
+          "size": 22470610
+        }
+      ]
     },
     {
       "name": "corpus/corpus_30k.jsonl",
-      "file": "corpus_30k.jsonl",
+      "target": "corpus/corpus_30k.jsonl",
       "sha256": "08b64305f2a846cad3283ab3340a95ae2c403120be5da42fe942055467860258",
-      "size": 71406879
+      "size": 71406879,
+      "parts": [
+        {
+          "file": "corpus_30k.jsonl.part001",
+          "sha256": "08b64305f2a846cad3283ab3340a95ae2c403120be5da42fe942055467860258",
+          "size": 71406879
+        }
+      ]
+    },
+    {
+      "name": "codebert-base",
+      "target": "codebert-base.tar.gz",
+      "sha256": "10c44dde01b3df687565de29e3042176acfa85c5eb57e2c07a6f44175408ea37",
+      "size": 463696367,
+      "parts": [
+        {
+          "file": "codebert-base.tar.gz.part001",
+          "sha256": "a6e29c926cdce2d048a3610a0a8dfc7a9c7e612c96772e984af72cd6de1048e6",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part002",
+          "sha256": "8a98caa2b8095b2239f830a8f54211dbf8b66776eef7aa103767cf7aaadd57e2",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part003",
+          "sha256": "3cf93d1fa7d85390e347472eae8057f8df763a62ca0e305b86c66b4b463524b5",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part004",
+          "sha256": "1a4bc593d6b4c073915389642a4a19a7100593e133b10d6903a86fa0aab97905",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part005",
+          "sha256": "6bd312259c53b2742a2c3f04a501dc827b5d599b71b4843b4855367768d219a6",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part006",
+          "sha256": "69fdc5600b5da97b79540819dca349ef46f0b3df00e09ef7321d615b762ff22c",
+          "size": 73400320
+        },
+        {
+          "file": "codebert-base.tar.gz.part007",
+          "sha256": "253a381aa46bb84ffe7ddf8dec89dc591ddfe79925fc4ec66ed27fefe3be4e1a",
+          "size": 23294447
+        }
+      ],
+      "extractTo": "codebert-base"
     }
   ]
 }

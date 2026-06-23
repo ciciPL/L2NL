@@ -16,8 +16,8 @@ PIVOT = "<PYTHON>\ndef foo():\n    return 1\n</PYTHON>"
 def _pipeline(llm):
     return Pipeline(
         translator=Translator(llm, Embedder(), P),
-        retriever=Retriever(),
-        extractor=Extractor(),
+        retriever=Retriever(allow_stubs=True),
+        extractor=Extractor(allow_stubs=True),
         generator=Generator(llm),
     )
 
@@ -50,7 +50,7 @@ def test_stage_failure_is_reported():
     pipe = Pipeline(
         translator=Translator(llm, Embedder(), P),
         retriever=BoomRetriever(),
-        extractor=Extractor(),
+        extractor=Extractor(allow_stubs=True),
         generator=Generator(llm),
     )
     resp = pipe.run("x", "ruby", P, trace=True)

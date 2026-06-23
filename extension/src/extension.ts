@@ -5,16 +5,17 @@ import { ResultPanel } from "./panel";
 import { provPaths } from "./paths";
 import { runProvision, stopBackend } from "./backend";
 import { WizardPanel } from "./wizard";
+import { loadOnlineApiKey } from "./secrets";
 
 let statusItem: vscode.StatusBarItem;
 
-function readSettings(): RawSettings {
+async function readSettings(ctx: vscode.ExtensionContext): Promise<RawSettings> {
   const c = vscode.workspace.getConfiguration("codeSummary");
   return {
     mode: c.get("mode", "online") as "online" | "offline",
     online: {
       baseUrl: c.get("online.baseUrl", "https://api.openai.com/v1"),
-      apiKey: c.get("online.apiKey", ""),
+      apiKey: await loadOnlineApiKey(ctx.secrets, c.get("online.apiKey", "")),
       model: c.get("online.model", "gpt-4o-mini"),
     },
     offline: {
@@ -45,10 +46,10 @@ function updateStatus() {
     statusItem.show();
     return;
   }
-  const s = readSettings();
-  const icon = s.mode === "offline" ? "$(vm)" : "$(cloud)";
-  const model = s.mode === "offline" ? s.offline.model : s.online.model;
-  statusItem.text = `${icon} Summary: ${s.mode} · ${model}`;
+  const mode = cfg.get<"online" | "offline">("mode", "online");
+  const icon = mode === "offline" ? "$(vm)" : "$(cloud)";
+  const model = mode === "offline" ? cfg.get("offline.model", "local-model") : cfg.get("online.model", "gpt-4o-mini");
+  statusItem.text = `${icon} Summary: ${mode} · ${model}`;
   statusItem.tooltip = "Toggle online/offline";
   statusItem.command = "codeSummary.toggleMode";
   statusItem.show();
@@ -97,7 +98,7 @@ async function summarizeSelection(ctx: vscode.ExtensionContext) {
 
   ResultPanel.loading();
   try {
-    const body = buildRequest(code, language, readSettings());
+    const body = buildRequest(code, language, await readSettings(ctx));
     const resp = await postSummarize(backendUrl(), body);
     ResultPanel.show(resp, code);
   } catch (e: any) {

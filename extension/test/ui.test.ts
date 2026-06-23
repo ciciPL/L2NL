@@ -27,6 +27,9 @@ describe("scoreBadge / warnBadges", () => {
     expect(scoreBadge(1)).toContain("1.00");
     expect(scoreBadge(0.8333)).toContain("0.83");
   });
+  it("marks unavailable selection scores without pretending a real score exists", () => {
+    expect(scoreBadge(null)).toContain("n/a");
+  });
   it("shows only the flags that are set", () => {
     expect(warnBadges(true, false)).toContain("repaired");
     expect(warnBadges(true, false)).not.toContain("fell back");

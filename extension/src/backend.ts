@@ -74,6 +74,7 @@ export async function runProvision(
     verify: (p2, a) => verifyAsset(p2, a),
     health: (url) => getHealth(url),
     mkdirp: (d) => fs.mkdirSync(d, { recursive: true }),
+    writeManifest: (p2, text) => fs.writeFileSync(p2, text),
     readState: () => readState(paths.state),
     writeState: (inputs, cb) => writeState(paths.state, inputs, cb),
     onStep,
@@ -87,6 +88,9 @@ export async function runProvision(
     requirementsPath,
     backendCwd,
     baseUrlOverride: cfg.get("assets.baseUrl", "") || undefined,
+    localAssetDir: cfg.get("assets.localDir", "") || undefined,
+    includeGlobalMirrors: cfg.get("assets.tryGlobalMirrors", false),
+    allowStubs: cfg.get("backend.allowStubs", false),
     manifest,
   }, deps);
   await cfg.update("backend.url", backendUrl, vscode.ConfigurationTarget.Global);

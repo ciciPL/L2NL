@@ -59,10 +59,12 @@ class Extractor:
 
     def __init__(self, weights_path: str | None = None,
                  codebert_path: str = "microsoft/codebert-base",
-                 device: str | None = None):
+                 device: str | None = None,
+                 allow_stubs: bool = False):
         self.weights_path = weights_path
         self.codebert_path = codebert_path
         self._device_pref = device
+        self.allow_stubs = allow_stubs
         self._model = None
         self._tokenizer = None
         self._torch = None
@@ -142,6 +144,10 @@ class Extractor:
 
     def extract(self, code: str, threshold: float) -> list[CoreBlock]:
         if not self.weights_path or not os.path.exists(self.weights_path):
+            if not self.allow_stubs:
+                raise RuntimeError(
+                    "CS_EXTRACTOR_WEIGHTS is missing or invalid; run setup or set CS_ALLOW_STUBS=1 for demo mode"
+                )
             return self._fallback(code)
         items = build_seq_items(code)
         if not items:
