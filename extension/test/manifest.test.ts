@@ -20,7 +20,10 @@ describe("shipped manifest", () => {
     expect(ckpt.parts?.length).toBeGreaterThan(1);
     expect(m.assets.find((a) => a.name === "codebert-base")?.parts?.length).toBeGreaterThan(1);
     const allParts = m.assets.flatMap((a) => a.parts ?? []);
-    expect(allParts.length).toBeLessThanOrEqual(20);
+    for (const asset of m.assets) {
+      expect(asset.sourcePath).toMatch(/^v0\.2-assets-cn-/);
+      expect(asset.parts?.length ?? 0).toBeLessThanOrEqual(20);
+    }
     expect(allParts.every((p) => p.size < 100 * 1024 * 1024)).toBe(true);
   });
 });

@@ -22,38 +22,58 @@
       "parts": [
         {
           "file": "pytorch_model.bin.part001",
-          "sha256": "864ec56a6de7835eadb084418106b7397d668987b5ad1f566b3f4f0c470a7d1f",
-          "size": 47185920
+          "sha256": "0dc68b67ca6e3d6c47b270054638746f6e18699d732aa7675b8e0de7ea3e6eee",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part002",
-          "sha256": "b6ae3729d7c5d70b321e3de51085204ccd94bad0c1a663c94cd8c4eb2911a8bf",
-          "size": 47185920
+          "sha256": "358ee9eb3c215abf6b02a46d2caeb4459898352290bda1a32fd6df7ab7aa8ebf",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part003",
-          "sha256": "b205f0da6150c4850cb829f39e277690842d075a6cea6995079c138b3b6b9746",
-          "size": 47185920
+          "sha256": "05af274b61530ca9366c90bf4cdeb34ff5f00d8ab2b480e33c156b4edf8090e9",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part004",
-          "sha256": "9b0c82151493f4511556c5ebf1bf6b52d0b05f8cd83fed086434b56fee45f47a",
-          "size": 47185920
+          "sha256": "3885f466aa9eca1c47e00f724c7f8b2da983e368205e8c155c5fc361652beaf7",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part005",
-          "sha256": "34a9c6bda73345a6f1213e7f54808c0b9cf547777cd80c8d5c6452afe2ded266",
-          "size": 47185920
+          "sha256": "78edb0c366822bfdfa9be1434ef640d21ac7678a4fe69b177b1c770c834fdccf",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part006",
-          "sha256": "fb305bc1e897e75cb6f5ea4976b16892e3d3e29ac3b1a534078661d979df97d6",
-          "size": 47185920
+          "sha256": "c06fd9e4804291bcfcde93a1b693ba8d28463886ef93f16a143713fab2887b61",
+          "size": 31457280
         },
         {
           "file": "pytorch_model.bin.part007",
-          "sha256": "82e6e78e28154e994985ebc70c232e11648eb74e63da9826c1e2aec0004b4a32",
-          "size": 32956370
+          "sha256": "5c5581c34b330dc6da709811460beb138911eb016ddf4fca0f4cbc43a72d5e7b",
+          "size": 31457280
+        },
+        {
+          "file": "pytorch_model.bin.part008",
+          "sha256": "407c451aed8db5c9d729eb01e8e5d8b80adfe27896551b894b153247ce41cced",
+          "size": 31457280
+        },
+        {
+          "file": "pytorch_model.bin.part009",
+          "sha256": "0c12f84ebb511278388b51e37481c5525c2ed941394212b522e7d23d1adf045f",
+          "size": 31457280
+        },
+        {
+          "file": "pytorch_model.bin.part010",
+          "sha256": "8ea8cab0869cc9e7b9b46babe73eed0ff5d2b22402f90c5fbeb88389791b131b",
+          "size": 31457280
+        },
+        {
+          "file": "pytorch_model.bin.part011",
+          "sha256": "5e40f97802b46591977f4fc26f75e311730d6b251391be9336aee8c5c74b8f2d",
+          "size": 1499090
         }
       ],
       "sourcePath": "v0.2-assets-cn-extractor"
@@ -66,13 +86,18 @@
       "parts": [
         {
           "file": "corpus_30k.jsonl.part001",
-          "sha256": "6fd13a9cdc9752507249036bd8d7e88aa28becde894cd0981b9c1fbd8a3bd7e4",
-          "size": 47185920
+          "sha256": "e0113379207e920c69f5aa89c49982d2e5bf361e3e6cbab16bfc0c76cc1783ec",
+          "size": 31457280
         },
         {
           "file": "corpus_30k.jsonl.part002",
-          "sha256": "c9c163873a9c32836aaecadac5c856b5c6da9ef4504a2744a1a689563485dac5",
-          "size": 24220959
+          "sha256": "802f4c2814d0cb09e09386e8b76787fe1184f987af6648a7f25ce453e80016b9",
+          "size": 31457280
+        },
+        {
+          "file": "corpus_30k.jsonl.part003",
+          "sha256": "8f2dd46fbf9d298fdc8c12edac0e4726e394675064ecfdcf72272da221c23e82",
+          "size": 8492319
         }
       ],
       "sourcePath": "v0.2-assets-cn-corpus"
@@ -85,53 +110,78 @@
       "parts": [
         {
           "file": "codebert-base.tar.gz.part001",
-          "sha256": "674f82ae8c99c899c6184c0a09f490a2429bff6f811bf31c90d8d993c884eb00",
-          "size": 47185920
+          "sha256": "ee0defe02f3eefafcb2aab4548ed89d0d9a310d7df56b14085918b3134d18d45",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part002",
-          "sha256": "f7167d9520aa66f3377e1b17410334969f92e8cb0cb44a0dca9a84b3a8ca36fe",
-          "size": 47185920
+          "sha256": "4d64465499bb964c89d91764f309defe8c436890e650806e8cb261cf9b79b007",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part003",
-          "sha256": "e3c862e93991579f4272139504b24bd6fcfd8d364c8bf1517ffc92b2be30b3fd",
-          "size": 47185920
+          "sha256": "3fdd9bdc604199246d5e9a3e1722341a3337abd8caba7fc32c62c7d2601ac17d",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part004",
-          "sha256": "a143d6a51b4380814002207edbd8b051328c7a38dc45f353414099b4b5bb3a18",
-          "size": 47185920
+          "sha256": "3620ac405a7120f4022e307f098bb8b65f5aa4b4b6ffd91b8a7b0ffe461e0dde",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part005",
-          "sha256": "5879f83c7b3de567d380ef8a996e14b4a94f404dd32e8ff99f12974bacb9acf3",
-          "size": 47185920
+          "sha256": "3c2f4987caec4f7de0adb9b2d9972b70358ff67fa512fc6d187d883ca8f03b0a",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part006",
-          "sha256": "885121ebbef6f03ecad70247bb1ca598884f6c6ba8e8725f6dd6516341df9d2a",
-          "size": 47185920
+          "sha256": "8b67cdd26c01d3c673235dbbf7e1edb0f539f4c76bd99cf478dd37e27c8b645b",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part007",
-          "sha256": "279603d93dc94b98c9cd384ec4c749737032bbf6e33f565a70e57db3732b4c5a",
-          "size": 47185920
+          "sha256": "2b259bc0b07273eb6a2a238ad847a173147a92d711277963eb3816380aeb2f77",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part008",
-          "sha256": "625345875fc6968a674b53d35c6efd134e5854deb55d0ed1619b6b4cd10a749c",
-          "size": 47185920
+          "sha256": "2523213ebcb193ebe1559a23f3ecae389de214846d73baefd14454100c176182",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part009",
-          "sha256": "f4431b4c1d3f6614dd78989a8fcbf67ca636d3c2e34a9ccd5f1cea2958529d01",
-          "size": 47185920
+          "sha256": "aa0533f6791fcbd665bc9c8d5bdb46cfec8e9a7605fad75322a30f64693ed0c4",
+          "size": 31457280
         },
         {
           "file": "codebert-base.tar.gz.part010",
-          "sha256": "31ae1e80d7c978e8360ceb1a1ed8bb6ba446dd769b78771a8e4120327c2e6c6c",
-          "size": 39023087
+          "sha256": "eff18e85044b795287ae96fb32b702ed44967dcbf7cca9b5b7eed9aabfc7ccd8",
+          "size": 31457280
+        },
+        {
+          "file": "codebert-base.tar.gz.part011",
+          "sha256": "613c82813f84386d80c342f9b683834c7ac7aea7b86b8cda47183c402699debe",
+          "size": 31457280
+        },
+        {
+          "file": "codebert-base.tar.gz.part012",
+          "sha256": "f5de828980500fe211e53ba6aee8f3dd5c883bdf904a1e304d08dd60bdfe3368",
+          "size": 31457280
+        },
+        {
+          "file": "codebert-base.tar.gz.part013",
+          "sha256": "7691110044dd9b2c1369e7b7c16c47d7b85b6a73ef3f26991186d4a03d5f2120",
+          "size": 31457280
+        },
+        {
+          "file": "codebert-base.tar.gz.part014",
+          "sha256": "07e4f3f03fd44ad64ece8638377eb24b368aad8d938cceae2bdea8be1601fb7b",
+          "size": 31457280
+        },
+        {
+          "file": "codebert-base.tar.gz.part015",
+          "sha256": "253a381aa46bb84ffe7ddf8dec89dc591ddfe79925fc4ec66ed27fefe3be4e1a",
+          "size": 23294447
         }
       ],
       "sourcePath": "v0.2-assets-cn-codebert",

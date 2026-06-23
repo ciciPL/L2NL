@@ -43,7 +43,7 @@ python deploy/build_assets_release.py \
   --release v0.2-assets-cn \
   --gitee-base-url https://gitee.com/ch2n2000/L2NL/releases/download \
   --global-base-url https://github.com/ciciPL/L2NL/releases/download \
-  --split-size-mib 45 \
+  --split-size-mib 30 \
   --per-asset-releases
 ```
 
@@ -58,7 +58,7 @@ Gitee 主 Release `v0.2-assets-cn` 上传 `code-summary-0.2.0.vsix`、
 `backend/assets/manifest.json`，再运行：
 
 Gitee 单个附件限制为 100M，页面实测还会限制一次 Release 的附件数量；因此
-默认使用 45MiB 分片并按资产拆分到多个 Release，降低网页上传失败率。
+默认使用 30MiB 分片并按资产拆分到多个 Release，降低网页登录上传失败率。
 
 ```bash
 cd extension
