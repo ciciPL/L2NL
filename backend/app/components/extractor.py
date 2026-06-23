@@ -3,7 +3,7 @@ import os
 import sys
 from pathlib import Path
 from app.schemas import CoreBlock
-from app.components._py_split import split_python_by_structure
+from app.components._py_split import split_python_by_structure_new
 
 # Vendored EASC classifier code (SelectorNet + utils) lives here; added to
 # sys.path lazily so `from model import SelectorNet` / `from utils import ...`
@@ -34,7 +34,7 @@ def build_seq_items(code: str) -> list[tuple[str, str, str]]:
     then loops/conditionals/assignments/others; each cleaned seq is whitespace-
     normalized and lowercased exactly as the classifier was trained on.
     """
-    parsed, ok = split_python_by_structure(code)
+    parsed, ok = split_python_by_structure_new(code)
     if not ok:
         return []
     items: list[tuple[str, str, str]] = []

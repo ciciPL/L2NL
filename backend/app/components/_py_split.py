@@ -1,16 +1,16 @@
 """Python AST structural splitter.
 
-Adapted from the recursive `split_python_by_structure_new` path in the L2NL
-research code (vendor/easc/ast_split_utils.py). The plugin receives Python
-pivots that may be async functions, class methods, or nested helpers, so the
-splitter must drill into function/class bodies instead of treating the whole
-container as one statement.
+The production plugin follows the research-code entry point
+`split_python_by_structure_new` from vendor/easc/ast_split_utils.py. That path
+supports multiple/nested Python functions by collecting every function signature
+and recursing into function bodies instead of treating the whole function as one
+statement.
 """
 from __future__ import annotations
 import ast
 
 
-def split_python_by_structure(raw_code):
+def split_python_by_structure_new(raw_code):
     try:
         tree = ast.parse(raw_code)
         result = {
@@ -63,3 +63,8 @@ def split_python_by_structure(raw_code):
             'assignments': [],
             'others': []
         }, False
+
+
+def split_python_by_structure(raw_code):
+    """Backward-compatible alias for older plugin code paths."""
+    return split_python_by_structure_new(raw_code)

@@ -1,3 +1,6 @@
+import inspect
+
+from app.components import _py_split
 from app.components.extractor import build_seq_items, Extractor
 
 CODE = (
@@ -23,6 +26,11 @@ def test_build_seq_items_categorizes_by_structure():
     cleaned = [c for _, c, _ in items]
     assert any("for i in range(x)" in r for r in raws)
     assert all(c == c.lower() for c in cleaned)
+
+
+def test_build_seq_items_uses_research_new_python_splitter():
+    assert hasattr(_py_split, "split_python_by_structure_new")
+    assert "split_python_by_structure_new" in inspect.getsource(build_seq_items)
 
 
 def test_build_seq_items_recurses_into_nested_python_functions():
