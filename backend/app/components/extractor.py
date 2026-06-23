@@ -38,9 +38,12 @@ def build_seq_items(code: str) -> list[tuple[str, str, str]]:
     if not ok:
         return []
     items: list[tuple[str, str, str]] = []
-    func = parsed.get("function_def", "")
-    if func and func.strip():
-        items.append((func, " ".join(func.split()).lower(), "signature"))
+    funcs = parsed.get("function_def", [])
+    if isinstance(funcs, str):
+        funcs = [funcs]
+    for func in funcs:
+        if func and func.strip():
+            items.append((func, " ".join(func.split()).lower(), "signature"))
     for key, btype in _BLOCK_KEYS:
         for stmt in parsed.get(key, []):
             cleaned = " ".join(stmt.split()).lower()

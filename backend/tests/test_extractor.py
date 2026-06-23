@@ -25,6 +25,40 @@ def test_build_seq_items_categorizes_by_structure():
     assert all(c == c.lower() for c in cleaned)
 
 
+def test_build_seq_items_recurses_into_nested_python_functions():
+    items = build_seq_items(
+        "def outer():\n"
+        "    def inner():\n"
+        "        value = 1\n"
+        "        return value\n"
+        "    return inner()"
+    )
+    raws = [r for r, _, _ in items]
+    assert "def outer():" in raws
+    assert "def inner():" in raws
+    assert "value = 1" in raws
+    assert not any(r.startswith("def inner():\n") for r in raws)
+
+
+def test_build_seq_items_handles_async_functions_and_class_methods():
+    async_items = build_seq_items("async def fetch():\n    value = 1\n    return value")
+    async_raws = [r for r, _, _ in async_items]
+    assert "async def fetch():" in async_raws
+    assert "value = 1" in async_raws
+    assert not any(r.startswith("async def fetch():\n") for r in async_raws)
+
+    class_items = build_seq_items(
+        "class Service:\n"
+        "    def run(self):\n"
+        "        value = 1\n"
+        "        return value"
+    )
+    class_raws = [r for r, _, _ in class_items]
+    assert "def run(self):" in class_raws
+    assert "value = 1" in class_raws
+    assert not any(r.startswith("class Service:\n") for r in class_raws)
+
+
 def test_build_seq_items_empty_on_syntax_error():
     assert build_seq_items("def f( :") == []
 

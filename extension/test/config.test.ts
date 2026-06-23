@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { buildRequest, RawSettings } from "../src/config";
 
 const base: RawSettings = {
@@ -23,5 +24,10 @@ describe("buildRequest", () => {
     expect(req.model.base_url).toBe("http://localhost:8080/v1");
     expect(req.model.api_key).toBe("sk-no-key");
     expect(req.model.model).toBe("local-model");
+  });
+
+  it("defaults extension interaction to one translation candidate for latency", () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    expect(pkg.contributes.configuration.properties["codeSummary.params.temperatures"].default).toEqual([0]);
   });
 });

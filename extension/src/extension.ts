@@ -24,7 +24,7 @@ async function readSettings(ctx: vscode.ExtensionContext): Promise<RawSettings> 
     },
     params: {
       k: c.get("params.k", 5),
-      temperatures: c.get("params.temperatures", [0, 0.4, 0.8]),
+      temperatures: c.get("params.temperatures", [0]),
       lambda: c.get("params.lambda", 0.5),
       threshold: c.get("params.threshold", 0.5),
       maxRepairIters: c.get("params.maxRepairIters", 3),
