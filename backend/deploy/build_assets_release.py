@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 ASSETS = [
-    ("extractor/pytorch_model.bin", Path("extractor/pytorch_model.bin"), "extractor/pytorch_model.bin", None),
-    ("corpus/corpus_30k.jsonl", Path("corpus/corpus_30k.jsonl"), "corpus/corpus_30k.jsonl", None),
-    ("codebert-base", Path("codebert/codebert-base.tar.gz"), "codebert-base.tar.gz", "codebert-base"),
+    ("extractor/pytorch_model.bin", Path("extractor/pytorch_model.bin"), "extractor/pytorch_model.bin", None, "extractor"),
+    ("corpus/corpus_30k.jsonl", Path("corpus/corpus_30k.jsonl"), "corpus/corpus_30k.jsonl", None, "corpus"),
+    ("codebert-base", Path("codebert/codebert-base.tar.gz"), "codebert-base.tar.gz", "codebert-base", "codebert"),
 ]
 
 
@@ -21,6 +21,7 @@ def sha256_path(path: Path) -> str:
 
 
 def split_asset(src: Path, out_dir: Path, split_size: int) -> list[dict]:
+    out_dir.mkdir(parents=True, exist_ok=True)
     parts = []
     idx = 1
     with src.open("rb") as f:
@@ -42,7 +43,8 @@ def build_release_assets(
     release: str,
     gitee_base_url: str,
     global_base_url: str | None = None,
-    split_size: int = 60 * 1024 * 1024,
+    split_size: int = 45 * 1024 * 1024,
+    per_asset_releases: bool = False,
 ) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     sources = [{"id": "gitee", "baseUrl": gitee_base_url.rstrip("/"), "enabledByDefault": True}]
@@ -50,17 +52,21 @@ def build_release_assets(
         sources.append({"id": "global", "baseUrl": global_base_url.rstrip("/"), "global": True})
 
     manifest = {"version": 2, "release": release, "sources": sources, "assets": []}
-    for name, rel, target, extract_to in ASSETS:
+    for name, rel, target, extract_to, slug in ASSETS:
         src = src_dir / rel
         if not src.is_file():
             raise FileNotFoundError(f"missing required asset: {src}")
+        source_path = f"{release}-{slug}" if per_asset_releases else None
+        part_dir = out_dir / source_path if source_path else out_dir
         entry = {
             "name": name,
             "target": target,
             "sha256": sha256_path(src),
             "size": src.stat().st_size,
-            "parts": split_asset(src, out_dir, split_size),
+            "parts": split_asset(src, part_dir, split_size),
         }
+        if source_path:
+            entry["sourcePath"] = source_path
         if extract_to:
             entry["extractTo"] = extract_to
         manifest["assets"].append(entry)
@@ -73,9 +79,9 @@ def build_release_assets(
 
 def write_checksums(out_dir: Path) -> None:
     lines = []
-    for p in sorted(out_dir.iterdir()):
+    for p in sorted(x for x in out_dir.rglob("*") if x.is_file()):
         if p.is_file() and p.name != "SHA256SUMS.txt":
-            lines.append(f"{sha256_path(p)}  {p.name}")
+            lines.append(f"{sha256_path(p)}  {p.relative_to(out_dir)}")
     (out_dir / "SHA256SUMS.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -86,11 +92,13 @@ def main() -> None:
     p.add_argument("--release", default="v0.2-assets-cn")
     p.add_argument("--gitee-base-url", required=True)
     p.add_argument("--global-base-url")
-    p.add_argument("--split-size-mib", type=int, default=60)
+    p.add_argument("--split-size-mib", type=int, default=45)
+    p.add_argument("--per-asset-releases", action="store_true", help="Put each asset's parts under <release>-<asset>/ and add sourcePath entries.")
     args = p.parse_args()
     build_release_assets(
         args.src, args.out, args.release, args.gitee_base_url, args.global_base_url,
         split_size=args.split_size_mib * 1024 * 1024,
+        per_asset_releases=args.per_asset_releases,
     )
 
 

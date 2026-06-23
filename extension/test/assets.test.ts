@@ -78,6 +78,27 @@ describe("assetUrl", () => {
     expect(urls.map((u) => u.sourceId)).toEqual(["gitee", "github"]);
     expect(urls[0].parts[0]).toBe("https://gitee.com/acme/l2nl/releases/download/v0.2-assets-cn/corpus_30k.jsonl.part001");
   });
+  it("supports per-asset release paths", () => {
+    const m = parseManifest(JSON.stringify({
+      version: 2,
+      release: "v0.2-assets-cn",
+      sources: [
+        { id: "gitee", baseUrl: "https://gitee.com/acme/l2nl/releases/download", enabledByDefault: true },
+        { id: "github", baseUrl: "https://github.com/acme/l2nl/releases/download", global: true },
+      ],
+      assets: [{
+        name: "codebert-base",
+        target: "codebert-base.tar.gz",
+        sourcePath: "v0.2-assets-cn-codebert",
+        sha256: "whole",
+        size: 6,
+        parts: [{ file: "codebert-base.tar.gz.part001", sha256: "p1", size: 6 }],
+      }],
+    }));
+    const urls = sourcePartUrls(m, m.assets[0], { includeGlobalMirrors: true });
+    expect(urls[0].parts[0]).toBe("https://gitee.com/acme/l2nl/releases/download/v0.2-assets-cn-codebert/codebert-base.tar.gz.part001");
+    expect(urls[1].parts[0]).toBe("https://github.com/acme/l2nl/releases/download/v0.2-assets-cn-codebert/codebert-base.tar.gz.part001");
+  });
 });
 
 describe("sha256File", () => {
@@ -188,6 +209,42 @@ describe("installAsset", () => {
     })).rejects.toThrow(/checksum/i);
     expect(fs.existsSync(dest)).toBe(false);
     expect(fs.existsSync(`${dest}.tmp`)).toBe(false);
+  });
+
+  it("accepts local asset parts inside the asset sourcePath folder", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "csa-local-sourcepath-"));
+    const local = path.join(root, "local");
+    const sourcePath = "v0.2-assets-cn-demo";
+    const dest = path.join(root, "out", "asset.bin");
+    fs.mkdirSync(path.join(local, sourcePath), { recursive: true });
+    fs.writeFileSync(path.join(local, sourcePath, "asset.bin.part001"), "abc");
+    fs.writeFileSync(path.join(local, sourcePath, "asset.bin.part002"), "def");
+    const whole = await sha256FileFromBytes("abcdef");
+    const p1 = await sha256FileFromBytes("abc");
+    const p2 = await sha256FileFromBytes("def");
+    const m = parseManifest(JSON.stringify({
+      version: 2,
+      release: "v0.2-assets-cn",
+      sources: [{ id: "gitee", baseUrl: "https://gitee.example/releases/download", enabledByDefault: true }],
+      assets: [{
+        name: "asset.bin",
+        target: "asset.bin",
+        sourcePath,
+        sha256: whole,
+        size: 6,
+        parts: [
+          { file: "asset.bin.part001", sha256: p1, size: 3 },
+          { file: "asset.bin.part002", sha256: p2, size: 3 },
+        ],
+      }],
+    }));
+
+    await installAsset(m, m.assets[0], dest, {
+      localAssetDir: local,
+      download: async () => { throw new Error("remote should not run"); },
+    });
+
+    expect(fs.readFileSync(dest, "utf8")).toBe("abcdef");
   });
 });
 

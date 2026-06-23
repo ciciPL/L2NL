@@ -41,17 +41,24 @@ python deploy/build_assets_release.py \
   --src /path/to/prepared-assets \
   --out /path/to/release-assets \
   --release v0.2-assets-cn \
-  --gitee-base-url https://gitee.com/ch2n2000/L2NL/releases/download/v0.2-assets-cn \
-  --global-base-url https://github.com/ciciPL/L2NL/releases/download/v0.2-assets-cn \
-  --split-size-mib 60
+  --gitee-base-url https://gitee.com/ch2n2000/L2NL/releases/download \
+  --global-base-url https://github.com/ciciPL/L2NL/releases/download \
+  --split-size-mib 45 \
+  --per-asset-releases
 ```
 
-把 `/path/to/release-assets` 中的 `assets-manifest.v2.json`、`SHA256SUMS.txt`
-和所有 `.partNNN` 文件上传到 Gitee Release。发布 VSIX 前，用生成出的
-`assets-manifest.v2.json` 覆盖 `backend/assets/manifest.json`，再运行：
+Gitee 主 Release `v0.2-assets-cn` 上传 `code-summary-0.2.0.vsix`、
+`assets-manifest.v2.json`、`SHA256SUMS.txt`、`INSTALL_CN.md`。资产分片分别上传到：
+
+- `v0.2-assets-cn-extractor`
+- `v0.2-assets-cn-corpus`
+- `v0.2-assets-cn-codebert`
+
+发布 VSIX 前，用生成出的 `assets-manifest.v2.json` 覆盖
+`backend/assets/manifest.json`，再运行：
 
 Gitee 单个附件限制为 100M，页面实测还会限制一次 Release 的附件数量；因此
-默认使用 60MiB 分片，控制 0.2 资产总附件数不超过 20，同时仍低于单附件上限。
+默认使用 45MiB 分片并按资产拆分到多个 Release，降低网页上传失败率。
 
 ```bash
 cd extension

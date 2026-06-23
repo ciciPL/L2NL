@@ -14,6 +14,7 @@ export interface AssetEntry {
   name: string;
   file?: string;
   target?: string;
+  sourcePath?: string;
   sha256: string;
   size: number;
   parts?: AssetPart[];
@@ -59,7 +60,7 @@ export function parseManifest(json: string): Manifest {
 
 export function assetUrl(m: Manifest, a: AssetEntry, baseOverride?: string): string {
   const base = (baseOverride ?? m.baseUrl ?? m.sources?.[0]?.baseUrl ?? "").replace(/\/+$/, "");
-  return `${base}/${assetParts(a)[0].file}`;
+  return sourceUrl(base, a, assetParts(a)[0].file, !!baseOverride);
 }
 
 export function assetParts(a: AssetEntry): AssetPart[] {
@@ -88,8 +89,13 @@ export function sourcePartUrls(
     .filter((s) => s.enabledByDefault || (opts.includeGlobalMirrors && s.global))
     .map((s) => {
       const base = s.baseUrl.replace(/\/+$/, "");
-      return { sourceId: s.id, parts: parts.map((p) => `${base}/${p.file}`) };
+      return { sourceId: s.id, parts: parts.map((p) => sourceUrl(base, a, p.file, false)) };
     });
+}
+
+function sourceUrl(base: string, a: AssetEntry, file: string, ignoreSourcePath: boolean): string {
+  const prefix = !ignoreSourcePath && a.sourcePath ? `${a.sourcePath.replace(/^\/+|\/+$/g, "")}/` : "";
+  return `${base}/${prefix}${file}`;
 }
 
 export function sha256File(path: string): Promise<string> {
@@ -181,7 +187,11 @@ function cleanupTemp(tmp: string, partDir: string) {
 
 async function tryInstallFromLocal(a: AssetEntry, localDir: string, tmp: string, partDir: string): Promise<boolean> {
   const parts = assetParts(a);
-  const partPaths = parts.map((p) => path.join(localDir, p.file));
+  const partPaths = parts.map((p) => {
+    const flat = path.join(localDir, p.file);
+    if (fs.existsSync(flat)) return flat;
+    return a.sourcePath ? path.join(localDir, a.sourcePath, p.file) : flat;
+  });
   if (!partPaths.every((p) => fs.existsSync(p))) return false;
   fs.mkdirSync(partDir, { recursive: true });
   for (let i = 0; i < parts.length; i++) {
