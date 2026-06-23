@@ -148,6 +148,14 @@ export class WizardPanel {
       .choice { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
       .choice button { width:100%; text-align:left; min-height:82px; }
       .choice strong { display:block; margin-bottom:4px; }
+      .choice button.cs-selected, .source-row button.cs-selected {
+        border-color: var(--vscode-focusBorder);
+        background: var(--vscode-list-activeSelectionBackground);
+        color: var(--vscode-list-activeSelectionForeground);
+      }
+      .mode-status, .source-status { margin-top:8px; }
+      .source-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .source-row button { text-align:left; min-height:54px; }
       .subtle { font-size:12px; color:var(--vscode-descriptionForeground); }
       .offline-only { display:none; }
       .online-only { display:block; }
@@ -163,15 +171,16 @@ export class WizardPanel {
     <div id="s-mode" class="step">
       <h2>Choose model mode</h2>
       <div class="choice">
-        <button class="secondary" onclick="chooseSetupMode('online')">
+        <button id="modeCardOnline" class="secondary" onclick="chooseSetupMode('online')">
           <strong>Online API</strong>
           <span class="subtle">DeepSeek, OpenAI, or any OpenAI-compatible endpoint. API key is stored in VS Code SecretStorage.</span>
         </button>
-        <button class="secondary" onclick="chooseSetupMode('offline')">
+        <button id="modeCardOffline" class="secondary" onclick="chooseSetupMode('offline')">
           <strong>Offline llama.cpp</strong>
           <span class="subtle">Use ModelScope GGUF models and a local llama-server on 127.0.0.1.</span>
         </button>
       </div>
+      <div id="modeStatus" class="mode-status ok">Selected: Online API</div>
       <div class="nav"><button class="secondary" onclick="go('welcome')">Back</button>
         <button onclick="go('env')">Next</button></div>
     </div>
@@ -183,7 +192,7 @@ export class WizardPanel {
         <div class="cs-label">inference device</div>
         <select id="device"><option value="cpu">CPU (works everywhere)</option></select>
       </div>
-      <div class="nav"><button class="secondary" onclick="go('welcome')">Back</button>
+      <div class="nav"><button class="secondary" onclick="go('mode')">Back</button>
         <button id="envNext" disabled onclick="go('install')">Next</button></div>
     </div>
 
@@ -191,15 +200,21 @@ export class WizardPanel {
       <h2>Install backend</h2>
       <div class="cs-card">
         <div class="cs-label">asset source</div>
-        <div class="nav"><button class="secondary" onclick="useGitee()">Online via Gitee</button>
-          <button class="secondary" onclick="pickLocalAssets()">Use local asset folder</button>
-          <button class="secondary" onclick="retryParts()">Retry failed parts</button></div>
-        <div id="assetSource" class="muted">Gitee Release multipart assets</div>
+        <div class="source-row">
+          <button id="assetGiteeBtn" class="secondary" onclick="useGitee()">
+            <strong>Online via Gitee</strong><br><span class="subtle">Use public Gitee Release assets.</span>
+          </button>
+          <button id="assetLocalBtn" class="secondary" onclick="pickLocalAssets()">
+            <strong>Use local asset folder</strong><br><span class="subtle">Choose a folder with release parts.</span>
+          </button>
+        </div>
+        <div id="assetSource" class="source-status ok">Selected: Online via Gitee</div>
         <label><input id="globalMirrors" type="checkbox" onchange="setAssetOptions()"> try global mirrors</label>
       </div>
       <div id="steps" class="cs-card steps"></div>
       <pre id="installLog" class="cs-code log muted">Idle.</pre>
       <div class="nav"><button id="installBtn" onclick="startInstall()">Install</button>
+        <button class="secondary" onclick="retryParts()">Retry failed parts</button>
         <button id="installNext" disabled onclick="go('model')">Next</button></div>
     </div>
 
@@ -247,6 +262,7 @@ export class WizardPanel {
       let mode = "online";
       let saved = null;
       let assetState = { localDir:"", tryGlobalMirrors:false };
+      let assetMode = "gitee";
       let modelScopePresets = [];
       let modelScopeFiles = [];
       const STEPS = ["venv","torch","deps","assets","codebert","launch"];
@@ -263,15 +279,29 @@ export class WizardPanel {
 
       function go(id){ document.querySelectorAll(".step").forEach(e=>e.classList.remove("active"));
         document.getElementById("s-"+id).classList.add("active"); renderStepper(id);
+        if(id==="mode"){ renderModeChoice(); }
         if(id==="env"){ vscode.postMessage({type:"detectEnv"}); }
+        if(id==="install"){ renderAssetChoice(); }
         if(id==="model"){ prefill(); } }
       function chooseSetupMode(m){ setMode(m); vscode.postMessage({type:"selectSetupMode",mode:m}); }
       function closeWizard(){ vscode.postMessage({type:"close"}); }
-      function useGitee(){ assetState.localDir=""; document.getElementById("assetSource").textContent="Gitee Release multipart assets"; vscode.postMessage({type:"useGiteeAssets"}); }
+      function useGitee(){ assetMode="gitee"; assetState.localDir=""; renderAssetChoice(); vscode.postMessage({type:"useGiteeAssets"}); }
       function pickLocalAssets(){ vscode.postMessage({type:"pickLocalAssetDir"}); }
       function retryParts(){ startInstall(); }
       function setAssetOptions(){ const v=document.getElementById("globalMirrors").checked;
         assetState.tryGlobalMirrors=v; vscode.postMessage({type:"setAssetOptions",tryGlobalMirrors:v}); }
+
+      function renderModeChoice(){
+        document.getElementById("modeCardOnline").classList.toggle("cs-selected", mode==="online");
+        document.getElementById("modeCardOffline").classList.toggle("cs-selected", mode==="offline");
+        document.getElementById("modeStatus").textContent = mode==="online" ? "Selected: Online API" : "Selected: Offline llama.cpp";
+      }
+      function renderAssetChoice(){
+        document.getElementById("assetGiteeBtn").classList.toggle("cs-selected", assetMode==="gitee");
+        document.getElementById("assetLocalBtn").classList.toggle("cs-selected", assetMode==="local");
+        document.getElementById("assetSource").textContent =
+          assetMode==="local" && assetState.localDir ? "Selected local folder: "+assetState.localDir : "Selected: Online via Gitee";
+      }
 
       function renderSteps(map){ document.getElementById("steps").innerHTML = STEPS.map(s=>{
           const st=map[s]||"pending";
@@ -280,12 +310,14 @@ export class WizardPanel {
       const stepMap={};
       function startInstall(){ document.getElementById("installBtn").disabled=true;
         STEPS.forEach(s=>stepMap[s]="pending"); renderSteps(stepMap);
-        document.getElementById("installLog").textContent="Installing… (first run downloads dependencies; this can take a few minutes)";
+        const sourceText = assetMode==="local" ? "local asset folder" : "Gitee online assets";
+        document.getElementById("installLog").textContent="Installing from "+sourceText+"… (first run downloads dependencies; this can take a few minutes)";
         vscode.postMessage({type:"startInstall"}); }
 
       function setMode(m){ mode=m;
         document.getElementById("seg-online").classList.toggle("cs-seg__opt--sel",m==="online");
         document.getElementById("seg-offline").classList.toggle("cs-seg__opt--sel",m==="offline");
+        renderModeChoice();
         document.getElementById("onlineBox").style.display = m==="online"?"block":"none";
         document.getElementById("offlineBox").style.display = m==="offline"?"block":"none";
         document.getElementById("saveModelBtn").style.display = m==="online"?"inline-block":"none";
@@ -355,8 +387,11 @@ export class WizardPanel {
 
       window.addEventListener("message",(ev)=>{ const m=ev.data;
         if(m.type==="initModel"){ saved=m.model; assetState=m.assets||assetState; modelScopePresets=m.modelScopePresets||[];
+          mode = (saved && saved.mode) || mode;
+          assetMode = assetState.localDir ? "local" : "gitee";
           renderOfflinePresets();
-          if(assetState.localDir) document.getElementById("assetSource").textContent=assetState.localDir;
+          renderModeChoice();
+          renderAssetChoice();
           document.getElementById("globalMirrors").checked=!!assetState.tryGlobalMirrors; }
         if(m.type==="setupMode"){ mode=m.mode; setMode(mode); }
         if(m.type==="envResult"){ const e=m.env; const py=e.python;
@@ -375,7 +410,7 @@ export class WizardPanel {
           document.getElementById("installNext").disabled=false; }
         if(m.type==="installError"){ document.getElementById("installLog").textContent="Failed: "+m.message;
           document.getElementById("installBtn").disabled=false; }
-        if(m.type==="assetSource"){ assetState.localDir=m.localDir; document.getElementById("assetSource").textContent=m.localDir||"Gitee Release multipart assets"; }
+        if(m.type==="assetSource"){ assetState.localDir=m.localDir; assetMode=m.localDir?"local":"gitee"; renderAssetChoice(); }
         if(m.type==="testResult"){ const el=document.getElementById("testMsg"); el.textContent=m.message; el.className=m.ok?"ok":"cs-err"; }
         if(m.type==="modelScopeResult"){
           if(m.files && m.files.length){ modelScopeFiles=m.files; renderGgufFiles(modelScopeFiles); document.getElementById("offlineLog").textContent="Found "+m.files.length+" GGUF file(s)."; }
