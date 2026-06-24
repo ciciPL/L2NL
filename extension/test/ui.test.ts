@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { escapeHtml, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks } from "../src/ui";
+import {
+  escapeHtml, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks,
+  splitDisplayBlocks,
+} from "../src/ui";
 
 describe("escapeHtml", () => {
   it("escapes angle brackets and ampersands", () => {
@@ -59,5 +62,24 @@ describe("highlightCoreBlocks", () => {
   });
   it("escapes code content", () => {
     expect(highlightCoreBlocks("x = a<b", [])).toContain("a&lt;b");
+  });
+  it("does not highlight function signatures as core logic statements", () => {
+    const html = highlightCoreBlocks("def f(x):\n    return x", [
+      { text: "def f(x):", block_type: "signature", prob: 0.9 },
+      { text: "return x", block_type: "other", prob: 0.8 },
+    ]);
+    expect(html).not.toContain("def f(x):<span class=\"cs-chip");
+    expect(html).toContain("return x<span class=\"cs-chip");
+  });
+});
+
+describe("splitDisplayBlocks", () => {
+  it("separates function signatures from core logic blocks", () => {
+    const blocks = [
+      { text: "def f(x):", block_type: "signature", prob: 0.9 },
+      { text: "return x", block_type: "other", prob: 0.8 },
+    ];
+    expect(splitDisplayBlocks(blocks).signatures.map((b) => b.text)).toEqual(["def f(x):"]);
+    expect(splitDisplayBlocks(blocks).logic.map((b) => b.text)).toEqual(["return x"]);
   });
 });

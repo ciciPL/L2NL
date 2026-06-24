@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { SummarizeResponse } from "./client";
 import {
-  escapeHtml, BASE_CSS, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks, StepStatus,
+  escapeHtml, BASE_CSS, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks, splitDisplayBlocks, StepStatus,
 } from "./ui";
 
 const PIPE = ["Translate", "Retrieve", "Extract", "Generate"];
@@ -42,11 +42,22 @@ function renderBody(resp: SummarizeResponse, source: string): string {
       <pre class="cs-code">${escapeHtml(e.code)}</pre></div>`).join("");
   html += `<details><summary>② Retrieved examples (${t.retrieved.length})</summary>${exs}</details>`;
 
-  const hl = highlightCoreBlocks(t.translation.pivot_code, t.core_blocks);
-  const list = t.core_blocks.map((b) =>
-    `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`).join("");
-  html += `<details><summary>③ Core statement blocks (${t.core_blocks.length})</summary>
-    <pre class="cs-code">${hl}</pre><ul class="cs-blocklist">${list}</ul></details>`;
+  const { signatures, logic } = splitDisplayBlocks(t.core_blocks);
+  const hl = highlightCoreBlocks(t.translation.pivot_code, logic);
+  const signatureList = signatures.length
+    ? `<div class="cs-label">function signatures</div><ul class="cs-blocklist">${
+        signatures.map((b) =>
+          `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`).join("")
+      }</ul>`
+    : "";
+  const list = logic.length
+    ? logic.map((b) =>
+      `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`,
+    ).join("")
+    : `<li class="muted">No core logic blocks selected.</li>`;
+  html += `<details><summary>③ Core logic blocks (${logic.length})</summary>
+    <pre class="cs-code">${hl}</pre>${signatureList}
+    <div class="cs-label">core logic</div><ul class="cs-blocklist">${list}</ul></details>`;
 
   html += `<details><summary>④ Final prompt</summary><pre class="cs-code">${escapeHtml(t.prompt)}</pre></details>`;
   return html;

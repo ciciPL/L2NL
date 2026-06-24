@@ -38,11 +38,27 @@ export function scoreBar(score: number, max: number): string {
     `<span class="cs-scorebar__num">${score.toFixed(1)}</span>`;
 }
 
+export interface DisplayBlock {
+  text: string;
+  prob: number;
+  block_type?: string;
+}
+
+export function splitDisplayBlocks<T extends { block_type?: string }>(blocks: T[]): {
+  signatures: T[];
+  logic: T[];
+} {
+  return {
+    signatures: blocks.filter((b) => b.block_type === "signature"),
+    logic: blocks.filter((b) => b.block_type !== "signature"),
+  };
+}
+
 export function highlightCoreBlocks(
-  pivotCode: string, blocks: { text: string; prob: number }[],
+  pivotCode: string, blocks: DisplayBlock[],
 ): string {
   const wanted = new Map<string, number>();
-  for (const b of blocks) wanted.set(b.text.trim(), b.prob);
+  for (const b of splitDisplayBlocks(blocks).logic) wanted.set(b.text.trim(), b.prob);
   return pivotCode.split("\n").map((line) => {
     const key = line.trim();
     if (key && wanted.has(key)) {
