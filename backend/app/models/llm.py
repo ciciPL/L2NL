@@ -16,8 +16,9 @@ class LLMClient:
         import httpx
         self.model = model
         self.max_tokens = max_tokens
+        self.disable_thinking = _is_local_base_url(base_url)
         http_client = None
-        if _is_local_base_url(base_url):
+        if self.disable_thinking:
             http_client = httpx.Client(trust_env=False, timeout=timeout)
         self._client = OpenAI(
             base_url=base_url,
@@ -28,9 +29,10 @@ class LLMClient:
 
     def chat(self, messages: list[dict], temperature: float,
              stop: list[str] | None = None) -> str:
+        extra_body = {"chat_template_kwargs": {"enable_thinking": False}} if self.disable_thinking else None
         resp = self._client.chat.completions.create(
             model=self.model, messages=messages, temperature=temperature,
-            stop=stop, max_tokens=self.max_tokens,
+            stop=stop, max_tokens=self.max_tokens, extra_body=extra_body,
         )
         return resp.choices[0].message.content or ""
 

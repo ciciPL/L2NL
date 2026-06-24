@@ -13,6 +13,7 @@ def _tr(llm):
 
 def test_extract_and_validate_helpers():
     assert extract_clean_code(VALID) == "def f():\n    return 1"
+    assert extract_clean_code("<PYTHON\ndef f():\n    return 1\n</PYTHON>") == "def f():\n    return 1"
     ok, _, _ = validate_syntax("def f():\n    return 1")
     assert ok is True
     bad, msg, _ = validate_syntax("def f( :")
@@ -32,6 +33,18 @@ def test_valid_translation_does_not_fabricate_selection_score():
     tr = _tr(FakeLLMClient(responses=[VALID]))
     res = tr.translate("def f; 1; end", "ruby")
     assert res.selected_score is None
+
+
+def test_python_source_is_used_as_pivot_without_llm_call():
+    llm = FakeLLMClient(responses=["should not be used"])
+    tr = _tr(llm)
+    code = "def f():\n    return 1"
+    res = tr.translate(code, "python")
+    assert res.pivot_code == code
+    assert res.candidates == [code]
+    assert res.repaired is False
+    assert res.fell_back is False
+    assert llm.calls == []
 
 
 def test_repair_recovers_invalid_candidate():

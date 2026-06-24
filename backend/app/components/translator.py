@@ -29,7 +29,7 @@ def validate_syntax(code: str):
 
 
 def extract_clean_code(generated_text: str) -> str:
-    xml_match = re.search(r"<PYTHON>(.*?)</PYTHON>", generated_text,
+    xml_match = re.search(r"<PYTHON(?:\s*>|\s+)(.*?)</PYTHON>", generated_text,
                           re.DOTALL | re.IGNORECASE)
     if xml_match:
         content = xml_match.group(1).strip()
@@ -157,6 +157,14 @@ class Translator:
         return (tau0 if tau0["valid"] else valid[0]), False
 
     def translate(self, code: str, src_lang: str) -> TranslationResult:
+        if src_lang.lower() in {"python", "py"}:
+            return TranslationResult(
+                pivot_code=code.strip(),
+                candidates=[code.strip()],
+                selected_score=None,
+                repaired=False,
+                fell_back=False,
+            )
         candidates = self._forward(code, src_lang)
         self._repair(code, src_lang, candidates)
         chosen, fell_back = self._select_best(candidates)
