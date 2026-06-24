@@ -5,6 +5,11 @@ import { BASE_CSS } from "./ui";
 import { loadOnlineApiKey, saveOnlineApiKey } from "./secrets";
 import { MODEL_SCOPE_PRESETS } from "./localRuntime";
 
+export interface WizardOpenOptions {
+  initialMode?: "online" | "offline";
+  initialStep?: "welcome" | "mode" | "env" | "install" | "model" | "done";
+}
+
 async function currentModel(ctx: vscode.ExtensionContext): Promise<SavedModel> {
   const c = vscode.workspace.getConfiguration("codeSummary");
   return {
@@ -21,23 +26,35 @@ async function currentModel(ctx: vscode.ExtensionContext): Promise<SavedModel> {
 export class WizardPanel {
   private static current: WizardPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
+  private openOptions: WizardOpenOptions | undefined;
 
-  static open(ctx: vscode.ExtensionContext) {
-    if (WizardPanel.current) { WizardPanel.current.panel.reveal(); return; }
+  static open(ctx: vscode.ExtensionContext, options: WizardOpenOptions = {}) {
+    if (WizardPanel.current) {
+      WizardPanel.current.panel.reveal();
+      WizardPanel.current.applyOpenOptions(options);
+      return;
+    }
     const panel = vscode.window.createWebviewPanel(
       "codeSummarySetup", "Code Summary — Setup",
       vscode.ViewColumn.Active, { enableScripts: true, retainContextWhenHidden: true });
-    WizardPanel.current = new WizardPanel(panel, ctx);
+    WizardPanel.current = new WizardPanel(panel, ctx, options);
   }
 
-  private constructor(panel: vscode.WebviewPanel, ctx: vscode.ExtensionContext) {
+  private constructor(panel: vscode.WebviewPanel, ctx: vscode.ExtensionContext, options: WizardOpenOptions) {
     this.panel = panel;
+    this.openOptions = options;
     panel.webview.html = this.html();
     panel.onDidDispose(() => (WizardPanel.current = undefined));
     panel.webview.onDidReceiveMessage((msg) => this.handle(msg, ctx));
   }
 
   private post(m: any) { this.panel.webview.postMessage(m); }
+
+  private applyOpenOptions(options: WizardOpenOptions) {
+    if (!options.initialMode && !options.initialStep) return;
+    this.openOptions = options;
+    this.post({ type: "openTarget", mode: options.initialMode, step: options.initialStep });
+  }
 
   private async handle(msg: any, ctx: vscode.ExtensionContext) {
     const cfg = vscode.workspace.getConfiguration("codeSummary");
@@ -53,6 +70,7 @@ export class WizardPanel {
           },
           modelScopePresets: MODEL_SCOPE_PRESETS,
         });
+        this.applyOpenOptions(this.openOptions ?? {});
         break;
       }
       case "selectSetupMode":
@@ -252,7 +270,7 @@ export class WizardPanel {
 
     <div id="s-done" class="step">
       <h2>✓ All set</h2>
-      <p>Select some code and run <b>Code Summary: Summarize Selection</b> (right-click or ⌘⇧P) to try it.</p>
+      <p>Select some code and run <b>Code Summary: Summarize Selection</b> (right-click or command palette) to try it. To change model mode later, run <b>Code Summary: Configure Model</b>.</p>
       <div class="nav"><button onclick="closeWizard()">Close</button></div>
     </div>
 
@@ -422,6 +440,7 @@ export class WizardPanel {
         if(m.type==="offlineReady"){ document.getElementById("offlineLog").textContent="Local runtime ready at "+m.result.baseUrl+" using "+m.result.model; document.getElementById("offlineStartBtn").disabled=false; go("done"); }
         if(m.type==="offlineError"){ document.getElementById("offlineLog").textContent="Offline setup failed: "+m.message; document.getElementById("offlineStartBtn").disabled=false; }
         if(m.type==="modelSaved"){ go("done"); }
+        if(m.type==="openTarget"){ if(m.step) go(m.step); if(m.mode) setMode(m.mode); }
       });
 
       renderStepper("welcome");

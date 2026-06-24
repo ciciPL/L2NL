@@ -35,6 +35,18 @@
         "command": "codeSummary.toggleMode",
         "title": "Code Summary: Toggle Online/Offline"
       },
+      {
+        "command": "codeSummary.configureModel",
+        "title": "Code Summary: Configure Model"
+      },
+      {
+        "command": "codeSummary.configureOnline",
+        "title": "Code Summary: Configure Online API"
+      },
+      {
+        "command": "codeSummary.configureOffline",
+        "title": "Code Summary: Configure Offline Local Model"
+      },
       { "command": "codeSummary.setup", "title": "Code Summary: Run Setup" }
     ],
     "menus": {

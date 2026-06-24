@@ -27,4 +27,12 @@ describe("setup wizard webview", () => {
     expect(src).toContain("function renderModeChoice()");
     expect(src).toContain("function renderAssetChoice()");
   });
+
+  it("supports opening directly to online or offline model configuration", () => {
+    const src = wizardSource();
+    expect(src).toContain("WizardOpenOptions");
+    expect(src).toContain("initialMode");
+    expect(src).toContain("initialStep");
+    expect(src).toContain('type==="openTarget"');
+  });
 });

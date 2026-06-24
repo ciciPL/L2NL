@@ -50,8 +50,8 @@ function updateStatus() {
   const icon = mode === "offline" ? "$(vm)" : "$(cloud)";
   const model = mode === "offline" ? cfg.get("offline.model", "local-model") : cfg.get("online.model", "gpt-4o-mini");
   statusItem.text = `${icon} Summary: ${mode} · ${model}`;
-  statusItem.tooltip = "Toggle online/offline";
-  statusItem.command = "codeSummary.toggleMode";
+  statusItem.tooltip = "Configure Code Summary model (online/offline)";
+  statusItem.command = "codeSummary.configureModel";
   statusItem.show();
 }
 
@@ -106,6 +106,32 @@ async function summarizeSelection(ctx: vscode.ExtensionContext) {
   }
 }
 
+async function configureModel(ctx: vscode.ExtensionContext) {
+  const pick = await vscode.window.showQuickPick([
+    {
+      label: "Configure Offline Local Model",
+      description: "Download a ModelScope GGUF and start llama.cpp",
+      command: "codeSummary.configureOffline",
+    },
+    {
+      label: "Configure Online API",
+      description: "DeepSeek, OpenAI, or an OpenAI-compatible endpoint",
+      command: "codeSummary.configureOnline",
+    },
+    {
+      label: "Run Full Setup",
+      description: "Backend assets, Python environment, and model configuration",
+      command: "codeSummary.setup",
+    },
+    {
+      label: "Toggle Active Mode",
+      description: "Switch between already configured online/offline modes",
+      command: "codeSummary.toggleMode",
+    },
+  ], { placeHolder: "Choose how to configure Code Summary" });
+  if (pick) await vscode.commands.executeCommand(pick.command);
+}
+
 export function activate(ctx: vscode.ExtensionContext) {
   statusItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right, 100);
@@ -117,6 +143,11 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("codeSummary.startBackend", () => provisionAndStart(ctx)),
     vscode.commands.registerCommand("codeSummary.stopBackend", stopBackend),
     vscode.commands.registerCommand("codeSummary.setup", () => WizardPanel.open(ctx)),
+    vscode.commands.registerCommand("codeSummary.configureModel", () => configureModel(ctx)),
+    vscode.commands.registerCommand("codeSummary.configureOnline", () =>
+      WizardPanel.open(ctx, { initialMode: "online", initialStep: "model" })),
+    vscode.commands.registerCommand("codeSummary.configureOffline", () =>
+      WizardPanel.open(ctx, { initialMode: "offline", initialStep: "model" })),
     vscode.commands.registerCommand("codeSummary.toggleMode", async () => {
       const cfg = vscode.workspace.getConfiguration("codeSummary");
       const next = cfg.get("mode", "online") === "online" ? "offline" : "online";

@@ -38,4 +38,19 @@ describe("buildRequest", () => {
     const extensionSource = readFileSync(new URL("../src/extension.ts", import.meta.url), "utf8");
     expect(extensionSource).toContain('k: c.get("params.k", 3)');
   });
+
+  it("contributes customer-visible commands for online and offline configuration", () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    const titles = Object.fromEntries(
+      pkg.contributes.commands.map((c: { command: string; title: string }) => [c.command, c.title]),
+    );
+
+    expect(titles["codeSummary.configureModel"]).toBe("Code Summary: Configure Model");
+    expect(titles["codeSummary.configureOnline"]).toBe("Code Summary: Configure Online API");
+    expect(titles["codeSummary.configureOffline"]).toBe("Code Summary: Configure Offline Local Model");
+
+    const extensionSource = readFileSync(new URL("../src/extension.ts", import.meta.url), "utf8");
+    expect(extensionSource).toContain('statusItem.command = "codeSummary.configureModel"');
+    expect(extensionSource).toContain('WizardPanel.open(ctx, { initialMode: "offline", initialStep: "model" })');
+  });
 });
