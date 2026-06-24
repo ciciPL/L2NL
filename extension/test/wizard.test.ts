@@ -35,4 +35,12 @@ describe("setup wizard webview", () => {
     expect(src).toContain("initialStep");
     expect(src).toContain('type==="openTarget"');
   });
+
+  it("lets offline users choose an existing local GGUF file", () => {
+    const src = wizardSource();
+    expect(src).toContain('id="localGgufBtn"');
+    expect(src).toContain("function useLocalGguf()");
+    expect(src).toContain('type:"pickLocalGguf"');
+    expect(src).toContain("prepareLocalGguf");
+  });
 });

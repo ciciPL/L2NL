@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { detectEnv, prepareOfflineLlama, runProvision, searchModelScopeGguf, testConnection } from "./backend";
+import { detectEnv, prepareLocalGguf, prepareOfflineLlama, runProvision, searchModelScopeGguf, testConnection } from "./backend";
 import { CLOUD_VENDORS, LOCAL_PRESETS, mergeModelConfig, SavedModel } from "./models";
 import { BASE_CSS } from "./ui";
 import { loadOnlineApiKey, saveOnlineApiKey } from "./secrets";
@@ -151,6 +151,28 @@ export class WizardPanel {
           this.post({ type: "offlineError", message: e.message });
         }
         break;
+      case "pickLocalGguf": {
+        const files = await vscode.window.showOpenDialog({
+          canSelectFiles: true,
+          canSelectFolders: false,
+          canSelectMany: false,
+          title: "Select local GGUF model",
+          filters: { "GGUF models": ["gguf"] },
+        });
+        const selected = files?.[0]?.fsPath ?? "";
+        if (!selected) {
+          this.post({ type: "offlineIdle" });
+          break;
+        }
+        try {
+          const result = await prepareLocalGguf(ctx, selected, (step, status, detail) =>
+            this.post({ type: "offlineStep", step, status, detail }));
+          this.post({ type: "offlineReady", result });
+        } catch (e: any) {
+          this.post({ type: "offlineError", message: e.message });
+        }
+        break;
+      }
       case "close":
         this.panel.dispose();
         break;
@@ -251,6 +273,14 @@ export class WizardPanel {
       </div>
 
       <div id="offlineBox" class="offline-only">
+        <div class="cs-card">
+          <div class="cs-label">local GGUF</div>
+          <div class="source-row">
+            <button id="localGgufBtn" class="secondary" onclick="useLocalGguf()">
+              <strong>Use local GGUF file</strong><br><span class="subtle">Choose an existing .gguf on this computer; no model download.</span>
+            </button>
+          </div>
+        </div>
         <div class="cs-label">ModelScope model</div>
         <select id="offlinePreset" onchange="selectOfflinePreset()"></select>
         <div id="customModelWrap" style="display:none">
@@ -399,8 +429,15 @@ export class WizardPanel {
         const selection=selectedOfflineModel();
         if(!selection){ document.getElementById("offlineLog").textContent="Choose a ModelScope GGUF file first."; return; }
         document.getElementById("offlineStartBtn").disabled=true;
+        document.getElementById("localGgufBtn").disabled=true;
         document.getElementById("offlineLog").textContent="Preparing local runtime…";
         vscode.postMessage({type:"prepareOfflineLlama",selection});
+      }
+      function useLocalGguf(){
+        document.getElementById("offlineStartBtn").disabled=true;
+        document.getElementById("localGgufBtn").disabled=true;
+        document.getElementById("offlineLog").textContent="Choose a local .gguf file…";
+        vscode.postMessage({type:"pickLocalGguf"});
       }
 
       window.addEventListener("message",(ev)=>{ const m=ev.data;
@@ -437,8 +474,9 @@ export class WizardPanel {
         }
         if(m.type==="modelScopeError"){ document.getElementById("offlineLog").textContent="ModelScope search failed: "+m.message; }
         if(m.type==="offlineStep"){ document.getElementById("offlineLog").textContent=m.step+": "+m.status+(m.detail?" — "+m.detail:""); }
-        if(m.type==="offlineReady"){ document.getElementById("offlineLog").textContent="Local runtime ready at "+m.result.baseUrl+" using "+m.result.model; document.getElementById("offlineStartBtn").disabled=false; go("done"); }
-        if(m.type==="offlineError"){ document.getElementById("offlineLog").textContent="Offline setup failed: "+m.message; document.getElementById("offlineStartBtn").disabled=false; }
+        if(m.type==="offlineReady"){ document.getElementById("offlineLog").textContent="Local runtime ready at "+m.result.baseUrl+" using "+m.result.model; document.getElementById("offlineStartBtn").disabled=false; document.getElementById("localGgufBtn").disabled=false; go("done"); }
+        if(m.type==="offlineError"){ document.getElementById("offlineLog").textContent="Offline setup failed: "+m.message; document.getElementById("offlineStartBtn").disabled=false; document.getElementById("localGgufBtn").disabled=false; }
+        if(m.type==="offlineIdle"){ document.getElementById("offlineStartBtn").disabled=false; document.getElementById("localGgufBtn").disabled=false; document.getElementById("offlineLog").textContent="Choose a preset, search ModelScope, or use a local GGUF file."; }
         if(m.type==="modelSaved"){ go("done"); }
         if(m.type==="openTarget"){ if(m.step) go(m.step); if(m.mode) setMode(m.mode); }
       });

@@ -14,7 +14,7 @@ Python venv、下载经过校验的流水线资产，并连接 OpenAI-compatible
    - `try global mirrors` 只在国内源失败且用户明确勾选时使用。
 4. 配置模型：
    - 在线：DeepSeek / OpenAI / 兼容服务，API key 存入 VS Code SecretStorage，不写 settings 明文。
-   - 离线：默认 llama.cpp，从 ModelScope 选择或搜索 GGUF；插件下载模型、启动本地 `llama-server`，并写入 `http://127.0.0.1:<port>/v1`。
+   - 离线：默认 llama.cpp，可直接选择已有本地 `.gguf`，也可从 ModelScope 选择或搜索 GGUF；插件启动本地 `llama-server`，并写入 `http://127.0.0.1:<port>/v1`。
 5. 选中代码后右键 `Code Summary: Summarize Selection`。
 
 ## 生产资产

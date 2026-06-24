@@ -29,10 +29,11 @@ Gitee Release `v0.2-runtime-llamacpp` 里的对应平台 runtime 分片。
    - API key 存在 VS Code SecretStorage，不写入 settings 明文。
    - 点 `Test connection`，通过后保存。
 7. 离线模式：
-   - 默认选择 `Fast: Qwen2.5-Coder 1.5B Q4_K_M`。
+   - 已经有本地模型：点 `Use local GGUF file`，选择已有 `.gguf` 文件，不会再下载模型。
+   - 需要下载模型：默认选择 `Fast: Qwen2.5-Coder 1.5B Q4_K_M`。
    - 也可以输入 ModelScope repo ID，例如 `Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF`，搜索 `.gguf` 文件。
    - 点 `Download model & start llama.cpp`。
-   - 插件会下载模型到 VS Code globalStorage、启动 `llama-server -m <gguf> --host 127.0.0.1 --port <freePort> -c 8192 --parallel 1`，并自动写入本地 `/v1` 地址。
+   - 插件会启动 `llama-server -m <gguf> --host 127.0.0.1 --port <freePort> -c 8192 --parallel 1`，并自动写入本地 `/v1` 地址。
 
 Python 依赖默认走清华 PyPI 镜像。可在 settings 里修改：
 

@@ -240,6 +240,55 @@ function modelNameFromFile(filePath: string): string {
   return path.basename(filePath).replace(/\.gguf$/i, "");
 }
 
+async function startOfflineLlama(
+  ctx: vscode.ExtensionContext,
+  modelPath: string,
+  modelName: string,
+  onStep: OnRuntimeStep,
+): Promise<{ baseUrl: string; model: string; modelPath: string; runtimePath: string }> {
+  const root = ctx.globalStorageUri.fsPath;
+  fs.mkdirSync(root, { recursive: true });
+
+  onStep("runtime", "running", "resolving llama-server");
+  const runtimePath = await ensureManagedLlamaServer(ctx, onStep);
+  onStep("runtime", "done", runtimePath);
+
+  const port = await findFreePort(8080, 50);
+  const baseUrl = `http://127.0.0.1:${port}/v1`;
+  stopLlamaRuntime();
+
+  onStep("launch", "running", `starting ${baseUrl}`);
+  const logPath = path.join(root, "llama-server.log");
+  const log = fs.createWriteStream(logPath, { flags: "a" });
+  llamaProc = spawn(runtimePath, buildLlamaServerArgs({ modelPath, port }), {
+    env: { ...process.env, NO_PROXY: LOCAL_NO_PROXY, no_proxy: LOCAL_NO_PROXY },
+  });
+  llamaProc.stdout?.pipe(log);
+  llamaProc.stderr?.pipe(log);
+  llamaProc.on("exit", () => (llamaProc = undefined));
+  llamaProc.on("error", (e) => log.write(`\n${e.message}\n`));
+
+  onStep("test", "running", "probing /chat/completions");
+  let last = "";
+  for (let i = 0; i < 60; i++) {
+    const probe = await testConnection({ base_url: baseUrl, api_key: "", model: modelName });
+    if (probe.ok) {
+      const cfg = vscode.workspace.getConfiguration("codeSummary");
+      await cfg.update("mode", "offline", vscode.ConfigurationTarget.Global);
+      await cfg.update("offline.baseUrl", baseUrl, vscode.ConfigurationTarget.Global);
+      await cfg.update("offline.model", modelName, vscode.ConfigurationTarget.Global);
+      await cfg.update("offline.modelPath", modelPath, vscode.ConfigurationTarget.Global);
+      onStep("launch", "done", baseUrl);
+      onStep("test", "done", "OK");
+      return { baseUrl, model: modelName, modelPath, runtimePath };
+    }
+    last = probe.message;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  stopLlamaRuntime();
+  throw new Error(`llama-server did not become ready: ${last || "timeout"}. See ${logPath}`);
+}
+
 export async function searchModelScopeGguf(query: string): Promise<OfflineModelSearchResult> {
   const q = query.trim();
   if (!q) return { presets: MODEL_SCOPE_PRESETS, files: [] };
@@ -279,45 +328,24 @@ export async function prepareOfflineLlama(
   );
   onStep("model", "done", modelPath);
 
-  onStep("runtime", "running", "resolving llama-server");
-  const runtimePath = await ensureManagedLlamaServer(ctx, onStep);
-  onStep("runtime", "done", runtimePath);
+  return startOfflineLlama(ctx, modelPath, modelNameFromFile(selection.filePath), onStep);
+}
 
-  const port = await findFreePort(8080, 50);
-  const baseUrl = `http://127.0.0.1:${port}/v1`;
-  const model = modelNameFromFile(selection.filePath);
-  stopLlamaRuntime();
-
-  onStep("launch", "running", `starting ${baseUrl}`);
-  const logPath = path.join(root, "llama-server.log");
-  const log = fs.createWriteStream(logPath, { flags: "a" });
-  llamaProc = spawn(runtimePath, buildLlamaServerArgs({ modelPath, port }), {
-    env: { ...process.env, NO_PROXY: LOCAL_NO_PROXY, no_proxy: LOCAL_NO_PROXY },
-  });
-  llamaProc.stdout?.pipe(log);
-  llamaProc.stderr?.pipe(log);
-  llamaProc.on("exit", () => (llamaProc = undefined));
-  llamaProc.on("error", (e) => log.write(`\n${e.message}\n`));
-
-  onStep("test", "running", "probing /chat/completions");
-  let last = "";
-  for (let i = 0; i < 60; i++) {
-    const probe = await testConnection({ base_url: baseUrl, api_key: "", model });
-    if (probe.ok) {
-      const cfg = vscode.workspace.getConfiguration("codeSummary");
-      await cfg.update("mode", "offline", vscode.ConfigurationTarget.Global);
-      await cfg.update("offline.baseUrl", baseUrl, vscode.ConfigurationTarget.Global);
-      await cfg.update("offline.model", model, vscode.ConfigurationTarget.Global);
-      await cfg.update("offline.modelPath", modelPath, vscode.ConfigurationTarget.Global);
-      onStep("launch", "done", baseUrl);
-      onStep("test", "done", "OK");
-      return { baseUrl, model, modelPath, runtimePath };
-    }
-    last = probe.message;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+export async function prepareLocalGguf(
+  ctx: vscode.ExtensionContext,
+  modelPath: string,
+  onStep: OnRuntimeStep,
+): Promise<{ baseUrl: string; model: string; modelPath: string; runtimePath: string }> {
+  const trimmed = modelPath.trim();
+  if (!trimmed) throw new Error("Choose a local .gguf model file first.");
+  if (!/\.gguf$/i.test(trimmed)) throw new Error(`Local model must be a .gguf file: ${trimmed}`);
+  try {
+    fs.accessSync(trimmed, fs.constants.R_OK);
+  } catch {
+    throw new Error(`Local GGUF model is not readable: ${trimmed}`);
   }
-  stopLlamaRuntime();
-  throw new Error(`llama-server did not become ready: ${last || "timeout"}. See ${logPath}`);
+  onStep("model", "done", trimmed);
+  return startOfflineLlama(ctx, trimmed, modelNameFromFile(trimmed), onStep);
 }
 
 export function stopLlamaRuntime() {

@@ -110,7 +110,7 @@ async function configureModel(ctx: vscode.ExtensionContext) {
   const pick = await vscode.window.showQuickPick([
     {
       label: "Configure Offline Local Model",
-      description: "Download a ModelScope GGUF and start llama.cpp",
+      description: "Use an existing GGUF or download one from ModelScope",
       command: "codeSummary.configureOffline",
     },
     {
