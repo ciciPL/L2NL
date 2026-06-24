@@ -10,7 +10,7 @@ def test_request_roundtrip_with_defaults():
         language="ruby",
         model=ModelConfig(base_url="http://x/v1", api_key="k", model="m"),
     )
-    assert req.params.k == 5
+    assert req.params.k == 3
     assert req.params.temperatures == [0.0, 0.4, 0.8]
     assert req.trace is True
 

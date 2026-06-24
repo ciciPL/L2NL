@@ -24,7 +24,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--base-url", required=True)
     p.add_argument("--api-key", default="sk-no-key")
     p.add_argument("--model", required=True)
-    p.add_argument("--k", type=int, default=5)
+    p.add_argument("--k", type=int, default=3)
     p.add_argument("--no-trace", action="store_true")
     args = p.parse_args(argv)
 

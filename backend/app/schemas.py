@@ -37,7 +37,7 @@ class ModelConfig(BaseModel):
 
 
 class Params(BaseModel):
-    k: int = 5
+    k: int = 3
     temperatures: list[float] = Field(default_factory=lambda: [0.0, 0.4, 0.8])
     lambda_: float = Field(default=0.5, alias="lambda")
     threshold: float = 0.5

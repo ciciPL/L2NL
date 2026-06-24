@@ -199,7 +199,7 @@ codeSummary.online.apiKey       : string
 codeSummary.online.model        : string
 codeSummary.offline.baseUrl     : string                 (default "http://localhost:8080/v1")
 codeSummary.offline.model       : string
-codeSummary.params.k            : number  (default 5)
+codeSummary.params.k            : number  (default 3)
 codeSummary.params.temperatures : number[] (default [0,0.4,0.8])
 codeSummary.params.lambda       : number  (default 0.5)
 codeSummary.params.threshold    : number  (default 0.5)

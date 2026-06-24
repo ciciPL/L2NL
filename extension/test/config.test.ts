@@ -6,7 +6,7 @@ const base: RawSettings = {
   mode: "online",
   online: { baseUrl: "https://api.openai.com/v1", apiKey: "K", model: "gpt-4o-mini" },
   offline: { baseUrl: "http://localhost:8080/v1", model: "local-model" },
-  params: { k: 5, temperatures: [0, 0.4, 0.8], lambda: 0.5, threshold: 0.5, maxRepairIters: 3 },
+  params: { k: 3, temperatures: [0, 0.4, 0.8], lambda: 0.5, threshold: 0.5, maxRepairIters: 3 },
 };
 
 describe("buildRequest", () => {
@@ -15,7 +15,7 @@ describe("buildRequest", () => {
     expect(req.model.base_url).toBe("https://api.openai.com/v1");
     expect(req.model.api_key).toBe("K");
     expect(req.model.model).toBe("gpt-4o-mini");
-    expect(req.params.k).toBe(5);
+    expect(req.params.k).toBe(3);
     expect(req.trace).toBe(true);
   });
 
@@ -29,5 +29,13 @@ describe("buildRequest", () => {
   it("defaults extension interaction to one translation candidate for latency", () => {
     const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
     expect(pkg.contributes.configuration.properties["codeSummary.params.temperatures"].default).toEqual([0]);
+  });
+
+  it("defaults retrieval to the paper Top-3 setting", () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    expect(pkg.contributes.configuration.properties["codeSummary.params.k"].default).toBe(3);
+
+    const extensionSource = readFileSync(new URL("../src/extension.ts", import.meta.url), "utf8");
+    expect(extensionSource).toContain('k: c.get("params.k", 3)');
   });
 });

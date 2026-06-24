@@ -23,7 +23,7 @@ async function readSettings(ctx: vscode.ExtensionContext): Promise<RawSettings> 
       model: c.get("offline.model", "local-model"),
     },
     params: {
-      k: c.get("params.k", 5),
+      k: c.get("params.k", 3),
       temperatures: c.get("params.temperatures", [0]),
       lambda: c.get("params.lambda", 0.5),
       threshold: c.get("params.threshold", 0.5),

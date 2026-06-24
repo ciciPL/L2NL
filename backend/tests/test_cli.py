@@ -1,6 +1,7 @@
 import cli
 import pytest
 from app.models.llm import FakeLLMClient
+from app.schemas import SummarizeResponse
 
 
 def test_run_file_prints_summary(tmp_path, capsys, monkeypatch):
@@ -32,3 +33,31 @@ def test_cli_requires_production_assets_before_pipeline(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="production assets are not ready"):
         cli.main(["--code-file", str(f), "--language", "ruby",
                   "--base-url", "http://x/v1", "--model", "m"])
+
+
+def test_cli_defaults_to_paper_top_three_retrieval(tmp_path, monkeypatch):
+    seen: dict[str, int] = {}
+
+    class FakePipeline:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def run(self, _code, _language, params, trace):
+            seen["k"] = params.k
+            return SummarizeResponse(summary="CLI summary.")
+
+    monkeypatch.setattr(cli, "ensure_ready", lambda _settings: None)
+    monkeypatch.setattr(cli, "make_llm", lambda *_args: object())
+    monkeypatch.setattr(cli, "Embedder", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(cli, "Translator", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(cli, "Retriever", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(cli, "Extractor", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(cli, "Generator", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(cli, "Pipeline", FakePipeline)
+
+    f = tmp_path / "snippet.rb"
+    f.write_text("def foo; 1; end")
+    cli.main(["--code-file", str(f), "--language", "ruby",
+              "--base-url", "http://x/v1", "--model", "m"])
+
+    assert seen["k"] == 3
