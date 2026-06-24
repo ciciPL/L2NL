@@ -3,7 +3,7 @@ import { RawSettings, buildRequest } from "./config";
 import { getHealth, postSummarize } from "./client";
 import { ResultPanel } from "./panel";
 import { provPaths } from "./paths";
-import { runProvision, stopBackend } from "./backend";
+import { prepareLocalGguf, runProvision, stopBackend, testConnection } from "./backend";
 import { WizardPanel } from "./wizard";
 import { loadOnlineApiKey } from "./secrets";
 
@@ -86,6 +86,39 @@ async function ensureBackend(ctx: vscode.ExtensionContext): Promise<boolean> {
   }
 }
 
+async function ensureOfflineRuntime(ctx: vscode.ExtensionContext): Promise<boolean> {
+  const cfg = vscode.workspace.getConfiguration("codeSummary");
+  if (cfg.get<"online" | "offline">("mode", "online") !== "offline") return true;
+
+  const baseUrl = cfg.get("offline.baseUrl", "http://localhost:8080/v1");
+  const model = cfg.get("offline.model", "local-model");
+  const probe = await testConnection({ base_url: baseUrl, api_key: "", model }, 5000);
+  if (probe.ok) return true;
+
+  const modelPath = cfg.get("offline.modelPath", "");
+  if (!modelPath) {
+    vscode.window.showErrorMessage(
+      `Offline model service is not reachable at ${baseUrl}. Run Code Summary: Configure Offline Local Model.`);
+    return false;
+  }
+
+  try {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Code Summary: starting local model",
+        cancellable: false,
+      },
+      () => prepareLocalGguf(ctx, modelPath, (step, status, detail) =>
+        console.log(`[llama] ${step}: ${status}${detail ? " " + detail : ""}`)),
+    );
+    return true;
+  } catch (e: any) {
+    vscode.window.showErrorMessage(`Offline model startup failed: ${e.message}`);
+    return false;
+  }
+}
+
 async function summarizeSelection(ctx: vscode.ExtensionContext) {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.selection.isEmpty) {
@@ -95,6 +128,7 @@ async function summarizeSelection(ctx: vscode.ExtensionContext) {
   const code = editor.document.getText(editor.selection);
   const language = editor.document.languageId;
   if (!(await ensureBackend(ctx))) return;
+  if (!(await ensureOfflineRuntime(ctx))) return;
 
   ResultPanel.loading();
   try {
