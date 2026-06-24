@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import { SummarizeResponse } from "./client";
 import {
-  escapeHtml, BASE_CSS, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks, splitDisplayBlocks, StepStatus,
+  escapeHtml, BASE_CSS, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks, splitDisplayBlocks,
+  coreBlockList, StepStatus,
 } from "./ui";
 
 const PIPE = ["Translate", "Retrieve", "Extract", "Generate"];
@@ -39,7 +40,9 @@ function renderBody(resp: SummarizeResponse, source: string): string {
   const exs = t.retrieved.map((e) =>
     `<div class="cs-card">${scoreBar(e.score, maxScore)}
       <div style="margin:6px 0 4px">${escapeHtml(e.summary)}</div>
-      <pre class="cs-code">${escapeHtml(e.code)}</pre></div>`).join("");
+      <pre class="cs-code">${escapeHtml(e.code)}</pre>
+      <div class="cs-label">retrieved key logic</div>
+      ${coreBlockList(e.core_blocks, "No retrieved core logic blocks selected.")}</div>`).join("");
   html += `<details><summary>② Retrieved examples (${t.retrieved.length})</summary>${exs}</details>`;
 
   const { signatures, logic } = splitDisplayBlocks(t.core_blocks);
@@ -50,14 +53,9 @@ function renderBody(resp: SummarizeResponse, source: string): string {
           `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`).join("")
       }</ul>`
     : "";
-  const list = logic.length
-    ? logic.map((b) =>
-      `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`,
-    ).join("")
-    : `<li class="muted">No core logic blocks selected.</li>`;
   html += `<details><summary>③ Core logic blocks (${logic.length})</summary>
     <pre class="cs-code">${hl}</pre>${signatureList}
-    <div class="cs-label">core logic</div><ul class="cs-blocklist">${list}</ul></details>`;
+    <div class="cs-label">core logic</div>${coreBlockList(t.core_blocks, "No core logic blocks selected.")}</details>`;
 
   html += `<details><summary>④ Final prompt</summary><pre class="cs-code">${escapeHtml(t.prompt)}</pre></details>`;
   return html;

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   escapeHtml, stepper, scoreBadge, warnBadges, scoreBar, highlightCoreBlocks,
-  splitDisplayBlocks,
+  splitDisplayBlocks, coreBlockList,
 } from "../src/ui";
 
 describe("escapeHtml", () => {
@@ -81,5 +81,18 @@ describe("splitDisplayBlocks", () => {
     ];
     expect(splitDisplayBlocks(blocks).signatures.map((b) => b.text)).toEqual(["def f(x):"]);
     expect(splitDisplayBlocks(blocks).logic.map((b) => b.text)).toEqual(["return x"]);
+  });
+});
+
+describe("coreBlockList", () => {
+  it("renders retrieved example key logic without treating signatures as core logic", () => {
+    const html = coreBlockList([
+      { text: "def f(x):", block_type: "signature", prob: 0.91 },
+      { text: "return x", block_type: "other", prob: 0.82 },
+    ], "No retrieved core logic blocks selected.");
+
+    expect(html).toContain("return x");
+    expect(html).toContain("0.82");
+    expect(html).not.toContain("def f(x):");
   });
 });

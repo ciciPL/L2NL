@@ -69,6 +69,16 @@ export function highlightCoreBlocks(
   }).join("\n");
 }
 
+export function coreBlockList(blocks: DisplayBlock[], emptyText: string): string {
+  const logic = splitDisplayBlocks(blocks).logic as DisplayBlock[];
+  const items = logic.length
+    ? logic.map((b) =>
+      `<li><span class="cs-chip--prob">${b.prob.toFixed(2)}</span> ${escapeHtml(b.text)}</li>`,
+    ).join("")
+    : `<li class="muted">${escapeHtml(emptyText)}</li>`;
+  return `<ul class="cs-blocklist">${items}</ul>`;
+}
+
 export const BASE_CSS = `
   body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); padding: 14px 16px; line-height: 1.5; }
   h1 { font-size: 1.05em; font-weight: 600; margin: 0 0 8px; }
