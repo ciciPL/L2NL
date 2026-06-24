@@ -48,6 +48,13 @@ def test_build_seq_items_recurses_into_nested_python_functions():
     assert not any(r.startswith("def inner():\n") for r in raws)
 
 
+def test_build_seq_items_keeps_single_line_function_signature_header_only():
+    items = build_seq_items("def f(x): return x + 1")
+    assert ("def f(x):", "def f(x):", "signature") in items
+    assert not any(raw == "def f(x): return x + 1" for raw, _, typ in items if typ == "signature")
+    assert "return x + 1" in [raw for raw, _, _ in items]
+
+
 def test_build_seq_items_handles_async_functions_and_class_methods():
     async_items = build_seq_items("async def fetch():\n    value = 1\n    return value")
     async_raws = [r for r, _, _ in async_items]
