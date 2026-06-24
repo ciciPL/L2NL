@@ -9,6 +9,24 @@ import { loadOnlineApiKey } from "./secrets";
 
 let statusItem: vscode.StatusBarItem;
 
+const LOCAL_NO_PROXY = ["127.0.0.1", "localhost", "::1"];
+
+function mergeNoProxy(current: string | undefined): string {
+  const parts = (current ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+  for (const host of LOCAL_NO_PROXY) {
+    if (!parts.includes(host)) parts.push(host);
+  }
+  return parts.join(",");
+}
+
+function ensureLocalNoProxy() {
+  process.env.NO_PROXY = mergeNoProxy(process.env.NO_PROXY);
+  process.env.no_proxy = mergeNoProxy(process.env.no_proxy);
+}
+
 async function readSettings(ctx: vscode.ExtensionContext): Promise<RawSettings> {
   const c = vscode.workspace.getConfiguration("codeSummary");
   return {
@@ -167,6 +185,7 @@ async function configureModel(ctx: vscode.ExtensionContext) {
 }
 
 export function activate(ctx: vscode.ExtensionContext) {
+  ensureLocalNoProxy();
   statusItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right, 100);
   updateStatus();
